@@ -1,0 +1,1240 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Kelola Pengguna | Sekdin-Poltekpin</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      /* ============================================================
+         PAGE LAYOUT
+      ============================================================ */
+      .admin-layout {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+
+      .action-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 15px;
+      }
+
+      .btn-new {
+        background: var(--navy);
+        color: #ffffff;
+        border: none;
+        padding: 10px 22px;
+        border-radius: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 14px;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .btn-new:hover {
+        background: var(--navy-dk);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(0,51,102,0.2);
+      }
+
+      /* ============================================================
+         TABLE
+      ============================================================ */
+      .users-table-container {
+        overflow-x: auto;
+        background: var(--card);
+        border-radius: 16px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-soft);
+        margin-bottom: 40px;
+      }
+
+      .users-table {
+        width: 100%;
+        border-collapse: collapse;
+        text-align: left;
+        font-size: 14px;
+      }
+
+      .users-table th, .users-table td {
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: middle;
+      }
+
+      .users-table tbody tr:last-child td { border-bottom: none; }
+
+      .users-table th {
+        background: rgba(18, 58, 99, 0.05);
+        color: var(--navy);
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 11px;
+        letter-spacing: 0.8px;
+        white-space: nowrap;
+      }
+
+      .users-table tbody tr { transition: background 0.15s ease; }
+      .users-table tbody tr:hover { background: rgba(13, 30, 61, 0.025); }
+
+      /* ============================================================
+         ROLE & STATUS BADGES
+      ============================================================ */
+      .role-badge {
+        display: inline-block;
+        padding: 3px 9px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+        margin-right: 3px;
+        margin-bottom: 2px;
+      }
+      .role-admin    { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+      .role-admin-info  { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+      .role-admin-aduan { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+      .role-participant  { background: #e8eef8; color: #1e3a5f; border: 1px solid #c3cfe2; }
+
+      .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .status-verified   { color: #16a34a; }
+      .status-unverified { color: #9ca3af; }
+
+      /* ============================================================
+         ACTION BUTTONS IN TABLE
+      ============================================================ */
+      .btn-edit {
+        background: #eff6ff;
+        color: #1d4ed8;
+        border: 1px solid #bfdbfe;
+        padding: 5px 12px;
+        border-radius: 7px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-right: 4px;
+        font-family: inherit;
+      }
+      .btn-edit:hover { background: #dbeafe; transform: translateY(-1px); }
+
+      .btn-delete {
+        background: #fef2f2;
+        color: #dc2626;
+        border: 1px solid #fecaca;
+        padding: 5px 12px;
+        border-radius: 7px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        font-size: 12px;
+        font-family: inherit;
+      }
+      .btn-delete:hover { background: #fee2e2; transform: translateY(-1px); }
+
+      /* ============================================================
+         MODAL OVERLAY
+      ============================================================ */
+      .modal {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(11, 18, 32, 0.65);
+        backdrop-filter: blur(6px);
+        z-index: 10000;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        opacity: 0;
+        transition: opacity 0.25s ease;
+      }
+      .modal.show {
+        display: flex;
+        opacity: 1;
+      }
+
+      /* ============================================================
+         MODAL CARD
+      ============================================================ */
+      .modal-card {
+        background: #fff;
+        border-radius: 24px;
+        width: 100%;
+        max-width: 560px;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 24px 60px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.06);
+        transform: translateY(24px) scale(0.98);
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        overflow: hidden;
+      }
+      .modal.show .modal-card {
+        transform: translateY(0) scale(1);
+      }
+
+      /* Header stripe */
+      .modal-stripe {
+        height: 6px;
+        background: linear-gradient(90deg, var(--navy), #1a5fa8, var(--accent));
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        padding: 22px 28px 16px;
+        border-bottom: 1px solid #f1f5f9;
+        gap: 12px;
+      }
+
+      .modal-header-text h3 {
+        margin: 0 0 3px 0;
+        color: var(--navy);
+        font-size: 18px;
+        font-weight: 800;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+      }
+      .modal-header-text p {
+        margin: 0;
+        font-size: 12.5px;
+        color: #64748b;
+      }
+
+      .modal-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #e8f0fe, #c7d9f9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        flex-shrink: 0;
+      }
+
+      .btn-close {
+        background: #f1f5f9;
+        border: none;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s ease;
+        flex-shrink: 0;
+      }
+      .btn-close:hover { background: #e2e8f0; color: #1e293b; }
+
+      /* ============================================================
+         MODAL BODY (scrollable)
+      ============================================================ */
+      .modal-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px 28px 8px;
+        scroll-behavior: smooth;
+      }
+      .modal-body::-webkit-scrollbar { width: 6px; }
+      .modal-body::-webkit-scrollbar-track { background: transparent; }
+      .modal-body::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+      /* ============================================================
+         FORM ELEMENTS
+      ============================================================ */
+      .form-section {
+        margin-bottom: 20px;
+      }
+      .form-section-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #94a3b8;
+        margin-bottom: 12px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid #f1f5f9;
+      }
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+      }
+      .form-grid .full { grid-column: 1 / -1; }
+
+      .form-group { position: relative; }
+
+      .form-group label {
+        display: block;
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #374151;
+        margin-bottom: 5px;
+      }
+      .form-group label .req { color: #ef4444; margin-left: 2px; }
+      .form-group label .opt {
+        font-size: 10px;
+        font-weight: 400;
+        color: #94a3b8;
+        margin-left: 5px;
+        text-transform: lowercase;
+      }
+
+      .form-control {
+        width: 100%;
+        padding: 9px 12px;
+        border-radius: 10px;
+        border: 1.5px solid #e2e8f0;
+        font-family: inherit;
+        font-size: 13.5px;
+        color: #1e293b;
+        background: #fafbfc;
+        transition: all 0.2s ease;
+        box-sizing: border-box;
+      }
+      .form-control:focus {
+        border-color: var(--navy);
+        outline: none;
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(18, 58, 99, 0.1);
+      }
+      .form-control::placeholder { color: #b0bec5; font-size: 13px; }
+
+      /* Password toggle wrapper */
+      .input-icon-wrap { position: relative; }
+      .input-icon-wrap .form-control { padding-right: 40px; }
+      .input-icon-wrap .toggle-pw {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 16px;
+        color: #94a3b8;
+        padding: 2px;
+        line-height: 1;
+      }
+
+      /* ============================================================
+         ROLE CHECKBOXES
+      ============================================================ */
+      .role-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        margin-top: 6px;
+      }
+
+      .role-option {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        border: 1.5px solid #e2e8f0;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        background: #fafbfc;
+        user-select: none;
+      }
+      .role-option:hover { border-color: #94a3b8; background: #f1f5f9; }
+      .role-option input[type="checkbox"] { display: none; }
+      .role-option.checked {
+        border-color: var(--navy);
+        background: #eff6ff;
+      }
+
+      .role-option-icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        flex-shrink: 0;
+      }
+      .role-opt-admin .role-option-icon    { background: #fee2e2; }
+      .role-opt-op-info .role-option-icon  { background: #e0f2fe; }
+      .role-opt-op-aduan .role-option-icon { background: #dcfce7; }
+      .role-opt-user .role-option-icon     { background: #e8eef8; }
+
+      .role-option-text strong {
+        display: block;
+        font-size: 12.5px;
+        font-weight: 700;
+        color: #1e293b;
+      }
+      .role-option-text small {
+        font-size: 11px;
+        color: #64748b;
+      }
+
+      .checkmark {
+        width: 18px;
+        height: 18px;
+        border-radius: 5px;
+        border: 1.5px solid #cbd5e1;
+        margin-left: auto;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        transition: all 0.15s ease;
+        color: transparent;
+        background: white;
+      }
+      .role-option.checked .checkmark {
+        background: var(--navy);
+        border-color: var(--navy);
+        color: white;
+      }
+
+      /* ============================================================
+         MODAL FOOTER
+      ============================================================ */
+      .modal-footer {
+        padding: 16px 28px 22px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        border-top: 1px solid #f1f5f9;
+        background: #fafbfc;
+      }
+
+      .btn-cancel {
+        background: white;
+        color: #64748b;
+        border: 1.5px solid #e2e8f0;
+        padding: 9px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 13.5px;
+        transition: all 0.15s ease;
+      }
+      .btn-cancel:hover { background: #f1f5f9; border-color: #cbd5e1; }
+
+      .btn-submit {
+        background: linear-gradient(135deg, var(--navy), #1a5fa8);
+        color: #ffffff;
+        border: none;
+        padding: 9px 24px;
+        border-radius: 10px;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 13.5px;
+        transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        min-width: 120px;
+        justify-content: center;
+      }
+      .btn-submit:hover {
+        opacity: 0.9;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px rgba(18, 58, 99, 0.3);
+      }
+      .btn-submit:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      /* ============================================================
+         TOAST NOTIFICATION
+      ============================================================ */
+      .toast-container {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 99999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        pointer-events: none;
+      }
+      .toast {
+        background: #1e293b;
+        color: white;
+        padding: 12px 18px;
+        border-radius: 12px;
+        font-size: 13.5px;
+        font-weight: 600;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: toastIn 0.3s ease;
+        pointer-events: all;
+      }
+      .toast.success { background: #166534; }
+      .toast.error   { background: #991b1b; }
+      @keyframes toastIn {
+        from { opacity: 0; transform: translateX(40px); }
+        to   { opacity: 1; transform: translateX(0); }
+      }
+
+      /* ============================================================
+         LOG ACTIVITY COLORED CHIPS
+      ============================================================ */
+      .log-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 3px 10px;
+        border-radius: 6px;
+        font-size: 11.5px;
+        font-weight: 700;
+        white-space: nowrap;
+      }
+      .log-chip-reply    { background: #e0f2fe; color: #0369a1; }
+      .log-chip-status   { background: #f0fdf4; color: #15803d; }
+      .log-chip-priority { background: #fefce8; color: #a16207; }
+      .log-chip-user     { background: #fef2f2; color: #dc2626; }
+      .log-chip-default  { background: #f1f5f9; color: #475569; }
+    </style>
+  </head>
+  <body data-page="kelola-pengguna">
+    <a class="skip" href="#utama">Lewati ke konten</a>
+    <div class="gov-topbar" style="position:fixed;top:0;left:0;right:0;height:38px;background:linear-gradient(90deg,#cc0000,#a00000);display:flex;align-items:center;padding:0 5vw;z-index:50;font-size:12px;color:rgba(255,255,255,0.95);font-weight:600;gap:10px;">
+      <span>🏛</span>
+      <span>Politeknik Pengayoman Indonesia — Kementerian Hukum RI</span>
+    </div>
+    <div data-site-header></div>
+
+    <main id="utama">
+      <section class="page-hero">
+        <div class="page-hero-card">
+          <span class="pill">Menu Admin Utama</span>
+          <h1>Kelola Pengguna &amp; Penugasan Peran</h1>
+          <p>
+            Buat akun baru, delegasikan peran operator bidang, atau hapus akun pengguna yang sudah tidak aktif.
+          </p>
+        </div>
+      </section>
+
+      <!-- ===== DAFTAR PENGGUNA ===== -->
+      <section class="admin-layout">
+        <div class="action-bar">
+          <div class="section-title" style="margin: 0;">
+            <h2 style="font-size: 20px;">Daftar Pengguna Aktif</h2>
+          </div>
+          <button class="btn-new" id="btn-open-modal">＋ &nbsp;Pengguna Baru</button>
+        </div>
+
+        <!-- Search & Filter -->
+        <div style="background: white; border-radius: 16px; padding: 14px 18px; border: 1px solid var(--border); box-shadow: var(--shadow-soft); margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+          <div style="position: relative; display: flex; align-items: center; flex: 1; min-width: 240px;">
+            <span style="position: absolute; left: 12px; color: var(--muted); font-size: 14px;">🔍</span>
+            <input type="text" id="search-input" placeholder="Cari nama, email, NIK, atau telepon..." style="width: 100%; padding: 8px 12px 8px 34px; border-radius: 10px; border: 1.5px solid var(--border); font-size: 13.5px; font-family: inherit; outline: none; box-sizing: border-box; transition: border-color 0.2s;" onfocus="this.style.borderColor='var(--navy)'" onblur="this.style.borderColor='var(--border)'">
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 5px;">
+              <label for="filter-role" style="font-size: 12.5px; font-weight: 700; color: var(--navy);">Peran:</label>
+              <select id="filter-role" style="padding: 7px 12px; border-radius: 8px; border: 1.5px solid var(--border); font-size: 13px; font-family: inherit; color: var(--navy); background: white; cursor: pointer;">
+                <option value="all">Semua Peran</option>
+                <option value="participant">Peserta</option>
+                <option value="operator_informasi">Operator Info</option>
+                <option value="operator_pengaduan">Operator Pengaduan</option>
+                <option value="admin">Admin Utama</option>
+              </select>
+            </div>
+            <div style="display: flex; align-items: center; gap: 5px;">
+              <label for="filter-status" style="font-size: 12.5px; font-weight: 700; color: var(--navy);">Status:</label>
+              <select id="filter-status" style="padding: 7px 12px; border-radius: 8px; border: 1.5px solid var(--border); font-size: 13px; font-family: inherit; color: var(--navy); background: white; cursor: pointer;">
+                <option value="all">Semua Status</option>
+                <option value="verified">Terverifikasi</option>
+                <option value="unverified">Belum Verifikasi</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="users-table-container">
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th>Nama Lengkap</th>
+                <th>Email</th>
+                <th>NIK</th>
+                <th>No. Telepon</th>
+                <th>Peran (Role)</th>
+                <th>Status</th>
+                <th>Terdaftar</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="users-list-body">
+              <tr>
+                <td colspan="8" style="text-align: center; color: var(--muted); padding: 40px;">
+                  Memuat data pengguna...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="pagination-controls" id="users-pagination" style="display:none; justify-content:space-between; align-items:center; padding: 12px 16px; background: white; border-top: 1px solid var(--border); font-size: 13px;">
+            <div>
+              <label>Tampilkan: </label>
+              <select onchange="changeUsersRows(this.value)" id="users-rows-select" style="padding: 4px; border-radius: 4px; border: 1px solid var(--border);">
+                <option value="10">10</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="999999">Semua</option>
+              </select>
+            </div>
+            <div>
+              <button onclick="changeUsersPage(-1)" id="btn-users-prev" style="padding: 4px 10px; border: 1px solid var(--border); background: white; border-radius: 4px; cursor: pointer;">&lt; Prev</button>
+              <span id="users-page-info" style="margin: 0 10px; font-weight: 600;">Hal 1</span>
+              <button onclick="changeUsersPage(1)" id="btn-users-next" style="padding: 4px 10px; border: 1px solid var(--border); background: white; border-radius: 4px; cursor: pointer;">Next &gt;</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ===== LOG AKTIVITAS ===== -->
+      <section class="admin-layout" style="padding-top: 0;">
+        <div class="action-bar" style="margin-bottom: 16px;">
+          <div class="section-title" style="margin: 0;">
+            <h2 style="font-size: 20px;">Log Aktivitas Operator &amp; Admin</h2>
+            <p style="font-size: 13px; color: var(--muted); margin: 4px 0 0 0;">Memantau riwayat aktivitas penanganan tiket dan pengelolaan pengguna</p>
+          </div>
+          <button class="btn-new" onclick="fetchLogs()" style="background: white; color: var(--navy); border: 1.5px solid var(--border); box-shadow: none;">🔄 &nbsp;Refresh Log</button>
+        </div>
+        <div class="users-table-container">
+          <table class="users-table">
+            <thead>
+              <tr>
+                <th style="width: 155px;">Waktu</th>
+                <th style="width: 180px;">Pengguna</th>
+                <th style="width: 155px;">Aksi</th>
+                <th>Detail</th>
+              </tr>
+            </thead>
+            <tbody id="logs-list-body">
+              <tr>
+                <td colspan="4" style="text-align: center; color: var(--muted); padding: 40px;">
+                  Memuat data log aktivitas...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="pagination-controls" id="logs-pagination" style="display:none; justify-content:space-between; align-items:center; padding: 12px 16px; background: white; border-top: 1px solid var(--border); font-size: 13px;">
+            <div>
+              <label>Tampilkan: </label>
+              <select onchange="changeLogsRows(this.value)" id="logs-rows-select" style="padding: 4px; border-radius: 4px; border: 1px solid var(--border);">
+                <option value="10">10</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="999999">Semua</option>
+              </select>
+            </div>
+            <div>
+              <button onclick="changeLogsPage(-1)" id="btn-logs-prev" style="padding: 4px 10px; border: 1px solid var(--border); background: white; border-radius: 4px; cursor: pointer;">&lt; Prev</button>
+              <span id="logs-page-info" style="margin: 0 10px; font-weight: 600;">Hal 1</span>
+              <button onclick="changeLogsPage(1)" id="btn-logs-next" style="padding: 4px 10px; border: 1px solid var(--border); background: white; border-radius: 4px; cursor: pointer;">Next &gt;</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- ============================================================
+         MODAL FORM TAMBAH / EDIT PENGGUNA
+    ============================================================ -->
+    <div class="modal" id="user-modal">
+      <div class="modal-card">
+        <div class="modal-stripe"></div>
+
+        <!-- Header -->
+        <div class="modal-header">
+          <div style="display: flex; align-items: center; gap: 14px; flex: 1;">
+            <div class="modal-icon" id="modal-icon">👤</div>
+            <div class="modal-header-text">
+              <h3 id="modal-title">Tambah Pengguna Baru</h3>
+              <p id="modal-subtitle">Isi form di bawah untuk mendaftarkan akun baru</p>
+            </div>
+          </div>
+          <button class="btn-close" id="btn-close-modal" title="Tutup">✕</button>
+        </div>
+
+        <!-- Body -->
+        <div class="modal-body">
+          <form id="create-user-form" autocomplete="off">
+
+            <!-- Section: Identitas -->
+            <div class="form-section">
+              <div class="form-section-label">📋 &nbsp;Data Identitas</div>
+              <div class="form-grid">
+                <div class="form-group full">
+                  <label for="fullname">Nama Lengkap <span class="req">*</span></label>
+                  <input type="text" id="fullname" class="form-control" required placeholder="Nama lengkap sesuai KTP" autocomplete="off">
+                </div>
+                <div class="form-group">
+                  <label for="nik">NIK <span class="opt">(opsional)</span></label>
+                  <input type="text" id="nik" class="form-control" placeholder="16 digit NIK" maxlength="16" pattern="[0-9]*" inputmode="numeric">
+                </div>
+                <div class="form-group">
+                  <label for="phone">No. Telepon <span class="opt">(opsional)</span></label>
+                  <input type="tel" id="phone" class="form-control" placeholder="Contoh: 08123456789">
+                </div>
+              </div>
+            </div>
+
+            <!-- Section: Akun -->
+            <div class="form-section">
+              <div class="form-section-label">🔐 &nbsp;Akun &amp; Keamanan</div>
+              <div class="form-grid">
+                <div class="form-group full">
+                  <label for="email">Alamat Email <span class="req">*</span></label>
+                  <input type="email" id="email" class="form-control" required placeholder="nama@email.com" autocomplete="off">
+                </div>
+                <div class="form-group full">
+                  <label for="password" id="password-label">Kata Sandi <span class="req" id="pw-req-star">*</span></label>
+                  <div class="input-icon-wrap">
+                    <input type="password" id="password" class="form-control" required placeholder="Minimal 6 karakter" autocomplete="new-password">
+                    <button type="button" class="toggle-pw" onclick="togglePw()" title="Tampilkan/Sembunyikan">👁</button>
+                  </div>
+                  <small id="pw-hint" style="font-size: 11.5px; color: #94a3b8; margin-top: 4px; display: block;"></small>
+                </div>
+              </div>
+            </div>
+
+            <!-- Section: Peran -->
+            <div class="form-section">
+              <div class="form-section-label">🎭 &nbsp;Peran / Hak Akses</div>
+              <div class="role-grid" id="role-checkboxes">
+                <label class="role-option role-opt-admin" onclick="toggleRole(this)">
+                  <input type="checkbox" name="role" value="admin">
+                  <div class="role-option-icon">🛡️</div>
+                  <div class="role-option-text">
+                    <strong>Admin Utama</strong>
+                    <small>Akses penuh ke semua fitur</small>
+                  </div>
+                  <div class="checkmark">✓</div>
+                </label>
+                <label class="role-option role-opt-op-info" onclick="toggleRole(this)">
+                  <input type="checkbox" name="role" value="operator_informasi">
+                  <div class="role-option-icon">ℹ️</div>
+                  <div class="role-option-text">
+                    <strong>Operator Info</strong>
+                    <small>Tiket layanan informasi</small>
+                  </div>
+                  <div class="checkmark">✓</div>
+                </label>
+                <label class="role-option role-opt-op-aduan" onclick="toggleRole(this)">
+                  <input type="checkbox" name="role" value="operator_pengaduan">
+                  <div class="role-option-icon">📣</div>
+                  <div class="role-option-text">
+                    <strong>Operator Pengaduan</strong>
+                    <small>Tiket layanan pengaduan</small>
+                  </div>
+                  <div class="checkmark">✓</div>
+                </label>
+                <label class="role-option role-opt-user" onclick="toggleRole(this)">
+                  <input type="checkbox" name="role" value="participant">
+                  <div class="role-option-icon">👤</div>
+                  <div class="role-option-text">
+                    <strong>Peserta / User</strong>
+                    <small>Akun publik biasa</small>
+                  </div>
+                  <div class="checkmark">✓</div>
+                </label>
+              </div>
+              <small style="font-size: 11.5px; color: #94a3b8; margin-top: 8px; display: block;">💡 Operator dapat memiliki lebih dari satu peran sekaligus.</small>
+            </div>
+
+          </form>
+        </div>
+
+        <!-- Footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" id="btn-cancel-modal">Batal</button>
+          <button type="button" class="btn-submit" id="btn-submit-form">
+            <span id="btn-submit-icon">💾</span>
+            <span id="btn-submit-text">Simpan Akun</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <div data-site-footer></div>
+    <script src="app.js"></script>
+    <script>
+      // ============================================================
+      //  GLOBAL STATE
+      // ============================================================
+      let allUsers = [];
+      let editMode = false;
+      let editUserId = null;
+
+      // ============================================================
+      //  DOM REFS
+      // ============================================================
+      const usersListBody   = document.getElementById("users-list-body");
+      const userModal       = document.getElementById("user-modal");
+      const createUserForm  = document.getElementById("create-user-form");
+      const btnOpenModal    = document.getElementById("btn-open-modal");
+      const btnCloseModal   = document.getElementById("btn-close-modal");
+      const btnCancelModal  = document.getElementById("btn-cancel-modal");
+      const btnSubmit       = document.getElementById("btn-submit-form");
+
+      // ============================================================
+      //  TOAST HELPER
+      // ============================================================
+      function showToast(message, type = "success") {
+        const container = document.getElementById("toast-container");
+        const icon = type === "success" ? "✅" : type === "error" ? "❌" : "ℹ️";
+        const toast = document.createElement("div");
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `${icon} ${message}`;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3500);
+      }
+
+      // ============================================================
+      //  ROLE TOGGLE LOGIC
+      // ============================================================
+      function toggleRole(labelEl) {
+        const cb = labelEl.querySelector('input[type="checkbox"]');
+        cb.checked = !cb.checked;
+        labelEl.classList.toggle("checked", cb.checked);
+      }
+
+      function setRoles(roleStr) {
+        const roles = (roleStr || '').split(',').map(r => r.trim()).filter(Boolean);
+        document.querySelectorAll('#role-checkboxes .role-option').forEach(opt => {
+          const cb = opt.querySelector('input[type="checkbox"]');
+          const isChecked = roles.includes(cb.value);
+          cb.checked = isChecked;
+          opt.classList.toggle("checked", isChecked);
+        });
+      }
+
+      function getSelectedRoles() {
+        const checked = Array.from(document.querySelectorAll('#role-checkboxes input[name="role"]:checked'));
+        return checked.map(cb => cb.value).join(',') || 'participant';
+      }
+
+      // ============================================================
+      //  PASSWORD TOGGLE
+      // ============================================================
+      function togglePw() {
+        const pw = document.getElementById("password");
+        pw.type = pw.type === "password" ? "text" : "password";
+      }
+
+      // ============================================================
+      //  MODAL HELPERS
+      // ============================================================
+      function openModal() {
+        userModal.style.display = 'flex';
+        requestAnimationFrame(() => userModal.classList.add("show"));
+      }
+
+      function closeModal() {
+        userModal.classList.remove("show");
+        setTimeout(() => {
+          userModal.style.display = 'none';
+          createUserForm.reset();
+          setRoles('participant');
+        }, 300);
+      }
+
+      function openCreateModal() {
+        editMode = false;
+        editUserId = null;
+        document.getElementById("modal-title").textContent = "Tambah Pengguna Baru";
+        document.getElementById("modal-subtitle").textContent = "Isi form di bawah untuk mendaftarkan akun baru";
+        document.getElementById("modal-icon").textContent = "➕";
+        document.getElementById("btn-submit-icon").textContent = "💾";
+        document.getElementById("btn-submit-text").textContent = "Simpan Akun";
+
+        const pwInput = document.getElementById("password");
+        pwInput.required = true;
+        pwInput.placeholder = "Minimal 6 karakter";
+        document.getElementById("pw-req-star").style.display = "";
+        document.getElementById("pw-hint").textContent = "";
+
+        createUserForm.reset();
+        setRoles('participant');
+        openModal();
+      }
+
+      function openEditModal(user) {
+        editMode = true;
+        editUserId = user.id;
+        document.getElementById("modal-title").textContent = "Edit Pengguna";
+        document.getElementById("modal-subtitle").textContent = `Memperbarui data akun: ${user.email}`;
+        document.getElementById("modal-icon").textContent = "✏️";
+        document.getElementById("btn-submit-icon").textContent = "✏️";
+        document.getElementById("btn-submit-text").textContent = "Simpan Perubahan";
+
+        const pwInput = document.getElementById("password");
+        pwInput.required = false;
+        pwInput.value = "";
+        pwInput.placeholder = "Kosongkan jika tidak diubah";
+        document.getElementById("pw-req-star").style.display = "none";
+        document.getElementById("pw-hint").textContent = "Biarkan kosong jika tidak ingin mengganti kata sandi.";
+
+        document.getElementById("fullname").value = user.fullname || "";
+        document.getElementById("email").value    = user.email    || "";
+        document.getElementById("nik").value      = user.nik      || "";
+        document.getElementById("phone").value    = user.phone    || "";
+
+        setRoles(user.role || 'participant');
+        openModal();
+      }
+
+      btnOpenModal.onclick   = openCreateModal;
+      btnCloseModal.onclick  = closeModal;
+      btnCancelModal.onclick = closeModal;
+      window.onclick = (e) => { if (e.target === userModal) closeModal(); };
+
+      // ============================================================
+      //  FORM SUBMIT
+      // ============================================================
+      btnSubmit.onclick = async () => {
+        if (!createUserForm.checkValidity()) {
+          createUserForm.reportValidity();
+          return;
+        }
+
+        const fullname = document.getElementById("fullname").value.trim();
+        const email    = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value;
+        const nik      = document.getElementById("nik").value.trim();
+        const phone    = document.getElementById("phone").value.trim();
+        const role     = getSelectedRoles();
+
+        if (nik && nik.length !== 16) {
+          showToast("NIK harus berjumlah 16 digit.", "error");
+          return;
+        }
+
+        const payload = { email, nik, phone, role, fullname };
+        if (password) payload.password = password;
+
+        btnSubmit.disabled = true;
+        document.getElementById("btn-submit-text").textContent = "Menyimpan...";
+        document.getElementById("btn-submit-icon").textContent = "⏳";
+
+        try {
+          const url    = editMode ? `${API_URL}/admin/users/${editUserId}` : `${API_URL}/admin/users`;
+          const method = editMode ? "PUT" : "POST";
+
+          const res  = await fetch(url, {
+            method,
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${getAuthToken()}`
+            },
+            body: JSON.stringify(payload)
+          });
+
+          const data = await res.json();
+          if (res.ok) {
+            showToast(data.message || (editMode ? "Pengguna berhasil diperbarui." : "Pengguna berhasil ditambahkan."), "success");
+            closeModal();
+            fetchUsers();
+          } else {
+            showToast(data.message || "Gagal menyimpan data.", "error");
+          }
+        } catch (err) {
+          showToast("Gagal terhubung ke server.", "error");
+        } finally {
+          btnSubmit.disabled = false;
+          document.getElementById("btn-submit-text").textContent = editMode ? "Simpan Perubahan" : "Simpan Akun";
+          document.getElementById("btn-submit-icon").textContent = editMode ? "✏️" : "💾";
+        }
+      };
+
+      // ============================================================
+      //  FETCH USERS
+      // ============================================================
+      async function fetchUsers() {
+        try {
+          const res = await fetch(`${API_URL}/admin/users`, {
+            headers: { "Authorization": `Bearer ${getAuthToken()}` }
+          });
+          if (res.ok) {
+            allUsers = await res.json();
+            filterAndRenderUsers();
+          } else {
+            usersListBody.innerHTML = `<tr><td colspan="8" style="text-align:center;color:red;padding:30px;">Gagal memuat pengguna. Kode: ${res.status}</td></tr>`;
+          }
+        } catch {
+          usersListBody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:red;padding:30px;">Koneksi ke server gagal.</td></tr>';
+        }
+      }
+
+      function filterAndRenderUsers() {
+        const query        = document.getElementById("search-input").value.toLowerCase().trim();
+        const roleFilter   = document.getElementById("filter-role").value;
+        const statusFilter = document.getElementById("filter-status").value;
+
+        const filtered = allUsers.filter(u => {
+          if (roleFilter !== "all" && (!u.role || !u.role.includes(roleFilter))) return false;
+          if (statusFilter === "verified"   && !u.is_verified) return false;
+          if (statusFilter === "unverified" &&  u.is_verified) return false;
+          if (query) {
+            const fields = [u.fullname, u.email, u.nik, u.phone].map(f => (f || "").toLowerCase());
+            if (!fields.some(f => f.includes(query))) return false;
+          }
+          return true;
+        });
+
+        renderUsers(filtered);
+      }
+
+      // ============================================================
+      //  ROLE BADGE
+      // ============================================================
+      function getRoleBadge(role) {
+        if (!role) return '<span class="role-badge role-participant">Peserta</span>';
+        return role.split(',').map(r => {
+          switch(r.trim()) {
+            case 'admin':              return '<span class="role-badge role-admin">Admin Utama</span>';
+            case 'operator_informasi': return '<span class="role-badge role-admin-info">Operator Info</span>';
+            case 'operator_pengaduan': return '<span class="role-badge role-admin-aduan">Operator Pengaduan</span>';
+            case 'participant':        return '<span class="role-badge role-participant">Peserta</span>';
+            default:                   return '';
+          }
+        }).join(' ');
+      }
+
+      // ============================================================
+      //  RENDER USERS (PAGINATED)
+      // ============================================================
+      let usersCurrentPage = 1;
+      let usersRowsPerPage = 10;
+      let filteredUsersData = [];
+
+      function changeUsersPage(delta) {
+        usersCurrentPage += delta;
+        renderUsersList();
+      }
+
+      function changeUsersRows(val) {
+        usersRowsPerPage = parseInt(val);
+        usersCurrentPage = 1;
+        renderUsersList();
+      }
+
+      function renderUsers(users) {
+        filteredUsersData = users;
+        usersCurrentPage = 1;
+        renderUsersList();
+      }
+
+      function renderUsersList() {
+        if (!filteredUsersData.length) {
+          usersListBody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--muted);padding:40px;">Tidak ada pengguna ditemukan.</td></tr>';
+          document.getElementById('users-pagination').style.display = 'none';
+          return;
+        }
+
+        const totalPages = Math.ceil(filteredUsersData.length / usersRowsPerPage);
+        if (usersCurrentPage > totalPages) usersCurrentPage = totalPages;
+        if (usersCurrentPage < 1) usersCurrentPage = 1;
+
+        const startIdx = (usersCurrentPage - 1) * usersRowsPerPage;
+        const endIdx = startIdx + usersRowsPerPage;
+        const paginatedUsers = filteredUsersData.slice(startIdx, endIdx);
+
+        const currentUser = JSON.parse(localStorage.getItem("user-data") || "{}");
+
+        usersListBody.innerHTML = paginatedUsers.map(u => {
+          const dateStr    = new Date(u.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+          const statusHtml = u.is_verified
+            ? '<span class="status-badge status-verified">✔ Terverifikasi</span>'
+            : '<span class="status-badge status-unverified">⌛ Belum Verifikasi</span>';
+          const isSelf = currentUser.id === u.id;
+          const userJson = JSON.stringify(u).replace(/"/g, '&quot;');
+
+          return `
+            <tr>
+              <td><strong style="color:var(--navy);">${u.fullname || "–"}</strong></td>
+              <td style="font-size:13px;color:#475569;">${u.email}</td>
+              <td style="font-size:13px;color:#64748b;">${u.nik || "–"}</td>
+              <td style="font-size:13px;color:#64748b;">${u.phone || "–"}</td>
+              <td>${getRoleBadge(u.role)}</td>
+              <td>${statusHtml}</td>
+              <td style="font-size:12px;color:#64748b;white-space:nowrap;">${dateStr}</td>
+              <td>
+                <div style="display:flex;gap:6px;align-items:center;">
+                  <button class="btn-edit" onclick='openEditModal(${JSON.stringify(u)})'>✏️ Edit</button>
+                  ${!isSelf ? `<button class="btn-delete" onclick="deleteUser(${u.id}, '${u.email}')">🗑️ Hapus</button>` : ''}
+                </div>
+              </td>
+            </tr>`;
+        }).join('');
+
+        // Update pagination UI
+        document.getElementById('users-pagination').style.display = 'flex';
+        document.getElementById('users-page-info').textContent = `Hal ${usersCurrentPage} dari ${totalPages}`;
+        document.getElementById('btn-users-prev').disabled = usersCurrentPage === 1;
+        document.getElementById('btn-users-prev').style.opacity = usersCurrentPage === 1 ? '0.5' : '1';
+        document.getElementById('btn-users-next').disabled = usersCurrentPage === totalPages;
+        document.getElementById('btn-users-next').style.opacity = usersCurrentPage === totalPages ? '0.5' : '1';
+      }
+
+      // ============================================================
+      //  DELETE USER
+      // ============================================================
+      async function deleteUser(id, email) {
+        if (!confirm(`Yakin ingin menghapus pengguna "${email}"?\nTindakan ini akan menghapus semua riwayat terkait dan tidak dapat dibatalkan.`)) return;
+
+        try {
+          const res  = await fetch(`${API_URL}/admin/users/${id}`, {
+            method: "DELETE",
+            headers: { "Authorization": `Bearer ${getAuthToken()}` }
+          });
+          const data = await res.json();
+          if (res.ok) {
+            showToast(data.message || "Pengguna berhasil dihapus.", "success");
+            fetchUsers();
+          } else {
+            showToast(data.message || "Gagal menghapus pengguna.", "error");
+          }
+        } catch {
+          showToast("Gagal terhubung ke server.", "error");
+        }
+      }
+
+      // ============================================================
+      //  FETCH ACTIVITY LOGS
+      // ============================================================
+      async function fetchLogs() {
+        const tbody = document.getElementById("logs-list-body");
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:30px;">Memuat log aktivitas...</td></tr>';
+        try {
+          const res = await fetch(`${API_URL}/admin/activity-logs`, {
+            headers: { "Authorization": `Bearer ${getAuthToken()}` }
+          });
+          if (res.ok) {
+            renderLogs(await res.json());
+          } else {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:red;padding:30px;">Gagal memuat log aktivitas.</td></tr>';
+          }
+        } catch {
+          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:red;padding:30px;">Koneksi ke server gagal.</td></tr>';
+        }
+      }
+
+      function getLogChip(action) {
+        const a = action.toLowerCase();
+        if (a.includes('balas') || a.includes('tiket'))  return `<span class="log-chip log-chip-reply">💬 ${action}</span>`;
+        if (a.includes('status'))    return `<span class="log-chip log-chip-status">🔄 ${action}</span>`;
+        if (a.includes('prioritas')) return `<span class="log-chip log-chip-priority">🚨 ${action}</span>`;
+        if (a.includes('hapus') || a.includes('tambah') || a.includes('edit')) return `<span class="log-chip log-chip-user">👤 ${action}</span>`;
+        return `<span class="log-chip log-chip-default">${action}</span>`;
+      }
+
+      // ============================================================
+      //  RENDER LOGS (PAGINATED)
+      // ============================================================
+      let logsCurrentPage = 1;
+      let logsRowsPerPage = 10;
+      let allLogsData = [];
+
+      function changeLogsPage(delta) {
+        logsCurrentPage += delta;
+        renderLogsList();
+      }
+
+      function changeLogsRows(val) {
+        logsRowsPerPage = parseInt(val);
+        logsCurrentPage = 1;
+        renderLogsList();
+      }
+
+      function renderLogs(logs) {
+        allLogsData = logs;
+        logsCurrentPage = 1;
+        renderLogsList();
+      }
+
+      function renderLogsList() {
+        const tbody = document.getElementById("logs-list-body");
+        if (!allLogsData.length) {
+          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:40px;">Belum ada log aktivitas.</td></tr>';
+          document.getElementById('logs-pagination').style.display = 'none';
+          return;
+        }
+
+        const totalPages = Math.ceil(allLogsData.length / logsRowsPerPage);
+        if (logsCurrentPage > totalPages) logsCurrentPage = totalPages;
+        if (logsCurrentPage < 1) logsCurrentPage = 1;
+
+        const startIdx = (logsCurrentPage - 1) * logsRowsPerPage;
+        const endIdx = startIdx + logsRowsPerPage;
+        const paginatedLogs = allLogsData.slice(startIdx, endIdx);
+
+        tbody.innerHTML = paginatedLogs.map(log => {
+          const date = new Date(log.created_at);
+          const dateStr = date.toLocaleString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+          return `
+            <tr>
+              <td style="font-size:12px;color:#64748b;white-space:nowrap;">${dateStr}</td>
+              <td style="font-weight:700;color:var(--navy);font-size:13px;">${log.user_name || 'System'}</td>
+              <td>${getLogChip(log.action)}</td>
+              <td style="font-size:13px;color:#334155;">${log.details}</td>
+            </tr>`;
+        }).join('');
+
+        // Update pagination UI
+        document.getElementById('logs-pagination').style.display = 'flex';
+        document.getElementById('logs-page-info').textContent = `Hal ${logsCurrentPage} dari ${totalPages}`;
+        document.getElementById('btn-logs-prev').disabled = logsCurrentPage === 1;
+        document.getElementById('btn-logs-prev').style.opacity = logsCurrentPage === 1 ? '0.5' : '1';
+        document.getElementById('btn-logs-next').disabled = logsCurrentPage === totalPages;
+        document.getElementById('btn-logs-next').style.opacity = logsCurrentPage === totalPages ? '0.5' : '1';
+      }
+
+      // ============================================================
+      //  SEARCH & FILTER EVENTS
+      // ============================================================
+      document.getElementById("search-input").oninput  = filterAndRenderUsers;
+      document.getElementById("filter-role").onchange  = filterAndRenderUsers;
+      document.getElementById("filter-status").onchange = filterAndRenderUsers;
+
+      // ============================================================
+      //  INIT
+      // ============================================================
+      if (isAuthenticated() && getUserRole() === "admin") {
+        fetchUsers();
+        fetchLogs();
+      }
+    </script>
+  </body>
+</html>

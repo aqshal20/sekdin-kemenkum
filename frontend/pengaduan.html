@@ -1,0 +1,1175 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Informasi & Pengaduan | Sekdin-Poltekpin</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+      .inbox-container {
+        display: grid;
+        grid-template-columns: 350px 1fr;
+        gap: 0;
+        background: white;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        overflow: hidden;
+        height: calc(100vh - 250px);
+        min-height: 600px;
+        box-shadow: var(--shadow-soft);
+      }
+      .inbox-sidebar {
+        border-right: 1px solid var(--border);
+        display: flex;
+        flex-direction: column;
+        background: #f8fafc;
+        overflow: hidden;
+      }
+      .inbox-sidebar-header {
+        padding: 20px;
+        border-bottom: 1px solid var(--border);
+      }
+      .btn-new-complaint {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-weight: 600;
+        padding: 12px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, var(--blue) 0%, #2b6cb0 100%);
+        color: white;
+        border: none;
+        cursor: pointer;
+        transition: 0.2s;
+        font-size: 14px;
+        box-shadow: 0 4px 10px rgba(27, 75, 143, 0.15);
+      }
+      .btn-new-complaint:hover {
+        background: linear-gradient(135deg, #21559e 0%, #3182ce 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 6px 14px rgba(27, 75, 143, 0.25);
+      }
+      .inbox-list {
+        flex: 1;
+        overflow-y: auto;
+      }
+      .inbox-item {
+        padding: 16px 20px;
+        border-bottom: 1px solid var(--border);
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .inbox-item:hover {
+        background: rgba(13, 30, 61, 0.02);
+      }
+      .inbox-item.active {
+        background: #eff6ff;
+        border-left: 4px solid var(--blue);
+        padding-left: 16px;
+      }
+      .inbox-item-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 11px;
+        color: var(--muted);
+      }
+      .inbox-item-subject {
+        font-weight: bold;
+        font-size: 14px;
+        color: var(--navy);
+      }
+      .inbox-item-preview {
+        font-size: 12px;
+        color: var(--muted);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .inbox-item-badge {
+        padding: 2px 6px;
+        border-radius: 6px;
+        font-size: 10px;
+        font-weight: 600;
+      }
+      .badge-info {
+        background: rgba(27, 75, 143, 0.1);
+        color: var(--blue);
+      }
+      .badge-pengaduan {
+        background: rgba(194, 154, 56, 0.15);
+        color: var(--gold-deep);
+      }
+      .inbox-detail {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        overflow: hidden;
+      }
+      .inbox-empty-state {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        color: var(--muted);
+        text-align: center;
+        padding: 40px;
+      }
+      .inbox-empty-icon {
+        font-size: 48px;
+        margin-bottom: 12px;
+      }
+      .form-panel {
+        flex: 1;
+        padding: 30px;
+        overflow-y: auto;
+      }
+      .form-panel-title {
+        font-size: 22px;
+        margin-bottom: 10px;
+        color: var(--navy);
+        font-weight: bold;
+      }
+      .form-panel-desc {
+        font-size: 14px;
+        color: var(--muted);
+        margin-bottom: 20px;
+      }
+      .chat-pane {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        overflow: hidden;
+      }
+      .chat-header {
+        padding: 20px;
+        border-bottom: 1px solid var(--border);
+        background: #f8fafc;
+      }
+      .chat-header-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      .chat-header-subject {
+        font-size: 18px;
+        margin: 0;
+        color: var(--navy);
+        font-weight: bold;
+      }
+      .chat-header-meta {
+        font-size: 12px;
+        color: var(--muted);
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      .chat-header-attachment {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: rgba(13, 148, 136, 0.1);
+        color: var(--accent);
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-weight: bold;
+      }
+      .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        background: #ffffff;
+      }
+      .msg-row {
+        display: flex;
+        flex-direction: column;
+        max-width: 70%;
+      }
+      .msg-row.me {
+        align-self: flex-end;
+        align-items: flex-end;
+      }
+      .msg-row.other {
+        align-self: flex-start;
+        align-items: flex-start;
+      }
+      .msg-sender {
+        font-size: 10px;
+        color: var(--muted);
+        margin-bottom: 2px;
+      }
+      .msg-bubble {
+        padding: 10px 14px;
+        border-radius: 12px;
+        font-size: 14px;
+        line-height: 1.5;
+        animation: slideUpFade 0.3s ease-out;
+      }
+      .me .msg-bubble {
+        background: linear-gradient(135deg, var(--blue) 0%, #2b6cb0 100%);
+        color: white;
+        border-bottom-right-radius: 2px;
+      }
+      .other .msg-bubble {
+        background: #f1f5f9;
+        color: var(--ink);
+        border-bottom-left-radius: 2px;
+        border: 1px solid var(--border);
+      }
+      .msg-time {
+        font-size: 9px;
+        margin-top: 2px;
+        color: var(--muted);
+      }
+      .me .msg-time {
+        color: rgba(255,255,255,0.7);
+      }
+      .chat-footer {
+        padding: 15px 20px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        gap: 10px;
+        background: white;
+      }
+      .chat-input {
+        flex: 1;
+        padding: 10px 14px;
+        border-radius: 10px;
+        border: 1px solid var(--border);
+        font-size: 14px;
+      }
+      .chat-input:focus {
+        outline: none;
+        border-color: var(--blue);
+      }
+      .btn-send {
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-weight: 600;
+      }
+
+      /* Responsiveness for User Inbox */
+      @media (max-width: 900px) {
+        .inbox-container {
+          grid-template-columns: 1fr;
+          height: auto;
+          min-height: auto;
+          overflow: visible;
+        }
+        .inbox-sidebar {
+          border-right: none;
+          border-bottom: 1px solid var(--border);
+          height: 300px;
+          flex-shrink: 0;
+        }
+        .inbox-detail {
+          height: auto;
+          min-height: auto;
+          overflow: visible;
+        }
+        .form-panel {
+          padding: 24px 16px;
+          height: auto;
+          overflow-y: visible;
+        }
+        .chat-pane {
+          height: 550px;
+          overflow: hidden;
+        }
+        .chat-messages {
+          flex: 1;
+          overflow-y: auto;
+          max-height: 380px;
+        }
+      }
+    </style>
+  </head>
+  <body data-page="pengaduan">
+    <a class="skip" href="#utama">Lewati ke konten</a>
+    <div class="gov-topbar" style="position:fixed;top:0;left:0;right:0;height:38px;background:linear-gradient(90deg,#cc0000,#a00000);display:flex;align-items:center;padding:0 5vw;z-index:50;font-size:12px;color:rgba(255,255,255,0.95);font-weight:600;gap:10px;">
+      <span>🏛</span>
+      <span>Politeknik Pengayoman Indonesia — Kementerian Hukum RI</span>
+    </div>
+    <div data-site-header></div>
+
+    <main id="utama">
+      <!-- ── Hero ── -->
+      <section class="page-hero fade-in">
+        <div class="page-hero-card">
+          <span class="pill">Layanan Informasi &amp; Pengaduan</span>
+          <h1>Sampaikan pertanyaan atau laporan melalui satu kanal layanan</h1>
+          <p>Form ini menggabungkan kebutuhan informasi dan pengaduan dalam satu alur.</p>
+        </div>
+      </section>
+
+      <!-- ── Form + Panel ── -->
+      <section class="fade-in delay">
+        <div class="section-title">
+          <h2>Kotak Masuk & Formulir Laporan</h2>
+          <div></div>
+        </div>
+
+        <style>
+          .alur-container {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 10px 40px rgba(13, 30, 61, 0.05);
+            margin-bottom: 32px;
+            position: relative;
+            overflow: hidden;
+          }
+          .alur-header {
+            text-align: center;
+            margin-bottom: 32px;
+          }
+          .alur-header h3 {
+            font-size: 24px;
+            color: var(--navy);
+            font-weight: 800;
+            margin-bottom: 8px;
+          }
+          .alur-header p {
+            color: var(--muted);
+            font-size: 15px;
+            max-width: 500px;
+            margin: 0 auto;
+          }
+          .alur-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            position: relative;
+          }
+          @media (min-width: 1024px) {
+            .alur-grid::before {
+              content: '';
+              position: absolute;
+              top: 40px;
+              left: 12%;
+              right: 12%;
+              height: 2px;
+              background: linear-gradient(90deg, rgba(59,130,246,0.1) 0%, rgba(59,130,246,1) 50%, rgba(59,130,246,0.1) 100%);
+              z-index: 0;
+              opacity: 0.5;
+            }
+          }
+          .alur-step {
+            position: relative;
+            z-index: 1;
+            background: #ffffff;
+            padding: 28px 24px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+          }
+          .alur-step:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(27,75,143,0.1);
+            border-color: rgba(59, 130, 246, 0.3);
+          }
+          .alur-icon-wrapper {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 20px auto;
+            border-radius: 50%;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 4px solid #ffffff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+            transition: all 0.3s ease;
+          }
+          .alur-step:hover .alur-icon-wrapper {
+            transform: scale(1.1);
+          }
+          .alur-step:nth-child(1) .alur-icon-wrapper { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
+          .alur-step:nth-child(2) .alur-icon-wrapper { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
+          .alur-step:nth-child(3) .alur-icon-wrapper { background: rgba(16, 185, 129, 0.1); color: #10b981; }
+          .alur-step:nth-child(4) .alur-icon-wrapper { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
+
+          .alur-step-num {
+            position: absolute;
+            top: -12px;
+            right: -12px;
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--blue) 0%, #2b6cb0 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(27, 75, 143, 0.3);
+          }
+          .alur-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--navy);
+            margin-bottom: 12px;
+          }
+          .alur-desc {
+            font-size: 14px;
+            color: var(--muted);
+            line-height: 1.6;
+            margin: 0;
+          }
+        </style>
+
+        <div class="alur-container fade-in">
+          <div class="alur-header">
+            <h3>Tata Cara & Alur Pengaduan</h3>
+            <p>Panduan langkah demi langkah untuk memastikan laporan Anda diproses dengan cepat dan transparan.</p>
+          </div>
+          <div class="alur-grid">
+            <div class="alur-step">
+              <div class="alur-step-num">1</div>
+              <div class="alur-icon-wrapper">
+                <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+              </div>
+              <h4 class="alur-title">Buat Laporan</h4>
+              <p class="alur-desc">Pilih "Tulis Laporan Baru", isi formulir pengaduan dengan lengkap beserta dokumen pendukung.</p>
+            </div>
+            
+            <div class="alur-step">
+              <div class="alur-step-num">2</div>
+              <div class="alur-icon-wrapper">
+                <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+              </div>
+              <h4 class="alur-title">Verifikasi & Proses</h4>
+              <p class="alur-desc">Laporan diverifikasi oleh tim admin dan akan dijawab dalam waktu <strong>maksimal 2x24 jam</strong>.</p>
+            </div>
+            
+            <div class="alur-step">
+              <div class="alur-step-num">3</div>
+              <div class="alur-icon-wrapper">
+                <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+              </div>
+              <h4 class="alur-title">Komunikasi Dua Arah</h4>
+              <p class="alur-desc">Anda akan menerima <strong>konfirmasi via email/WhatsApp</strong> setiap kali laporan ditanggapi oleh admin. Gunakan fitur pesan untuk berkomunikasi lebih lanjut.</p>
+            </div>
+            
+            <div class="alur-step">
+              <div class="alur-step-num">4</div>
+              <div class="alur-icon-wrapper">
+                <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              </div>
+              <h4 class="alur-title">Penyelesaian Laporan</h4>
+              <p class="alur-desc">Tindak lanjut selesai. Status laporan diubah menjadi "Selesai" jika masalah sudah tertangani penuh.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="inbox-container">
+          <!-- Left: Inbox Sidebar -->
+          <div class="inbox-sidebar">
+            <div class="inbox-sidebar-header">
+              <button class="btn-new-complaint" id="btn-new-complaint">
+                <span>➕</span> Tulis Laporan Baru
+              </button>
+            </div>
+            <div style="padding: 12px 20px; border-bottom: 1px solid var(--border); background: #ffffff;">
+              <div style="position: relative; display: flex; align-items: center;">
+                <span style="position: absolute; left: 10px; color: var(--muted); font-size: 13px;">🔍</span>
+                <input type="text" id="user-search-input" placeholder="Cari laporan..." style="width: 100%; padding: 8px 10px 8px 30px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 13px; outline: none;" oninput="filterUserConversations()">
+              </div>
+            </div>
+            <div class="inbox-list" id="inbox-list">
+              <div style="padding: 20px; text-align: center; color: var(--muted); font-size: 14px;">Memuat riwayat laporan...</div>
+            </div>
+          </div>
+
+          <!-- Right: Inbox Detail Panel -->
+          <div class="inbox-detail" id="inbox-detail-pane">
+            <div class="inbox-empty-state" style="max-width: 520px; margin: 40px auto; padding: 20px;">
+              <div class="inbox-empty-icon" style="font-size: 54px; margin-bottom: 16px;">✉️</div>
+              <h3 style="font-size: 20px; margin-bottom: 8px;">Pilih atau Buat Laporan Baru</h3>
+              <p style="margin-bottom: 30px; font-size: 14px; color: var(--muted);">Silakan pilih salah satu laporan di daftar riwayat, atau klik tombol "Tulis Laporan Baru" untuk mengirimkan pengaduan baru.</p>
+              
+              <div style="text-align: left; border-top: 1px dashed var(--border); padding-top: 24px; width: 100%;">
+                <h4 style="font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 16px;">Alur Penyelesaian Pengaduan</h4>
+                <ul class="steps-list">
+                  <li>
+                    <span class="step-num">1</span>
+                    <div class="step-body">
+                      <strong>Kirim Laporan</strong>
+                      <span>Isi formulir pengaduan dengan data pendukung dan lampiran yang valid.</span>
+                    </div>
+                  </li>
+                  <li>
+                    <span class="step-num">2</span>
+                    <div class="step-body">
+                      <strong>Verifikasi & Proses</strong>
+                      <span>Petugas admin akan menelaah dan memperbarui status laporan menjadi "Dalam Proses".</span>
+                    </div>
+                  </li>
+                  <li>
+                    <span class="step-num">3</span>
+                    <div class="step-body">
+                      <strong>Komunikasi Dua Arah</strong>
+                      <span>Gunakan ruang pesan ini untuk berkomunikasi dengan petugas admin terkait tiket Anda.</span>
+                    </div>
+                  </li>
+                  <li>
+                    <span class="step-num">4</span>
+                    <div class="step-body">
+                      <strong>Penyelesaian</strong>
+                      <span>Laporan diselesaikan secara transparan dan status diperbarui menjadi "Selesai".</span>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div data-site-footer></div>
+
+    <script src="app.js"></script>
+    <script>
+      let socket;
+      let activeConversationId = null;
+      const userData = JSON.parse(localStorage.getItem("user-data"));
+      
+      const inboxListEl = document.getElementById("inbox-list");
+      const detailPaneEl = document.getElementById("inbox-detail-pane");
+      const btnNewComplaint = document.getElementById("btn-new-complaint");
+
+      btnNewComplaint.onclick = () => {
+        showNewComplaintForm();
+      };
+
+      async function fetchConversations() {
+        if (!getAuthToken()) return;
+        try {
+          const res = await fetch(`${API_URL}/conversations`, {
+            headers: { "Authorization": `Bearer ${getAuthToken()}` }
+          });
+          const conversations = await res.json();
+          renderConversations(conversations);
+        } catch (error) {
+          inboxListEl.innerHTML = '<div style="padding: 20px; text-align: center; color: red; font-size: 14px;">Gagal memuat percakapan.</div>';
+        }
+      }
+
+      function renderConversations(convs) {
+        if (convs.length === 0) {
+          inboxListEl.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--muted); font-size: 13px;">Belum ada riwayat laporan.</div>';
+          showNewComplaintForm();
+          return;
+        }
+
+        inboxListEl.innerHTML = "";
+        convs.forEach(c => {
+          const div = document.createElement("div");
+          div.className = `inbox-item ${Number(activeConversationId) === Number(c.id) ? 'active' : ''}`;
+          div.dataset.id = c.id;
+          
+          const badgeClass = c.service_type === "Informasi" ? "badge-info" : "badge-pengaduan";
+          const lastMsg = escapeHtml(c.last_message || "Belum ada pesan");
+          const formattedTime = c.last_message_time ? formatTime(c.last_message_time) : formatTime(c.created_at);
+          
+          const unreadHtml = c.unread_count > 0 
+            ? `<span style="background: #ef4444; color: white; border-radius: 50%; font-size: 10px; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; margin-left: auto; box-shadow: 0 2px 6px rgba(239, 68, 68, 0.25);">${c.unread_count}</span>`
+            : '';
+
+          let statusClass = "status-waiting";
+          if (c.status === "Dalam Proses") statusClass = "status-process";
+          else if (c.status === "Selesai") statusClass = "status-done";
+
+          div.innerHTML = `
+            <div class="inbox-item-meta" style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+              <div style="display: flex; gap: 8px; align-items: center;">
+                <span class="inbox-item-badge ${badgeClass}">${c.service_type || 'Layanan'}</span>
+                <span>${formattedTime}</span>
+              </div>
+              ${unreadHtml}
+            </div>
+            <div class="inbox-item-subject" style="display: flex; justify-content: space-between; align-items: center; width: 100%; margin-top: 2px;">
+              <span>${c.category || 'Kategori'}</span>
+              <span class="status-badge ${statusClass}" style="font-size: 10px; padding: 2px 6px;">${c.status || 'Menunggu Respon'}</span>
+            </div>
+            <div class="inbox-item-preview">${lastMsg}</div>
+          `;
+          
+          div.onclick = () => selectConversation(c);
+          inboxListEl.appendChild(div);
+        });
+      }
+
+      function formatTime(isoStr) {
+        const d = isoStr ? new Date(isoStr) : new Date();
+        return d.toLocaleString("id-ID", {
+          timeZone: "Asia/Jakarta",
+          day: "2-digit",
+          month: "short",
+          hour: "2-digit",
+          minute: "2-digit"
+        }).replace(/\./g, ':') + " WIB";
+      }
+
+      function showNewComplaintForm() {
+        activeConversationId = null;
+        
+        document.querySelectorAll(".inbox-item").forEach(item => item.classList.remove("active"));
+        
+        detailPaneEl.innerHTML = `
+          <div class="form-panel">
+            <h2 class="form-panel-title">Isi Data Laporan</h2>
+            <p class="form-panel-desc">Gunakan formulir di bawah ini untuk mengirimkan pertanyaan atau pengaduan baru kepada petugas admin.</p>
+            
+            <form id="new-complaint-form">
+              <div class="grid-2">
+                <div>
+                  <label for="service-type">Jenis Layanan</label>
+                  <select id="service-type" name="serviceType" required>
+                    <option value="" selected disabled>Pilih jenis layanan</option>
+                    <option value="Informasi">Informasi</option>
+                    <option value="Pengaduan">Pengaduan</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="category">Kategori Terkait</label>
+                  <select id="category" name="category" required>
+                    <option value="" selected disabled>Pilih kategori</option>
+                    <option value="Administrasi">Administrasi</option>
+                    <option value="SKD">SKD</option>
+                    <option value="Kesehatan">Kesehatan</option>
+                    <option value="Psikotes">Psikotes</option>
+                    <option value="Kebugaran">Kebugaran</option>
+                    <option value="Wawancara">Wawancara</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label>Lampiran <span class="optional-label">(opsional)</span></label>
+                <div class="file-zone" id="file-drop">
+                  <input id="attachment" name="attachment" type="file" accept=".pdf,.jpg,.jpeg,.png,.doc,.docx" />
+                  <span class="file-zone-icon">📎</span>
+                  <div class="file-zone-text"><strong>Klik untuk memilih file</strong> atau seret ke sini</div>
+                  <div class="file-name-preview" id="file-name-preview"></div>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="message">Uraian Laporan</label>
+                <textarea id="message" name="message" required placeholder="Jelaskan secara detail laporan atau pertanyaan Anda di sini..."></textarea>
+              </div>
+
+              <div class="form-actions">
+                <button id="submit-complaint" class="btn btn-primary full-submit" type="submit">Kirim Laporan</button>
+              </div>
+            </form>
+          </div>
+        `;
+        
+        const fileDrop = document.getElementById("file-drop");
+        const fileInput = document.getElementById("attachment");
+        const fileNamePreview = document.getElementById("file-name-preview");
+        
+        fileDrop.onclick = () => fileInput.click();
+        fileInput.onchange = () => {
+          if (fileInput.files.length > 0) {
+            const file = fileInput.files[0];
+            const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+            if (file.size > 5 * 1024 * 1024) {
+              alert("Ukuran berkas terlalu besar. Maksimal adalah 5 MB.");
+              fileInput.value = "";
+              fileNamePreview.textContent = "";
+              return;
+            }
+            fileNamePreview.textContent = `📎 ${file.name} (${fileSizeMB} MB)`;
+          } else {
+            fileNamePreview.textContent = "";
+          }
+        };
+        
+        const form = document.getElementById("new-complaint-form");
+        form.onsubmit = async (e) => {
+          e.preventDefault();
+          const submitBtn = document.getElementById("submit-complaint");
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Mengirim...";
+          
+          const formData = new FormData();
+          formData.append("serviceType", document.getElementById("service-type").value);
+          formData.append("category", document.getElementById("category").value);
+          formData.append("message", document.getElementById("message").value);
+          if (fileInput.files[0]) {
+            formData.append("attachment", fileInput.files[0]);
+          }
+          
+          try {
+            const res = await fetch(`${API_URL}/conversations`, {
+              method: "POST",
+              headers: {
+                "Authorization": `Bearer ${getAuthToken()}`
+              },
+              body: formData
+            });
+            
+            if (res.ok) {
+              const data = await res.json();
+              alert("Laporan berhasil dikirim!");
+              activeConversationId = data.conversation.id;
+              await fetchConversations();
+              selectConversation(data.conversation);
+            } else {
+              const err = await res.json();
+              alert(err.message || "Gagal mengirim laporan.");
+              submitBtn.disabled = false;
+              submitBtn.textContent = "Kirim Laporan";
+            }
+          } catch (error) {
+            alert("Terjadi kesalahan koneksi.");
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Kirim Laporan";
+          }
+        };
+      }
+
+      async function selectConversation(conv) {
+        if (activeConversationId) {
+          socket.emit('leave', `conv_${activeConversationId}`);
+        }
+        
+        activeConversationId = conv.id;
+        
+        document.querySelectorAll(".inbox-item").forEach(item => {
+          item.classList.remove("active");
+          if (parseInt(item.dataset.id) === conv.id) {
+            item.classList.add("active");
+          }
+        });
+        
+        let attachmentHtml = "";
+        if (conv.attachment) {
+          try {
+            const attach = JSON.parse(conv.attachment);
+            attachmentHtml = `<a href="${attach.path}" target="_blank" class="chat-header-attachment">📎 Lampiran: ${attach.name}</a>`;
+          } catch (e) {
+            attachmentHtml = `<a href="${conv.attachment}" target="_blank" class="chat-header-attachment">📎 Unduh Lampiran</a>`;
+          }
+        }
+        
+        const badgeClass = conv.service_type === "Informasi" ? "badge-info" : "badge-pengaduan";
+        const formattedDate = formatTime(conv.created_at);
+        
+        let statusClass = "status-waiting";
+        if (conv.status === "Dalam Proses") statusClass = "status-process";
+        else if (conv.status === "Selesai") statusClass = "status-done";
+
+        detailPaneEl.innerHTML = `
+          <div class="chat-pane">
+            <div class="chat-header">
+              <div class="chat-header-top">
+                <h3 class="chat-header-subject"><span style="color:var(--accent); margin-right: 5px;">[${conv.ticket_id || 'TKT'}]</span> ${conv.service_type || 'Laporan'}: ${conv.category || 'Kategori'}</h3>
+                <span class="inbox-item-badge ${badgeClass}">${conv.service_type || 'Layanan'}</span>
+              </div>
+              <div class="chat-header-meta">
+                <span><strong>Kategori:</strong> ${conv.category || '-'}</span>
+                <span><strong>Tanggal:</strong> ${formattedDate}</span>
+                <span><strong>Status:</strong> <span id="active-chat-status" class="status-badge ${statusClass}">${conv.status || 'Menunggu Respon'}</span></span>
+                ${conv.status !== 'Selesai' ? '<span style="color: #b45309; font-weight: bold; background: #fef3c7; padding: 2px 6px; border-radius: 4px; font-size: 11px;">Maks. Respon: 2x24 Jam</span>' : ''}
+                ${attachmentHtml}
+              </div>
+            </div>
+            <div class="chat-messages" id="active-chat-messages">
+              <div style="text-align: center; color: var(--muted); padding: 20px;">Memuat pesan...</div>
+            </div>
+            ${conv.status === 'Selesai' && !conv.rating ? `
+              <div id="rating-form-container" style="padding: 10px 15px; border-top: 1px solid var(--border); background: #f8fafc; flex-shrink: 0; box-shadow: 0 -2px 10px rgba(0,0,0,0.02); z-index: 10;">
+                <h4 style="margin: 0 0 6px 0; font-size: 13px; color: var(--primary);">Bagaimana penilaian Anda terhadap layanan kami?</h4>
+                <div style="display: flex; gap: 5px; margin-bottom: 8px;" id="star-rating">
+                  <span class="star" data-val="1" style="cursor: pointer; font-size: 22px; color: #cbd5e1;">★</span>
+                  <span class="star" data-val="2" style="cursor: pointer; font-size: 22px; color: #cbd5e1;">★</span>
+                  <span class="star" data-val="3" style="cursor: pointer; font-size: 22px; color: #cbd5e1;">★</span>
+                  <span class="star" data-val="4" style="cursor: pointer; font-size: 22px; color: #cbd5e1;">★</span>
+                  <span class="star" data-val="5" style="cursor: pointer; font-size: 22px; color: #cbd5e1;">★</span>
+                </div>
+                <textarea id="rating-feedback" placeholder="Tinggalkan ulasan (opsional)..." style="width: 100%; margin-bottom: 8px; resize: none; height: 45px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 6px; font-family: inherit; font-size: 12px; box-sizing: border-box;"></textarea>
+                <button id="btn-submit-rating" class="btn btn-primary" style="width: 100%; padding: 8px; font-size: 13px;">Kirim Penilaian</button>
+              </div>
+            ` : conv.rating ? `
+              <div style="padding: 15px; border-top: 1px solid var(--border); background: #f0fdf4; text-align: center; flex-shrink: 0;">
+                <p style="margin: 0; color: #166534; font-weight: bold;">Terima kasih! Anda memberikan rating ${conv.rating} Bintang.</p>
+                ${conv.feedback ? `<p style="margin: 5px 0 0 0; font-size: 12px; color: #15803d; font-style: italic;">"${escapeHtml(conv.feedback)}"</p>` : ''}
+              </div>
+            ` : ''}
+            <form class="chat-footer" id="reply-form" style="display: none; gap: 10px; align-items: center; position: relative; flex-shrink: 0;">
+              <input type="file" id="reply-attachment" style="display: none;">
+              <button type="button" id="btn-reply-attachment" class="btn btn-ghost" style="padding: 10px 14px;" title="Lampirkan File">📎</button>
+              <input type="text" id="reply-input" class="chat-input" placeholder="Tulis jawaban atau lampirkan berkas..." autocomplete="off" style="flex: 1;">
+              <button type="submit" class="btn btn-primary btn-send">Kirim</button>
+            </form>
+          </div>
+        `;
+        
+        const chatMessagesEl = document.getElementById("active-chat-messages");
+        const replyForm = document.getElementById("reply-form");
+        const replyInput = document.getElementById("reply-input");
+        const replyAttachmentInput = document.getElementById("reply-attachment");
+        const btnReplyAttachment = document.getElementById("btn-reply-attachment");
+        
+        btnReplyAttachment.onclick = () => {
+          replyAttachmentInput.click();
+        };
+
+        // Rating Logic
+        let selectedRating = 0;
+        const stars = document.querySelectorAll(".star");
+        stars.forEach(star => {
+          star.onclick = () => {
+            selectedRating = parseInt(star.dataset.val);
+            stars.forEach(s => {
+              s.style.color = parseInt(s.dataset.val) <= selectedRating ? "#fbbf24" : "#cbd5e1";
+            });
+          };
+        });
+
+        const btnSubmitRating = document.getElementById("btn-submit-rating");
+        if (btnSubmitRating) {
+          btnSubmitRating.onclick = async () => {
+            if (selectedRating === 0) {
+              alert("Silakan pilih rating bintang terlebih dahulu.");
+              return;
+            }
+            const feedback = document.getElementById("rating-feedback").value;
+            btnSubmitRating.disabled = true;
+            btnSubmitRating.textContent = "Mengirim...";
+            
+            try {
+              const res = await fetch(`${API_URL}/conversations/${conv.id}/rate`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${getAuthToken()}`
+                },
+                body: JSON.stringify({ rating: selectedRating, feedback })
+              });
+              
+              if (res.ok) {
+                alert("Terima kasih atas penilaian Anda!");
+                conv.rating = selectedRating;
+                conv.feedback = feedback;
+                selectConversation(conv); // refresh view
+              } else {
+                alert("Gagal mengirim penilaian.");
+                btnSubmitRating.disabled = false;
+              }
+            } catch (err) {
+              alert("Terjadi kesalahan.");
+              btnSubmitRating.disabled = false;
+            }
+          };
+        }
+
+        const previewLabel = document.createElement("div");
+        previewLabel.id = "attachment-preview-label";
+        previewLabel.style.fontSize = "11px";
+        previewLabel.style.color = "var(--accent)";
+        previewLabel.style.fontWeight = "bold";
+        previewLabel.style.padding = "0 10px 5px 10px";
+        previewLabel.style.display = "none";
+        document.querySelector(".chat-pane").insertBefore(previewLabel, replyForm);
+
+        replyAttachmentInput.onchange = () => {
+          if (replyAttachmentInput.files[0]) {
+            const fileName = replyAttachmentInput.files[0].name;
+            const fileSizeMB = (replyAttachmentInput.files[0].size / (1024 * 1024)).toFixed(2);
+            
+            if (replyAttachmentInput.files[0].size > 5 * 1024 * 1024) {
+              alert("Ukuran berkas terlalu besar. Maksimal adalah 5 MB.");
+              replyAttachmentInput.value = "";
+              previewLabel.style.display = "none";
+              return;
+            }
+
+            previewLabel.textContent = `📎 Terpilih: ${fileName} (${fileSizeMB} MB)`;
+            previewLabel.style.display = "block";
+          } else {
+            previewLabel.style.display = "none";
+          }
+        };
+        
+        socket.emit('join', `conv_${conv.id}`);
+        
+        try {
+          const res = await fetch(`${API_URL}/messages/${conv.id}`, {
+            headers: { "Authorization": `Bearer ${getAuthToken()}` }
+          });
+          const messages = await res.json();
+          chatMessagesEl.innerHTML = "";
+          messages.forEach(appendMessageToPane);
+          
+          // Check if admin has responded
+          const hasAdminResponse = messages.some(m => m.sender_id !== userData.id);
+          
+          if (hasAdminResponse && conv.status !== 'Selesai') {
+            replyForm.style.display = "flex";
+          } else {
+            replyForm.style.display = "none";
+            // Auto reply system logic if no admin response
+            if (conv.status === 'Menunggu Respon' || conv.status === 'Dalam Proses') {
+              const autoReply = {
+                created_at: conv.created_at,
+                sender_email: "Sistem Otomatis",
+                message: "Terima kasih telah menghubungi kami. Laporan/pertanyaan Anda telah kami terima dan saat ini sedang dalam antrean untuk diproses oleh admin. Mohon menunggu tanggapan selanjutnya.",
+                is_auto: true
+              };
+              appendMessageToPane(autoReply);
+            }
+          }
+          
+          chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+          fetchConversations();
+        } catch (error) {
+          chatMessagesEl.innerHTML = '<div style="text-align: center; color: red; padding: 20px;">Gagal memuat riwayat percakapan.</div>';
+        }
+        
+        replyForm.onsubmit = async (e) => {
+          e.preventDefault();
+          const message = replyInput.value.trim();
+          const file = replyAttachmentInput.files[0];
+
+          if (!message && !file) {
+            alert("Harap tulis pesan atau lampirkan berkas.");
+            return;
+          }
+          
+          const formData = new FormData();
+          formData.append("conversationId", conv.id);
+          if (message) formData.append("message", message);
+          if (file) formData.append("attachment", file);
+
+          const submitBtn = replyForm.querySelector(".btn-send");
+          submitBtn.disabled = true;
+          submitBtn.textContent = "Mengirim...";
+
+          try {
+            const res = await fetch(`${API_URL}/messages`, {
+              method: "POST",
+              headers: {
+                "Authorization": `Bearer ${getAuthToken()}`
+              },
+              body: formData
+            });
+            
+            if (res.ok) {
+              replyInput.value = "";
+              replyAttachmentInput.value = "";
+              previewLabel.style.display = "none";
+            } else {
+              const err = await res.json();
+              alert(err.message || "Gagal mengirim pesan.");
+            }
+          } catch (err) {
+            alert("Terjadi kesalahan koneksi.");
+          } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = "Kirim";
+          }
+        };
+      }
+
+      function appendMessageToPane(msg) {
+        const chatMessagesEl = document.getElementById("active-chat-messages");
+        if (!chatMessagesEl) return;
+        
+        const isMe = msg.sender_id === userData.id;
+        const msgRow = document.createElement("div");
+        msgRow.className = `msg-row ${isMe ? 'me' : 'other'}`;
+        
+        const d = new Date(msg.created_at);
+        const timeStr = d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
+        
+        let attachmentHtml = "";
+        if (msg.attachment) {
+          try {
+            const attach = JSON.parse(msg.attachment);
+            const isImage = /\.(jpg|jpeg|png|webp|gif)$/i.test(attach.name);
+            
+            if (isImage) {
+              attachmentHtml = `
+                <div style="margin-top: 8px; max-width: 280px; border-radius: 8px; overflow: hidden; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                  <a href="${attach.path}" target="_blank">
+                    <img src="${attach.path}" alt="${attach.name}" style="width: 100%; height: auto; display: block; max-height: 200px; object-fit: cover;">
+                  </a>
+                </div>
+              `;
+            } else {
+              attachmentHtml = `
+                <div style="margin-top: 8px; font-size: 13px;">
+                  <a href="${attach.path}" target="_blank" style="color: ${isMe ? 'white' : 'var(--accent)'}; font-weight: bold; background: ${isMe ? 'rgba(255,255,255,0.2)' : 'rgba(15, 107, 98, 0.1)'}; padding: 4px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; text-decoration: none;">
+                    📎 ${attach.name}
+                  </a>
+                </div>
+              `;
+            }
+          } catch (e) {
+            const isImage = /\.(jpg|jpeg|png|webp|gif)$/i.test(msg.attachment);
+            if (isImage) {
+              attachmentHtml = `
+                <div style="margin-top: 8px; max-width: 280px; border-radius: 8px; overflow: hidden; border: 1px solid rgba(0,0,0,0.06); box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                  <a href="${msg.attachment}" target="_blank">
+                    <img src="${msg.attachment}" alt="Lampiran Gambar" style="width: 100%; height: auto; display: block; max-height: 200px; object-fit: cover;">
+                  </a>
+                </div>
+              `;
+            } else {
+              attachmentHtml = `
+                <div style="margin-top: 8px; font-size: 13px;">
+                  <a href="${msg.attachment}" target="_blank" style="color: ${isMe ? 'white' : 'var(--accent)'}; font-weight: bold; background: ${isMe ? 'rgba(255,255,255,0.2)' : 'rgba(15, 107, 98, 0.1)'}; padding: 4px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; text-decoration: none;">
+                    📎 Unduh Lampiran
+                  </a>
+                </div>
+              `;
+            }
+          }
+        }
+        
+        const messageContent = msg.message 
+          ? `<div class="msg-bubble" ${msg.is_auto ? 'style="background: #fff8e1; color: #b45309; border: 1px solid #fde68a;"' : ''}>${escapeHtml(msg.message)}${attachmentHtml}</div>`
+          : `<div class="msg-bubble">${attachmentHtml}</div>`;
+
+        let senderDisplay = isMe ? 'Anda' : (msg.sender_role === 'admin' ? 'Admin' : (msg.sender_email || 'Petugas'));
+        if (msg.is_auto) {
+           senderDisplay = 'Sistem Balasan Otomatis';
+        }
+
+        msgRow.innerHTML = `
+          <div class="msg-sender">${senderDisplay}</div>
+          ${messageContent}
+          <div class="msg-time">${timeStr}</div>
+        `;
+        
+        chatMessagesEl.appendChild(msgRow);
+        chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+      }
+
+      function filterUserConversations() {
+        const query = document.getElementById("user-search-input").value.toLowerCase().trim();
+        const items = document.querySelectorAll("#inbox-list .inbox-item");
+        items.forEach(item => {
+          const text = item.innerText.toLowerCase();
+          if (text.includes(query)) {
+            item.style.display = "flex";
+          } else {
+            item.style.display = "none";
+          }
+        });
+      }
+
+      function showNotification(title, message) {
+        let container = document.getElementById("toast-container");
+        if (!container) {
+          container = document.createElement("div");
+          container.id = "toast-container";
+          document.body.appendChild(container);
+        }
+
+        const toast = document.createElement("div");
+        toast.className = "toast";
+        toast.innerHTML = `
+          <div class="toast-title">${title}</div>
+          <div class="toast-message">${message}</div>
+        `;
+
+        container.appendChild(toast);
+
+        setTimeout(() => {
+          toast.classList.add("show");
+        }, 10);
+
+        setTimeout(() => {
+          toast.classList.remove("show");
+          setTimeout(() => {
+            toast.remove();
+          }, 300);
+        }, 4000);
+      }
+
+      function initSocket() {
+        socket = io("http://localhost:3000");
+        
+        socket.on("connect", () => {
+          socket.emit("join", `user_room_${userData.id}`);
+          if (activeConversationId) {
+            socket.emit("join", `conv_${activeConversationId}`);
+          }
+        });
+        
+        socket.on("new_conversation_update", (data) => {
+          fetchConversations();
+          if (Number(activeConversationId) !== Number(data.conversationId)) {
+            showNotification("Balasan Petugas Baru", `Pesan baru: "${data.lastMessage}"`);
+          }
+        });
+        
+        socket.on("new_message", (msg) => {
+          if (msg.is_internal) return;
+          const isMe = msg.sender_id === userData.id;
+          if (Number(activeConversationId) === Number(msg.pengaduan_id)) {
+            appendMessageToPane(msg);
+          } else if (!isMe) {
+            showNotification("Pesan Baru Masuk", `${msg.sender_email || 'Petugas'}: ${msg.message}`);
+          }
+        });
+
+        socket.on("status_change", (data) => {
+          if (Number(data.conversationId) === Number(activeConversationId)) {
+            const statusBadge = document.getElementById("active-chat-status");
+            if (statusBadge) {
+              statusBadge.textContent = data.status;
+              statusBadge.className = "status-badge"; // Reset classes
+              
+              let statusClass = "status-waiting";
+              if (data.status === "Dalam Proses") statusClass = "status-process";
+              else if (data.status === "Selesai") statusClass = "status-done";
+              statusBadge.classList.add(statusClass);
+            }
+            fetchConversations();
+          }
+        });
+      }
+
+      async function initPage() {
+        if (!isAuthenticated()) return;
+        initSocket();
+        await fetchConversations();
+      }
+      
+      initPage();
+    </script>
+  </body>
+</html>

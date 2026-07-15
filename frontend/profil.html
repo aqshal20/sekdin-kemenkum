@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Profil Saya | Sekdin-Poltekpin</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      .gov-topbar {
+        position: fixed; top: 0; left: 0; right: 0; height: 38px;
+        background: linear-gradient(90deg, #cc0000, #a00000);
+        display: flex; align-items: center; padding: 0 5vw; z-index: 50;
+        font-size: 12px; color: rgba(255,255,255,0.95); font-weight: 600; gap: 10px;
+      }
+      .profile-layout {
+        max-width: 900px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+      @media(min-width: 768px) {
+        .profile-layout { grid-template-columns: 270px 1fr; }
+      }
+      .profile-sidebar { display: flex; flex-direction: column; gap: 20px; }
+      .profile-avatar-card {
+        background: white; border: 1px solid var(--border-lt);
+        border-radius: 16px; padding: 28px 20px; text-align: center;
+        box-shadow: var(--shadow-sm);
+      }
+      .avatar-placeholder {
+        width: 88px; height: 88px; border-radius: 50%;
+        background: var(--navy-lt); color: var(--navy);
+        display: inline-flex; align-items: center; justify-content: center;
+        font-size: 32px; font-weight: 800; margin-bottom: 14px;
+        border: 3px solid rgba(0,51,102,0.15);
+        font-family: 'Plus Jakarta Sans', sans-serif;
+      }
+      .profile-main {
+        background: white; border: 1px solid var(--border-lt);
+        border-radius: 16px; padding: 28px; box-shadow: var(--shadow-sm);
+      }
+      .info-row {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 10px 0; border-bottom: 1px solid var(--border-lt); font-size: 13.5px;
+      }
+      .info-row:last-child { border-bottom: none; }
+      .info-label { color: var(--muted); font-weight: 600; }
+      .info-value { color: var(--navy); font-weight: 700; font-size: 13px; text-align: right; }
+      .form-section-title {
+        font-size: 15px; color: var(--navy); font-weight: 700;
+        border-bottom: 2px solid var(--gold); padding-bottom: 8px;
+        margin: 24px 0 14px; display: flex; align-items: center; gap: 8px;
+      }
+      .form-section-title:first-of-type { margin-top: 0; }
+    </style>
+  </head>
+  <body data-page="profil">
+    <a class="skip" href="#utama">Lewati ke konten</a>
+    <div class="gov-topbar">
+      <span>🏛</span>
+      <span>Politeknik Pengayoman Indonesia — Kementerian Hukum RI</span>
+    </div>
+    <div data-site-header></div>
+
+    <main id="utama">
+      <section class="page-hero fade-in" aria-label="Profil Saya">
+        <div class="page-hero-card">
+          <span class="pill">👤 Pengaturan Akun</span>
+          <h1>Profil Saya</h1>
+          <p>Kelola informasi pribadi Anda dan ubah kata sandi dengan aman melalui portal Sekdin-Poltekpin.</p>
+        </div>
+        <div class="page-hero-meta">
+          <div class="page-hero-stat">
+            <strong id="hero-role">Peserta</strong>
+            <span>Peran akun Anda dalam sistem portal ini.</span>
+          </div>
+        </div>
+      </section>
+
+      <div class="profile-layout">
+        <!-- Sidebar Info Ringkas -->
+        <div class="profile-sidebar">
+          <div class="profile-avatar-card">
+            <div class="avatar-placeholder" id="avatar-initials">U</div>
+            <h3 id="sidebar-fullname" style="margin: 0 0 6px; font-size: 17px; color: var(--navy); font-family: 'Plus Jakarta Sans', sans-serif;">Nama Lengkap</h3>
+            <span id="sidebar-role-badge" style="display:inline-block; font-size: 11px; font-weight: 700; background: var(--navy-lt); color: var(--navy); padding: 3px 10px; border-radius: 999px; letter-spacing: 0.3px;">Peserta</span>
+            
+            <div style="margin-top: 25px; text-align: left;">
+              <div class="info-row">
+                <span class="info-label">Email</span>
+                <span class="info-value" id="info-email" style="font-size: 12px; word-break: break-all;">-</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">NIK</span>
+                <span class="info-value" id="info-nik">-</span>
+              </div>
+              <div class="info-row">
+                <span class="info-label">Terdaftar</span>
+                <span class="info-value" id="info-date">-</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Formulir Edit Profil -->
+        <div class="profile-main">
+          <div id="profile-error" class="error" style="display: none; margin-bottom: 20px;"></div>
+          
+          <form id="profile-form">
+            <div class="form-section-title">👤 Informasi Pribadi</div>
+            <div>
+              <label for="fullname">Nama Lengkap</label>
+              <input type="text" id="fullname" required placeholder="Nama lengkap sesuai KTP" style="width: 100%; box-sizing: border-box;" />
+            </div>
+            <div style="margin-top: 15px;">
+              <label for="phone">Nomor Telepon</label>
+              <input type="tel" id="phone" placeholder="Contoh: 081234567890" style="width: 100%; box-sizing: border-box;" />
+            </div>
+
+            <div class="form-section-title">🔑 Ubah Kata Sandi <span style="font-size:12px;font-weight:400;color:var(--muted);">(opsional)</span></div>
+            <div>
+              <label for="old-password">Kata Sandi Lama</label>
+              <input type="password" id="old-password" placeholder="Masukkan kata sandi lama" style="width: 100%; box-sizing: border-box;" />
+            </div>
+            <div style="margin-top: 15px;">
+              <label for="new-password">Kata Sandi Baru</label>
+              <input type="password" id="new-password" placeholder="Minimal 6 karakter" style="width: 100%; box-sizing: border-box;" />
+            </div>
+            <div style="margin-top: 15px;">
+              <label for="confirm-new-password">Konfirmasi Kata Sandi Baru</label>
+              <input type="password" id="confirm-new-password" placeholder="Ulangi kata sandi baru" style="width: 100%; box-sizing: border-box;" />
+            </div>
+
+            <button class="btn btn-primary btn-full" type="submit" id="save-btn" style="margin-top: 24px; padding: 13px; font-size: 15px;">💾 Simpan Perubahan</button>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <div data-site-footer></div>
+    <script src="app.js"></script>
+    <script>
+      const profileForm = document.getElementById("profile-form");
+      const profileError = document.getElementById("profile-error");
+      const saveBtn = document.getElementById("save-btn");
+
+      // Protect page
+      if (!isAuthenticated()) {
+        window.location.href = "login.html";
+      }
+
+      async function loadProfile() {
+        try {
+          const res = await fetch(`${API_URL}/profile`, {
+            headers: { "Authorization": `Bearer ${getAuthToken()}` }
+          });
+
+          if (res.ok) {
+            const user = await res.json();
+            
+            // Set static values
+            document.getElementById("info-email").textContent = user.email;
+            document.getElementById("info-nik").textContent = user.nik || "-";
+            
+            const dateStr = new Date(user.created_at).toLocaleDateString("id-ID", {
+              day: "numeric",
+              month: "short",
+              year: "numeric"
+            });
+            document.getElementById("info-date").textContent = dateStr;
+
+            // Set role display
+            let roleName = "Peserta";
+            if (user.role === "admin") roleName = "Admin Utama";
+            else if (user.role === "admin_informasi") roleName = "Admin Info";
+            else if (user.role === "admin_pengaduan") roleName = "Admin Pengaduan";
+            
+            document.getElementById("sidebar-role-badge").textContent = roleName;
+            const heroRoleEl = document.getElementById("hero-role");
+            if (heroRoleEl) heroRoleEl.textContent = roleName;
+
+            // Set form values
+            const nameVal = user.fullname || "";
+            document.getElementById("fullname").value = nameVal;
+            document.getElementById("sidebar-fullname").textContent = nameVal || "Belum diisi";
+            document.getElementById("phone").value = user.phone || "";
+
+            // Initials avatar
+            const initials = nameVal ? nameVal.substring(0, 2).toUpperCase() : user.email.substring(0, 2).toUpperCase();
+            document.getElementById("avatar-initials").textContent = initials;
+          } else {
+            alert("Gagal memuat profil.");
+          }
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      profileForm.onsubmit = async (e) => {
+        e.preventDefault();
+        profileError.style.display = "none";
+
+        const fullname = document.getElementById("fullname").value.trim();
+        const phone = document.getElementById("phone").value.trim();
+        const oldPassword = document.getElementById("old-password").value;
+        const newPassword = document.getElementById("new-password").value;
+        const confirmNewPassword = document.getElementById("confirm-new-password").value;
+
+        if (newPassword) {
+          if (!oldPassword) {
+            profileError.textContent = "Kata sandi lama wajib diisi untuk mengubah kata sandi.";
+            profileError.style.display = "block";
+            return;
+          }
+          if (newPassword.length < 6) {
+            profileError.textContent = "Kata sandi baru minimal 6 karakter.";
+            profileError.style.display = "block";
+            return;
+          }
+          if (newPassword !== confirmNewPassword) {
+            profileError.textContent = "Konfirmasi kata sandi baru tidak cocok.";
+            profileError.style.display = "block";
+            return;
+          }
+        }
+
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = "⏳ Menyimpan...";
+
+        const payload = { fullname, phone };
+        if (newPassword) {
+          payload.oldPassword = oldPassword;
+          payload.newPassword = newPassword;
+        }
+
+        try {
+          const res = await fetch(`${API_URL}/profile`, {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${getAuthToken()}`
+            },
+            body: JSON.stringify(payload)
+          });
+
+          const data = await res.json();
+          if (res.ok) {
+            alert("Profil berhasil diperbarui!");
+            // Reset password inputs
+            document.getElementById("old-password").value = "";
+            document.getElementById("new-password").value = "";
+            document.getElementById("confirm-new-password").value = "";
+            
+            // Save updated user data in localStorage
+            localStorage.setItem("user-data", JSON.stringify(data.user));
+            loadProfile();
+          } else {
+            profileError.textContent = data.message || "Gagal memperbarui profil.";
+            profileError.style.display = "block";
+          }
+        } catch (err) {
+          profileError.textContent = "Kesalahan koneksi ke server.";
+          profileError.style.display = "block";
+        } finally {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = "💾 Simpan Perubahan";
+        }
+      };
+
+      loadProfile();
+    </script>
+  </body>
+</html>

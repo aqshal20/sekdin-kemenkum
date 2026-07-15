@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pengumuman Resmi | Sekdin-Poltekpin</title>
+    <meta name="description" content="Pengumuman resmi terkini dari Sekdin-Poltekpin yang tersusun, ringkas, dan mudah ditelusuri." />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      .gov-topbar {
+        position: fixed; top: 0; left: 0; right: 0; height: 38px;
+        background: linear-gradient(90deg, #cc0000, #a00000);
+        display: flex; align-items: center; padding: 0 5vw; z-index: 50;
+        font-size: 12px; color: rgba(255,255,255,0.95); font-weight: 600; gap: 10px;
+      }
+    </style>
+  </head>
+  <body data-page="pengumuman">
+    <a class="skip" href="#utama">Lewati ke konten</a>
+    <div class="gov-topbar">
+      <span>🏛</span>
+      <span>Politeknik Pengayoman Indonesia — Kementerian Hukum RI</span>
+    </div>
+    <div data-site-header></div>
+
+    <main id="utama">
+      <!-- Page Hero -->
+      <section class="page-hero fade-in" aria-label="Pengumuman">
+        <div class="page-hero-card">
+          <span class="pill">📋 Layanan Informasi</span>
+          <h1>Pengumuman Resmi Sekdin-Poltekpin</h1>
+          <p>
+            Semua pengumuman ditampilkan dari yang terbaru, lengkap dengan kategori,
+            tanggal publikasi, dan lampiran pendukung agar informasi penting lebih cepat dipahami.
+          </p>
+        </div>
+        <div class="page-hero-meta">
+          <div class="page-hero-stat">
+            <strong>4 Terbaru</strong>
+            <span>Pengumuman paling baru ditampilkan terlebih dahulu secara otomatis.</span>
+          </div>
+          <div class="page-hero-stat">
+            <strong id="hero-count">—</strong>
+            <span>Total pengumuman yang tersedia di portal ini.</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Pengumuman List -->
+      <section class="section-stack">
+        <div class="section-title">
+          <h2>Pengumuman Terkini</h2>
+          <div></div>
+        </div>
+
+        <div class="cards single-column" id="announcement-list"></div>
+
+        <div class="announcement-actions">
+          <button id="toggle-announcements" class="btn btn-outline-navy" type="button">
+            Lihat Pengumuman Lainnya ▼
+          </button>
+        </div>
+
+        <!-- Admin Panel -->
+        <div id="admin-panel" class="card admin-only glass-panel" style="margin-top: 12px;">
+          <div class="admin-actions">
+            <h3 style="margin: 0; font-size: 17px;">➕ Tambah Pengumuman Baru</h3>
+            <button id="logout-btn" class="btn btn-ghost btn-sm" type="button">Keluar Admin</button>
+          </div>
+          <div class="notice" style="margin: 16px 0 0;">
+            <span>ℹ️</span>
+            <span>Gunakan form ini untuk mempublikasikan pengumuman resmi baru.</span>
+          </div>
+          <form id="announcement-form" style="margin-top: 20px;">
+            <div class="grid-2">
+              <div>
+                <label for="title">Judul Pengumuman</label>
+                <input id="title" name="title" required placeholder="Judul pengumuman resmi" />
+              </div>
+              <div>
+                <label for="category">Kategori</label>
+                <select id="category" name="category">
+                  <option>Informasi Publik</option>
+                  <option>Agenda</option>
+                  <option>Layanan</option>
+                  <option>Akademik</option>
+                  <option>Administratif</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label for="content">Isi Pengumuman</label>
+              <textarea id="content" name="content" required placeholder="Tuliskan isi pengumuman secara lengkap..." style="min-height: 160px;"></textarea>
+            </div>
+            <div class="grid-2">
+              <div>
+                <label for="announcement-image">Gambar Pengumuman <span class="optional-label">(opsional)</span></label>
+                <input id="announcement-image" name="image" type="file" accept="image/*" />
+              </div>
+              <div>
+                <label for="announcement-attachment">Lampiran Dokumen <span class="optional-label">(opsional)</span></label>
+                <input id="announcement-attachment" name="attachment" type="file" />
+              </div>
+            </div>
+            <button class="btn btn-primary" type="submit" style="padding: 12px 28px;">
+              📢 Publikasikan Pengumuman
+            </button>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <div data-site-footer></div>
+
+    <script>
+      const DEFAULT_IMG = "https://pbs.twimg.com/profile_images/1902219666120175619/dgRN2WQ6_400x400.png";
+    </script>
+    <script src="app.js"></script>
+    <script>
+      const myRole     = getUserRole();
+      const isAdmin    = myRole === "admin" || myRole === "admin_informasi";
+      const adminPanel = document.getElementById("admin-panel");
+      const logoutBtn  = document.getElementById("logout-btn");
+      const heroCount  = document.getElementById("hero-count");
+
+      if (isAdmin && adminPanel) adminPanel.style.display = "block";
+
+      logoutBtn && logoutBtn.addEventListener("click", () => {
+        ["sekdin-token","user-role","user-data"].forEach(k => localStorage.removeItem(k));
+        window.location.reload();
+      });
+
+      const announcementList    = document.getElementById("announcement-list");
+      const toggleAnnouncements = document.getElementById("toggle-announcements");
+      let allAnnouncements = [];
+      let showingAll = false;
+
+      function renderAnnouncement({ title, category, content, created_at, attachment_path, attachment_name, image_path }) {
+        const article  = document.createElement("article");
+        article.className = "card announcement-card";
+        const imageSrc = image_path || DEFAULT_IMG;
+        const dateStr  = new Date(created_at).toLocaleDateString("id-ID", {
+          day: "numeric", month: "long", year: "numeric"
+        });
+
+        const catClass = (() => {
+          if (category === "Akademik") return "pill-gold";
+          if (category === "Administratif") return "pill-merah";
+          return "pill-navy";
+        })();
+
+        const attachHtml = attachment_path
+          ? `<p class="announcement-meta" style="margin-top:10px;">
+               📎 <a href="${attachment_path}" target="_blank" 
+                  style="color: var(--navy); font-weight: 700; text-decoration: underline;">
+                 ${escapeHtml(attachment_name || "Unduh Dokumen")}
+               </a>
+             </p>` : "";
+
+        article.innerHTML = `
+          <div class="announcement-header">
+            <span class="pill ${catClass}">${escapeHtml(category)}</span>
+            <span class="announcement-meta">📅 ${dateStr}</span>
+          </div>
+          <h3 class="announcement-title">${escapeHtml(title)}</h3>
+          <div class="announcement-body">
+            <div>
+              <p style="white-space: pre-line; color: var(--ink); line-height: 1.7; font-size: 14.5px;">${escapeHtml(content)}</p>
+              ${attachHtml}
+              <div class="announcement-meta" style="margin-top: 14px; font-size: 12.5px;">
+                📌 Dipublikasikan: ${dateStr}
+              </div>
+            </div>
+            <div class="announcement-image">
+              <img src="${imageSrc}" alt="Gambar pengumuman" loading="lazy" />
+            </div>
+          </div>
+        `;
+        return article;
+      }
+
+      async function fetchAnnouncements() {
+        announcementList.innerHTML = `
+          <div style="padding: 40px; text-align: center; color: var(--muted);">
+            <div class="spinner" style="margin: 0 auto 12px;"></div>
+            <p style="font-size: 14px;">Memuat pengumuman...</p>
+          </div>`;
+        try {
+          const res = await fetch(`${API_URL}/announcements`);
+          if (res.ok) {
+            allAnnouncements = await res.json();
+            if (heroCount) heroCount.textContent = allAnnouncements.length;
+            renderAnnouncementList();
+          } else {
+            announcementList.innerHTML = `<div class="notice notice-warning">⚠️ Gagal memuat pengumuman dari server.</div>`;
+          }
+        } catch {
+          announcementList.innerHTML = `<div class="notice notice-warning">⚠️ Koneksi ke server gagal. Pastikan server berjalan.</div>`;
+        }
+      }
+
+      function renderAnnouncementList() {
+        announcementList.innerHTML = "";
+        if (allAnnouncements.length === 0) {
+          announcementList.innerHTML = `<div style="padding: 40px; text-align: center; color: var(--muted); font-size: 14px;">📭 Belum ada pengumuman saat ini.</div>`;
+          toggleAnnouncements.style.display = "none";
+          return;
+        }
+        const limit = showingAll ? allAnnouncements.length : 4;
+        allAnnouncements.slice(0, limit).forEach(item => announcementList.appendChild(renderAnnouncement(item)));
+
+        if (allAnnouncements.length <= 4) {
+          toggleAnnouncements.style.display = "none";
+        } else {
+          toggleAnnouncements.style.display = "inline-flex";
+          toggleAnnouncements.textContent = showingAll ? "Sembunyikan Pengumuman ▲" : "Lihat Pengumuman Lainnya ▼";
+        }
+      }
+
+      fetchAnnouncements();
+      toggleAnnouncements.addEventListener("click", () => { showingAll = !showingAll; renderAnnouncementList(); });
+
+      const announcementForm = document.getElementById("announcement-form");
+      if (announcementForm) {
+        announcementForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          if (!isAdmin) return;
+          const submitBtn = announcementForm.querySelector('button[type="submit"]');
+          submitBtn.disabled = true;
+          submitBtn.textContent = "⏳ Mempublikasikan...";
+
+          const formData = new FormData();
+          formData.append("title",    document.getElementById("title").value.trim());
+          formData.append("category", document.getElementById("category").value);
+          formData.append("content",  document.getElementById("content").value.trim());
+          const img  = document.getElementById("announcement-image").files[0];
+          const att  = document.getElementById("announcement-attachment").files[0];
+          if (img) formData.append("image", img);
+          if (att) formData.append("attachment", att);
+
+          try {
+            const res = await fetch(`${API_URL}/announcements`, {
+              method: "POST",
+              headers: { "Authorization": `Bearer ${getAuthToken()}` },
+              body: formData
+            });
+            if (res.ok) { alert("Pengumuman berhasil dipublikasikan!"); announcementForm.reset(); fetchAnnouncements(); }
+            else { const err = await res.json(); alert(err.message || "Gagal mempublikasikan."); }
+          } catch { alert("Kesalahan koneksi."); }
+          finally { submitBtn.disabled = false; submitBtn.innerHTML = "📢 Publikasikan Pengumuman"; }
+        });
+      }
+    </script>
+  </body>
+</html>

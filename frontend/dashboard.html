@@ -1,0 +1,915 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Dashboard Admin | Sekdin-Poltekpin</title>
+    <meta name="description" content="Dashboard Evaluasi Laporan Admin Sekdin-Poltekpin - Pantau pengaduan dan kepuasan layanan" />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      /* ============================================================
+         DASHBOARD LAYOUT
+      ============================================================ */
+      .dash-wrap {
+        max-width: 1280px;
+        margin: 0 auto;
+        padding: 36px 24px 60px;
+      }
+
+      /* --- Hero Banner --- */
+      .dash-hero {
+        background: linear-gradient(135deg, #002244 0%, #003366 50%, #0a4a7a 100%);
+        border-radius: 20px;
+        padding: 36px 40px;
+        margin-bottom: 32px;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 24px;
+        box-shadow: 0 16px 48px rgba(0,34,68,0.35);
+      }
+
+      .dash-hero::before {
+        content: '';
+        position: absolute;
+        top: -40px; right: -40px;
+        width: 220px; height: 220px;
+        border-radius: 50%;
+        background: rgba(201,162,39,0.12);
+        pointer-events: none;
+      }
+
+      .dash-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -60px; left: 40%;
+        width: 300px; height: 300px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.04);
+        pointer-events: none;
+      }
+
+      .dash-hero-text h1 {
+        font-size: 26px;
+        font-weight: 800;
+        color: #ffffff;
+        margin-bottom: 8px;
+        letter-spacing: -0.3px;
+      }
+
+      .dash-hero-text p {
+        color: rgba(255,255,255,0.7);
+        font-size: 14.5px;
+        max-width: 520px;
+        line-height: 1.6;
+      }
+
+      .dash-hero-badges {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-end;
+        flex-shrink: 0;
+      }
+
+      .hero-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.15);
+        color: #fff;
+        border-radius: 50px;
+        padding: 6px 14px;
+        font-size: 12.5px;
+        font-weight: 600;
+        backdrop-filter: blur(4px);
+      }
+
+      .hero-badge.gold {
+        background: rgba(201,162,39,0.25);
+        border-color: rgba(201,162,39,0.4);
+        color: #fde68a;
+      }
+
+      /* --- Stats Grid --- */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 18px;
+        margin-bottom: 28px;
+      }
+
+      @media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+      @media (max-width: 500px) { .stats-grid { grid-template-columns: 1fr; } }
+
+      .stat-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 22px 24px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 8px rgba(0,51,102,0.06);
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+        cursor: default;
+      }
+
+      .stat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 28px rgba(0,51,102,0.12);
+      }
+
+      .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 4px;
+        border-radius: 16px 16px 0 0;
+      }
+
+      .stat-card.navy::before  { background: linear-gradient(90deg, #003366, #1b4b8f); }
+      .stat-card.green::before { background: linear-gradient(90deg, #15803d, #22c55e); }
+      .stat-card.orange::before{ background: linear-gradient(90deg, #d97706, #f59e0b); }
+      .stat-card.gold::before  { background: linear-gradient(90deg, #a37e1a, #c9a227); }
+
+      .stat-icon {
+        width: 44px; height: 44px;
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 20px;
+        margin-bottom: 14px;
+      }
+
+      .stat-card.navy  .stat-icon { background: #e8eef8; }
+      .stat-card.green .stat-icon { background: #dcfce7; }
+      .stat-card.orange .stat-icon { background: #fef3c7; }
+      .stat-card.gold  .stat-icon { background: #fdf8e7; }
+
+      .stat-label {
+        font-size: 11.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.8px;
+        color: #64748b;
+        margin-bottom: 6px;
+      }
+
+      .stat-value {
+        font-size: 30px;
+        font-weight: 800;
+        color: #0f172a;
+        line-height: 1;
+        margin-bottom: 10px;
+      }
+
+      .stat-sub {
+        font-size: 12px;
+        color: #94a3b8;
+        font-weight: 500;
+      }
+
+      /* --- Charts Grid --- */
+      .charts-grid {
+        display: grid;
+        grid-template-columns: 1.4fr 1fr;
+        gap: 18px;
+        margin-bottom: 28px;
+      }
+
+      @media (max-width: 860px) { .charts-grid { grid-template-columns: 1fr; } }
+
+      .chart-card {
+        background: #ffffff;
+        border-radius: 18px;
+        padding: 26px 28px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 8px rgba(0,51,102,0.06);
+      }
+
+      .chart-card-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 22px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid #f1f5f9;
+      }
+
+      .chart-card-header h3 {
+        font-size: 15px;
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      .chart-badge {
+        font-size: 11px;
+        font-weight: 600;
+        background: #f1f5f9;
+        color: #475569;
+        padding: 4px 10px;
+        border-radius: 20px;
+      }
+
+      .chart-container {
+        position: relative;
+        height: 260px;
+      }
+
+      /* --- Trend Mini Cards (below charts) --- */
+      .metrics-row {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+        margin-bottom: 28px;
+      }
+
+      @media (max-width: 700px) { .metrics-row { grid-template-columns: 1fr; } }
+
+      .metric-card {
+        background: #ffffff;
+        border-radius: 14px;
+        padding: 18px 22px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 8px rgba(0,51,102,0.06);
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .metric-icon {
+        width: 42px; height: 42px;
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+      }
+
+      .metric-info .metric-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: #64748b;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .metric-info .metric-val {
+        font-size: 20px;
+        font-weight: 800;
+        color: #0f172a;
+      }
+
+      /* --- Table Section --- */
+      .table-section {
+        background: #ffffff;
+        border-radius: 18px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 8px rgba(0,51,102,0.06);
+        overflow: hidden;
+      }
+
+      .table-section-header {
+        padding: 22px 28px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        border-bottom: 1px solid #f1f5f9;
+      }
+
+      .table-section-header h2 {
+        font-size: 16px;
+        font-weight: 700;
+        color: #0f172a;
+      }
+
+      .table-section-header p {
+        font-size: 12.5px;
+        color: #64748b;
+        margin-top: 2px;
+      }
+
+      .btn-goto-inbox {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: linear-gradient(135deg, #003366, #1b4b8f);
+        color: #ffffff;
+        border: none;
+        padding: 9px 18px;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        transition: opacity 0.2s;
+        font-family: inherit;
+      }
+
+      .btn-goto-inbox:hover { opacity: 0.85; }
+
+      .dash-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13.5px;
+      }
+
+      .dash-table th {
+        padding: 14px 24px;
+        background: #f8fafc;
+        color: #003366;
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 10.5px;
+        letter-spacing: 1px;
+        white-space: nowrap;
+        border-bottom: 1px solid #e2e8f0;
+      }
+
+      .dash-table td {
+        padding: 16px 24px;
+        border-bottom: 1px solid #f1f5f9;
+        vertical-align: middle;
+        color: #1e293b;
+      }
+
+      .dash-table tbody tr:last-child td { border-bottom: none; }
+
+      .dash-table tbody tr {
+        transition: background 0.15s;
+      }
+
+      .dash-table tbody tr:hover {
+        background: #f8fafc;
+      }
+
+      .avatar {
+        width: 34px; height: 34px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #003366, #1b4b8f);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 700;
+        display: inline-flex; align-items: center; justify-content: center;
+        margin-right: 10px;
+        flex-shrink: 0;
+      }
+
+      .name-cell {
+        display: flex; align-items: center;
+      }
+
+      .name-cell .name-text {
+        font-weight: 600;
+        color: #0f172a;
+        font-size: 13.5px;
+      }
+
+      .name-cell .name-sub {
+        font-size: 11.5px;
+        color: #94a3b8;
+        margin-top: 1px;
+      }
+
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 5px 12px;
+        border-radius: 50px;
+      }
+
+      .pill-selesai  { background: #dcfce7; color: #15803d; }
+      .pill-menunggu { background: #fef3c7; color: #b45309; }
+
+      .star-rating {
+        color: #c9a227;
+        font-size: 15px;
+        letter-spacing: 1.5px;
+      }
+
+      .no-rating {
+        color: #cbd5e1;
+        font-size: 12px;
+        font-style: italic;
+      }
+
+      .msg-preview {
+        max-width: 280px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        color: #475569;
+        font-size: 13px;
+      }
+
+      .table-loading {
+        padding: 56px;
+        text-align: center;
+        color: #94a3b8;
+        font-size: 14px;
+      }
+
+      .table-loading .load-icon {
+        font-size: 40px;
+        display: block;
+        margin-bottom: 12px;
+      }
+
+      @keyframes pulse-dot {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50%       { opacity: 0.4; transform: scale(0.7); }
+      }
+
+      @keyframes fade-in {
+        from { opacity: 0; transform: translateY(6px); }
+        to   { opacity: 1; transform: translateY(0); }
+      }
+
+      .stat-value { transition: all 0.4s ease; }
+      .dash-table tbody { animation: fade-in 0.35s ease; }
+    </style>
+  </head>
+  <body data-page="dashboard">
+    <a class="skip" href="#utama">Lewati ke konten</a>
+    <div class="gov-topbar" style="position:fixed;top:0;left:0;right:0;height:38px;background:linear-gradient(90deg,#cc0000,#a00000);display:flex;align-items:center;padding:0 5vw;z-index:50;font-size:12px;color:rgba(255,255,255,0.95);font-weight:600;gap:10px;">
+      <span>🏛</span>
+      <span>Politeknik Pengayoman Indonesia — Kementerian Hukum RI</span>
+    </div>
+    <div data-site-header></div>
+
+    <main id="utama" class="site-main" style="margin-top: 38px; background: #f4f6f9; min-height: calc(100vh - 38px);">
+      <div class="dash-wrap">
+
+        <!-- ====== HERO BANNER ====== -->
+        <div class="dash-hero">
+          <div class="dash-hero-text">
+            <h1>Dashboard Evaluasi Layanan</h1>
+            <p>Pantau seluruh pengaduan dan pertanyaan masyarakat secara real-time, beserta status penyelesaian dan tingkat kepuasan penanya.</p>
+          </div>
+          <div class="dash-hero-badges">
+            <div class="hero-badge" style="gap:8px;"><span style="display:inline-block;width:8px;height:8px;background:#4ade80;border-radius:50%;animation:pulse-dot 1.5s ease-in-out infinite;"></span> Live</div>
+            <div class="hero-badge gold">⭐ Evaluasi Kepuasan</div>
+            <div class="hero-badge" id="last-refresh-badge">🕐 Memuat...</div>
+            <div class="hero-badge" style="background:rgba(74,222,128,0.15);border-color:rgba(74,222,128,0.3);color:#4ade80;">🔄 Update setiap 1 menit</div>
+          </div>
+        </div>
+
+        <!-- ====== STATISTICS CARDS ====== -->
+        <div class="stats-grid">
+          <div class="stat-card navy">
+            <div class="stat-icon">📋</div>
+            <div class="stat-label">Total Laporan</div>
+            <div class="stat-value" id="stat-total">—</div>
+            <div class="stat-sub">Seluruh laporan masuk</div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-icon">✅</div>
+            <div class="stat-label">Sudah Terjawab</div>
+            <div class="stat-value" id="stat-selesai">—</div>
+            <div class="stat-sub" id="stat-selesai-pct">- dari total</div>
+          </div>
+          <div class="stat-card orange">
+            <div class="stat-icon">⏳</div>
+            <div class="stat-label">Menunggu Respon</div>
+            <div class="stat-value" id="stat-menunggu">—</div>
+            <div class="stat-sub" id="stat-menunggu-pct">- dari total</div>
+          </div>
+          <div class="stat-card gold">
+            <div class="stat-icon">⭐</div>
+            <div class="stat-label">Rata-rata Rating</div>
+            <div class="stat-value" id="stat-rating">—</div>
+            <div class="stat-sub" id="stat-rating-sub">dari skala 5.0</div>
+          </div>
+        </div>
+
+        <!-- ====== CHARTS ====== -->
+        <div class="charts-grid">
+          <!-- Bar Chart: Service Type -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div>
+                <h3>Laporan per Jenis Layanan</h3>
+              </div>
+              <span class="chart-badge">Bar Chart</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="serviceChart"></canvas>
+            </div>
+          </div>
+          <!-- Doughnut: Status -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div>
+                <h3>Status Penyelesaian</h3>
+              </div>
+              <span class="chart-badge">Donut Chart</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="statusChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Second Charts Row -->
+        <div class="charts-grid" style="grid-template-columns: 1fr 1fr; margin-bottom: 28px;">
+          <!-- Rating Distribution -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div>
+                <h3>Distribusi Rating Kepuasan</h3>
+              </div>
+              <span class="chart-badge">Bar Chart</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="ratingChart"></canvas>
+            </div>
+          </div>
+          <!-- Category -->
+          <div class="chart-card">
+            <div class="chart-card-header">
+              <div>
+                <h3>Laporan per Kategori</h3>
+              </div>
+              <span class="chart-badge">Pie Chart</span>
+            </div>
+            <div class="chart-container">
+              <canvas id="categoryChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- ====== TABLE ====== -->
+        <div class="table-section">
+          <div class="table-section-header">
+            <div>
+              <h2>Daftar Lengkap Pengaduan &amp; Informasi</h2>
+              <p>Data terbaru dari seluruh laporan yang masuk ke sistem</p>
+            </div>
+            <a href="kotak-masuk.html" class="btn-goto-inbox">📥 Buka Kotak Masuk</a>
+          </div>
+          <div style="overflow-x: auto;">
+            <table class="dash-table">
+              <thead>
+                <tr>
+                  <th width="4%">No</th>
+                  <th width="20%">Nama Penanya</th>
+                  <th width="30%">Isi Pertanyaan / Laporan</th>
+                  <th width="12%">Jenis Layanan</th>
+                  <th width="12%">Status</th>
+                  <th width="15%">Rating Kepuasan</th>
+                </tr>
+              </thead>
+              <tbody id="dashboard-tbody">
+                <tr>
+                  <td colspan="6" class="table-loading">
+                    <span class="load-icon">📊</span>
+                    Memuat data dashboard...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="pagination-controls" id="dash-pagination" style="display:none; justify-content:space-between; align-items:center; padding: 12px 16px; background: white; border-top: 1px solid var(--border); font-size: 13px; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
+              <div>
+                <label>Tampilkan: </label>
+                <select onchange="changeDashRows(this.value)" id="dash-rows-select" style="padding: 4px; border-radius: 4px; border: 1px solid var(--border);">
+                  <option value="10">10</option>
+                  <option value="50">50</option>
+                  <option value="100">100</option>
+                  <option value="999999">Semua</option>
+                </select>
+              </div>
+              <div>
+                <button onclick="changeDashPage(-1)" id="btn-dash-prev" style="padding: 4px 10px; border: 1px solid var(--border); background: white; border-radius: 4px; cursor: pointer;">&lt; Prev</button>
+                <span id="dash-page-info" style="margin: 0 10px; font-weight: 600;">Hal 1</span>
+                <button onclick="changeDashPage(1)" id="btn-dash-next" style="padding: 4px 10px; border: 1px solid var(--border); background: white; border-radius: 4px; cursor: pointer;">Next &gt;</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <div data-site-footer></div>
+
+    <script src="app.js"></script>
+    <script>
+    (function () {
+      // ============================================================
+      //  State — keeps Chart.js instances so we can destroy & redraw
+      // ============================================================
+      const chartInstances = {};
+      const REFRESH_INTERVAL = 60; // seconds
+
+      let dashCurrentPage = 1;
+      let dashRowsPerPage = 10;
+      let allReportsData = [];
+
+      window.changeDashPage = function(delta) {
+        dashCurrentPage += delta;
+        renderDashTable();
+      };
+      
+      window.changeDashRows = function(val) {
+        dashRowsPerPage = parseInt(val);
+        dashCurrentPage = 1;
+        renderDashTable();
+      };
+
+      const NAV_COLORS = [
+        "#003366","#1b4b8f","#2d6cc0","#c9a227","#cc0000",
+        "#15803d","#0369a1","#a37e1a","#7c3aed","#0891b2"
+      ];
+
+      function destroyChart(id) {
+        if (chartInstances[id]) {
+          chartInstances[id].destroy();
+          delete chartInstances[id];
+        }
+      }
+
+      function renderDashTable() {
+        const tbody = document.getElementById("dashboard-tbody");
+        if (!allReportsData.length) {
+          tbody.innerHTML = `<tr><td colspan="6" class="table-loading">
+            <span class="load-icon">📭</span>Belum ada pertanyaan atau laporan masuk.
+          </td></tr>`;
+          document.getElementById('dash-pagination').style.display = 'none';
+          return;
+        }
+
+        const totalPages = Math.ceil(allReportsData.length / dashRowsPerPage);
+        if (dashCurrentPage > totalPages) dashCurrentPage = totalPages;
+        if (dashCurrentPage < 1) dashCurrentPage = 1;
+
+        const startIdx = (dashCurrentPage - 1) * dashRowsPerPage;
+        const endIdx = startIdx + dashRowsPerPage;
+        const paginatedReports = allReportsData.slice(startIdx, endIdx);
+
+        const rows = paginatedReports.map((item, i) => {
+          const actualIndex = startIdx + i + 1;
+          const isResolved = item.status === "Selesai" || item.status === "Ditutup";
+          const svc = item.service_type || "Tidak Diketahui";
+          
+          let ratingHtml = '<span class="no-rating">Belum Dinilai</span>';
+          if (item.rating) {
+            const filled = '★'.repeat(item.rating);
+            const empty  = '☆'.repeat(5 - item.rating);
+            ratingHtml = `<span class="star-rating" title="${item.rating} dari 5 bintang">${filled}${empty}</span>`;
+          }
+
+          const initials = (item.participant_fullname || "?")
+            .split(" ").slice(0, 2).map(w => w[0]).join("").toUpperCase();
+
+          const statusClass = isResolved ? "pill-selesai" : "pill-menunggu";
+          const statusText  = isResolved ? "✓ Terjawab" : "⏳ Menunggu";
+
+          return `
+            <tr>
+              <td style="color:#94a3b8;font-weight:600;">${actualIndex}</td>
+              <td>
+                <div class="name-cell">
+                  <div class="avatar">${initials}</div>
+                  <div>
+                    <div class="name-text">${item.participant_fullname || "-"}</div>
+                    <div class="name-sub">${item.participant_email || ""}</div>
+                  </div>
+                </div>
+              </td>
+              <td><div class="msg-preview" title="${(item.first_message||'').replace(/"/g,"&quot;")}">${item.first_message || "<em style='color:#cbd5e1'>Belum ada pesan</em>"}</div></td>
+              <td style="font-size:12.5px;color:#475569;font-weight:600;">${svc}</td>
+              <td><span class="status-pill ${statusClass}">${statusText}</span></td>
+              <td>${ratingHtml}</td>
+            </tr>
+          `;
+        });
+
+        tbody.innerHTML = rows.join("");
+
+        // Update pagination UI
+        document.getElementById('dash-pagination').style.display = 'flex';
+        document.getElementById('dash-page-info').textContent = `Hal ${dashCurrentPage} dari ${totalPages}`;
+        document.getElementById('btn-dash-prev').disabled = dashCurrentPage === 1;
+        document.getElementById('btn-dash-prev').style.opacity = dashCurrentPage === 1 ? '0.5' : '1';
+        document.getElementById('btn-dash-next').disabled = dashCurrentPage === totalPages;
+        document.getElementById('btn-dash-next').style.opacity = dashCurrentPage === totalPages ? '0.5' : '1';
+      }
+
+      // ============================================================
+      //  Main loader — fetches data, updates stats + charts + table
+      // ============================================================
+      async function loadDashboard() {
+        const tbody = document.getElementById("dashboard-tbody");
+
+        // Update last-refresh timestamp
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+        document.getElementById("last-refresh-badge").textContent = `🕐 ${timeStr} WIB`;
+
+        try {
+          const res = await fetch(`${API_URL}/admin/reports`, {
+            headers: { "Authorization": `Bearer ${getAuthToken()}` }
+          });
+
+          if (!res.ok) {
+            tbody.innerHTML = `<tr><td colspan="6" class="table-loading" style="color:#ef4444;">
+              <span class="load-icon">⚠️</span>Gagal memuat data. Pastikan Anda memiliki akses Admin.
+            </td></tr>`;
+            return;
+          }
+
+          const reports = await res.json();
+
+          if (reports.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="table-loading">
+              <span class="load-icon">📭</span>Belum ada pertanyaan atau laporan masuk.
+            </td></tr>`;
+            return;
+          }
+
+          // ---- Aggregate ----
+          let totalSelesai = 0, totalMenunggu = 0;
+          let ratingSum = 0, ratingCount = 0;
+          const ratingDist = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+          const serviceCount = {};
+          const categoryCount = {};
+
+          reports.forEach((item) => {
+            const isResolved = item.status === "Selesai" || item.status === "Ditutup";
+            if (isResolved) totalSelesai++; else totalMenunggu++;
+
+            const svc = item.service_type || "Tidak Diketahui";
+            serviceCount[svc] = (serviceCount[svc] || 0) + 1;
+
+            const cat = item.category || "Lainnya";
+            categoryCount[cat] = (categoryCount[cat] || 0) + 1;
+
+            if (item.rating) {
+              ratingSum += item.rating;
+              ratingCount++;
+              ratingDist[item.rating]++;
+            }
+          });
+          
+          allReportsData = reports;
+          dashCurrentPage = 1;
+          renderDashTable();
+
+          // ---- Stat Cards ----
+          const total = reports.length;
+          document.getElementById("stat-total").textContent    = total;
+          document.getElementById("stat-selesai").textContent  = totalSelesai;
+          document.getElementById("stat-menunggu").textContent = totalMenunggu;
+
+          const pctSelesai  = total ? Math.round((totalSelesai  / total) * 100) : 0;
+          const pctMenunggu = total ? Math.round((totalMenunggu / total) * 100) : 0;
+          document.getElementById("stat-selesai-pct").textContent  = `${pctSelesai}% dari total laporan`;
+          document.getElementById("stat-menunggu-pct").textContent = `${pctMenunggu}% dari total laporan`;
+
+          const avgRating = ratingCount > 0 ? (ratingSum / ratingCount).toFixed(1) : "0.0";
+          document.getElementById("stat-rating").textContent     = avgRating;
+          document.getElementById("stat-rating-sub").textContent = `dari ${ratingCount} penilaian`;
+
+          // ---- Chart Defaults ----
+          Chart.defaults.font.family = "'Inter', 'Plus Jakarta Sans', sans-serif";
+          Chart.defaults.font.size   = 12;
+          Chart.defaults.color       = "#64748b";
+
+          // ---- Destroy old charts before redrawing ----
+          ["serviceChart","statusChart","ratingChart","categoryChart"].forEach(destroyChart);
+
+          // 1. Service Type Bar
+          const svcLabels = Object.keys(serviceCount);
+          const svcValues = Object.values(serviceCount);
+          chartInstances["serviceChart"] = new Chart(document.getElementById("serviceChart"), {
+            type: "bar",
+            data: {
+              labels: svcLabels,
+              datasets: [{
+                label: "Jumlah Laporan",
+                data: svcValues,
+                backgroundColor: svcLabels.map((_, i) => NAV_COLORS[i % NAV_COLORS.length] + "CC"),
+                borderColor:     svcLabels.map((_, i) => NAV_COLORS[i % NAV_COLORS.length]),
+                borderWidth: 1.5, borderRadius: 8, borderSkipped: false
+              }]
+            },
+            options: {
+              responsive: true, maintainAspectRatio: false,
+              animation: { duration: 600, easing: "easeInOutQuart" },
+              plugins: { legend: { display: false } },
+              scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: "#f1f5f9" } },
+                x: { grid: { display: false } }
+              }
+            }
+          });
+
+          // 2. Status Doughnut
+          chartInstances["statusChart"] = new Chart(document.getElementById("statusChart"), {
+            type: "doughnut",
+            data: {
+              labels: ["Sudah Terjawab", "Menunggu Respon"],
+              datasets: [{
+                data: [totalSelesai, totalMenunggu],
+                backgroundColor: ["#15803d", "#f59e0b"],
+                hoverBackgroundColor: ["#166534", "#d97706"],
+                borderWidth: 0, hoverOffset: 8
+              }]
+            },
+            options: {
+              responsive: true, maintainAspectRatio: false, cutout: "68%",
+              animation: { duration: 600, easing: "easeInOutQuart" },
+              plugins: { legend: { position: "bottom", labels: { padding: 20, usePointStyle: true } } }
+            },
+            plugins: [{
+              id: "center-text",
+              beforeDraw(chart) {
+                const { ctx, chartArea: { width, height } } = chart;
+                ctx.save();
+                ctx.textAlign = "center"; ctx.textBaseline = "middle";
+                const cx = width / 2, cy = height / 2 - 20;
+                ctx.font = "bold 28px Inter"; ctx.fillStyle = "#0f172a";
+                ctx.fillText(total, cx, cy);
+                ctx.font = "500 12px Inter"; ctx.fillStyle = "#94a3b8";
+                ctx.fillText("Total", cx, cy + 24);
+                ctx.restore();
+              }
+            }]
+          });
+
+          // 3. Rating Bar
+          chartInstances["ratingChart"] = new Chart(document.getElementById("ratingChart"), {
+            type: "bar",
+            data: {
+              labels: ["★ 1", "★ 2", "★ 3", "★ 4", "★ 5"],
+              datasets: [{
+                label: "Jumlah Penilaian",
+                data: [ratingDist[1], ratingDist[2], ratingDist[3], ratingDist[4], ratingDist[5]],
+                backgroundColor: ["#ef4444CC","#f97316CC","#eab308CC","#84cc16CC","#22c55eCC"],
+                borderColor:     ["#ef4444","#f97316","#eab308","#84cc16","#22c55e"],
+                borderWidth: 1.5, borderRadius: 8, borderSkipped: false
+              }]
+            },
+            options: {
+              responsive: true, maintainAspectRatio: false,
+              animation: { duration: 600, easing: "easeInOutQuart" },
+              plugins: { legend: { display: false } },
+              scales: {
+                y: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: "#f1f5f9" } },
+                x: { grid: { display: false } }
+              }
+            }
+          });
+
+          // 4. Category Pie
+          const catLabels = Object.keys(categoryCount);
+          const catValues = Object.values(categoryCount);
+          chartInstances["categoryChart"] = new Chart(document.getElementById("categoryChart"), {
+            type: "pie",
+            data: {
+              labels: catLabels,
+              datasets: [{
+                data: catValues,
+                backgroundColor: catLabels.map((_, i) => NAV_COLORS[i % NAV_COLORS.length] + "CC"),
+                hoverOffset: 8, borderWidth: 0
+              }]
+            },
+            options: {
+              responsive: true, maintainAspectRatio: false,
+              animation: { duration: 600, easing: "easeInOutQuart" },
+              plugins: { legend: { position: "bottom", labels: { padding: 16, usePointStyle: true } } }
+            }
+          });
+
+        } catch (error) {
+          console.error("Dashboard error:", error);
+          const tbody2 = document.getElementById("dashboard-tbody");
+          tbody2.innerHTML = `<tr><td colspan="6" class="table-loading" style="color:#ef4444;">
+            <span class="load-icon">⚠️</span>Terjadi kesalahan saat memuat data.
+          </td></tr>`;
+        }
+      }
+
+      // ============================================================
+      //  Boot — first load + auto-refresh every 60 s
+      // ============================================================
+      document.addEventListener("DOMContentLoaded", () => {
+        loadDashboard();
+        setInterval(loadDashboard, REFRESH_INTERVAL * 1000);
+      });
+    })();
+    </script>
+  </body>
+</html>

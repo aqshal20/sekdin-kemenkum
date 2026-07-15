@@ -1,0 +1,51 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Environment variables (sensitive data)
+.env
+**/.env
+*.env.local
+*.env.development.local
+*.env.test.local
+*.env.production.local
+
+# WhatsApp Web.js auth & cache (contains session data)
+backend/.wwebjs_auth/
+backend/.wwebjs_cache/
+
+# Uploads (user-generated files)
+backend/uploads/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Lock files (optional, keep package-lock.json for reproducible builds)
+# package-lock.json
+
+# Temporary files
+*.tmp
+*.temp
+backend/server.js.tmp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Build output
+dist/
+build/
+
+# Test files (opsional - hapus jika ingin menyertakan)
+# test-*.js
+# *.test.js

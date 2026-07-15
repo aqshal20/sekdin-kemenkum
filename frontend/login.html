@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Login | Sekdin-Poltekpin</title>
+    <meta name="description" content="Masuk ke portal Sekdin-Poltekpin untuk mengakses layanan pengaduan dan administrasi." />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      .gov-topbar {
+        position: fixed; top: 0; left: 0; right: 0; height: 38px;
+        background: linear-gradient(90deg, #cc0000, #a00000);
+        display: flex; align-items: center; padding: 0 5vw; z-index: 50;
+        font-size: 12px; color: rgba(255,255,255,0.95); font-weight: 600;
+        gap: 10px;
+      }
+    </style>
+  </head>
+  <body class="auth" data-page="login">
+    <div class="gov-topbar">
+      <span>🏛</span>
+      <span>Politeknik Pengayoman Indonesia — Kementerian Hukum RI</span>
+    </div>
+    <div data-site-header></div>
+
+    <main>
+      <div class="auth-card fade-in">
+        <!-- Header -->
+        <div style="text-align: center; margin-bottom: 28px;">
+          <div style="width: 60px; height: 60px; border-radius: 12px; background: #e8eef8; display: grid; place-items: center; font-size: 28px; margin: 0 auto 14px;">
+            🔐
+          </div>
+          <h1 style="font-size: 22px; margin-bottom: 4px; color: #003366;">Masuk ke Sistem</h1>
+          <p class="auth-subtitle">Gunakan akun Admin atau Akun Peserta untuk mengakses layanan</p>
+        </div>
+
+        <!-- Notice -->
+        <div class="notice" style="margin-bottom: 20px; font-size: 13px;">
+          <span>ℹ️</span>
+          <span>Pastikan Anda menggunakan email yang terdaftar dan terverifikasi.</span>
+        </div>
+
+        <!-- Error -->
+        <div id="login-error" class="error" style="margin-bottom: 16px;">
+          Email atau kata sandi salah.
+        </div>
+
+        <!-- Form -->
+        <form id="login-form">
+          <div>
+            <label for="email">Alamat Email</label>
+            <input id="email" name="email" type="email" required placeholder="contoh@poltekpin.ac.id" />
+          </div>
+          <div>
+            <label for="password">Kata Sandi</label>
+            <input id="password" name="password" type="password" required placeholder="Masukkan kata sandi Anda" />
+          </div>
+          <label class="toggle" style="margin-top: -6px;">
+            <input id="toggle-password" type="checkbox" />
+            Tampilkan kata sandi
+          </label>
+          <button class="btn btn-primary btn-full" type="submit" id="login-btn" style="margin-top: 6px; padding: 13px;">
+            🔐 Masuk ke Portal
+          </button>
+        </form>
+
+        <hr class="auth-divider" />
+
+        <div class="auth-footer-text">
+          Belum punya akun? <a href="register.html">Daftar di sini</a>
+        </div>
+        <div class="auth-footer-text" style="margin-top: 10px;">
+          <a href="index.html" style="color: var(--muted); border-bottom-color: transparent;">← Kembali ke Beranda</a>
+        </div>
+      </div>
+    </main>
+
+    <div data-site-footer></div>
+    <script src="app.js"></script>
+    <script>
+      const loginForm     = document.getElementById("login-form");
+      const loginError    = document.getElementById("login-error");
+      const togglePwd     = document.getElementById("toggle-password");
+      const passwordInput = document.getElementById("password");
+      const loginBtn      = document.getElementById("login-btn");
+
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        loginError.style.display = "none";
+        loginBtn.disabled = true;
+        loginBtn.textContent = "⏳ Memproses...";
+
+        const email    = document.getElementById("email").value.trim();
+        const password = document.getElementById("password").value.trim();
+
+        try {
+          const response = await fetch(`${API_URL}/login`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email, password }),
+          });
+          const data = await response.json();
+          if (response.ok) {
+            localStorage.setItem("sekdin-token", data.token);
+            localStorage.setItem("user-role", data.user.role);
+            localStorage.setItem("user-data", JSON.stringify(data.user));
+            if (data.user.role && data.user.role.startsWith("admin")) {
+              window.location.href = "kotak-masuk.html";
+            } else {
+              window.location.href = "pengaduan.html";
+            }
+          } else {
+            if (response.status === 403 && data.unverified) {
+              alert(data.message || "Akun Anda belum terverifikasi.");
+              window.location.href = `register.html?email=${encodeURIComponent(email)}&unverified=true`;
+            } else {
+              loginError.textContent = data.message || "Gagal masuk.";
+              loginError.style.display = "block";
+            }
+          }
+        } catch {
+          loginError.textContent = "Koneksi ke server gagal. Coba lagi nanti.";
+          loginError.style.display = "block";
+        } finally {
+          loginBtn.disabled = false;
+          loginBtn.innerHTML = "🔐 Masuk ke Portal";
+        }
+      });
+
+      togglePwd.addEventListener("change", () => {
+        passwordInput.type = togglePwd.checked ? "text" : "password";
+      });
+    </script>
+  </body>
+</html>

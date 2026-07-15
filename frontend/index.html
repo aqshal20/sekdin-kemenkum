@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Portal Layanan &amp; Helpdesk | Sekdin-Poltekpin</title>
+    <meta name="description" content="Portal resmi layanan terpadu dan helpdesk Politeknik Pengayoman Indonesia." />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+    <!-- Gov Topbar inline style override to ensure it shows -->
+    <style>
+      .gov-topbar {
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        height: 38px;
+        background: linear-gradient(90deg, #cc0000, #a00000);
+        display: flex;
+        align-items: center;
+        padding: 0 5vw;
+        gap: 20px;
+        z-index: 50;
+        font-size: 12px;
+        color: rgba(255,255,255,0.95);
+        font-weight: 500;
+      }
+      .gov-topbar .topbar-brand {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-weight: 700;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .gov-topbar-divider {
+        width: 1px; height: 14px;
+        background: rgba(255,255,255,0.3);
+      }
+      .gov-topbar .topbar-links {
+        display: flex; gap: 16px; margin-left: auto;
+      }
+      .gov-topbar .topbar-links a {
+        color: rgba(255,255,255,0.88);
+        font-size: 11.5px;
+        font-weight: 500;
+      }
+      .gov-topbar .topbar-links a:hover { color: #fff; text-decoration: underline; }
+    </style>
+  </head>
+  <body data-page="index">
+    <a class="skip" href="#utama">Lewati ke konten</a>
+
+    <!-- Government Top Bar -->
+    <div class="gov-topbar" role="banner">
+      <div class="topbar-brand">
+        <span>🏛</span>
+        <span>Politeknik Pengayoman Indonesia — Kementerian Hukum RI</span>
+      </div>
+      <div class="gov-topbar-divider"></div>
+      <span style="font-size:11.5px; color: rgba(255,255,255,0.75);" id="topbar-date"></span>
+      <div class="topbar-links">
+        <a href="https://www.Pengayoman.go.id" target="_blank" rel="noreferrer">Pengayoman.go.id</a>
+        <a href="https://www.Kemenkum.go.id" target="_blank" rel="noreferrer">Kemenkum.go.id</a>
+      </div>
+    </div>
+
+    <div data-site-header></div>
+
+    <main id="utama">
+      <!-- ========== HERO ========== -->
+      <section class="hero fade-in" aria-label="Selamat Datang" style="
+        background: linear-gradient(135deg, rgba(0, 51, 102, 0.92) 0%, rgba(27, 75, 143, 0.85) 100%), 
+                    url('assets/gedung-kb-kecil.jpg') center/cover no-repeat;
+      ">
+        <div class="hero-content">
+          <div class="hero-badge" style="background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3);">Pusat Bantuan & Layanan Terpadu</div>
+          <h1 style="font-size: 42px; text-shadow: 0 4px 12px rgba(0,0,0,0.3);">Selamat Datang di Portal<br><em style="color: #fdf8e7; text-shadow: 0 4px 12px rgba(0,0,0,0.3);">Layanan & Helpdesk</em></h1>
+          <p style="color: rgba(255, 255, 255, 0.95); font-size: 16px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+            Portal resmi Sekolah Dinas Politeknik Pengayoman Indonesia. Untuk menanyakan informasi atau menyampaikan pengaduan yang transparan dan akuntabel, harap masuk (login) ke dalam sistem terlebih dahulu.
+          </p>
+          <div class="hero-actions">
+            <a class="btn btn-gold btn-lg" href="login.html" id="btn-login-hero" style="box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
+              🔐 Login / Masuk
+            </a>
+            <a class="btn btn-outline btn-lg" href="register.html" id="btn-register-hero" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.4); backdrop-filter: blur(8px);">
+              📝 Daftar Akun
+            </a>
+          </div>
+        </div>
+
+        <div class="hero-sidebar" style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); border-left: 1px solid rgba(255,255,255,0.15);">
+          <div class="hero-stat" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2);">
+            <div class="hero-stat-value" style="color: #fff;">24/7</div>
+            <div class="hero-stat-label" style="color: rgba(255,255,255,0.8);">Informasi pengumuman tersedia kapan saja secara daring</div>
+          </div>
+          <div class="hero-stat" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2);">
+            <div class="hero-stat-value" style="color: #fff;">≤ 3 Hari</div>
+            <div class="hero-stat-label" style="color: rgba(255,255,255,0.8);">Estimasi tindak lanjut pengaduan oleh petugas berwenang</div>
+          </div>
+          <div class="status-live">
+            <span class="status-dot"></span>
+            <span style="color: rgba(255,255,255,0.9);">Layanan aktif: Senin–Jumat 08.00–16.00 WIB</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== MENU UTAMA ========== -->
+      <section style="margin-top: 40px;" aria-label="Menu Utama">
+        <div class="section-title">
+          <h2>Menu Layanan</h2>
+          <div></div>
+        </div>
+        <div class="cards">
+          <div class="card menu-card fade-in" data-nav="pengaduan">
+            <div class="card-icon">📨</div>
+            <h3>Kirim Pengaduan</h3>
+            <p>Sampaikan pengaduan atau pertanyaan Anda langsung kepada petugas yang berwenang.</p>
+            <a class="btn btn-primary" href="pengaduan.html" id="menu-pengaduan">Buka Pengaduan</a>
+          </div>
+          <div class="card menu-card fade-in delay-2">
+            <div class="card-icon">📥</div>
+            <h3>Kotak Masuk (Operator)</h3>
+            <p>Akses khusus bagi operator dan admin untuk membalas serta menindaklanjuti laporan.</p>
+            <a class="btn btn-primary" href="kotak-masuk.html" id="menu-kotak-masuk">Buka Kotak Masuk</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========== INFO STRIP ========== -->
+      <section style="margin-top: 40px;" aria-label="Informasi Layanan">
+        <div class="notice" style="border-radius: 12px; padding: 18px 24px; gap: 14px;">
+          <span style="font-size: 22px; flex-shrink:0;">ℹ️</span>
+          <div>
+            <strong style="display:block; margin-bottom:4px; color:#003366;">Tentang Portal Ini</strong>
+            Sekdin-Poltekpin adalah portal resmi Sekolah Dinas Politeknik Pengayoman Indonesia di bawah Kementerian Hukum Republik Indonesia. 
+            Seluruh pengaduan dicatat dan ditindaklanjuti sesuai standar layanan. Pelapor akan menerima nomor tiket dan estimasi waktu tindak lanjut.
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div data-site-footer></div>
+    <script src="app.js"></script>
+    <script>
+      // Set topbar date
+      const topbarDate = document.getElementById('topbar-date');
+      if (topbarDate) {
+        topbarDate.textContent = new Date().toLocaleDateString('id-ID', {
+          weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+        });
+      }
+    </script>
+  </body>
+</html>
