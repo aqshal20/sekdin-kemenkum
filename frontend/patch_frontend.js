@@ -154,9 +154,9 @@ const jsLogs = `
           return \`
             <tr>
               <td style="font-size: 12px; color: #475569;">\${date.toLocaleString('id-ID', {day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'})}</td>
-              <td style="font-weight: 600; color: var(--navy);">\${log.user_name || 'System'}</td>
-              <td><span style="background: #f1f5f9; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; color: #334155; border: 1px solid #cbd5e1;">\${log.action}</span></td>
-              <td style="font-size: 13px; color: #334155;">\${log.details}</td>
+              <td style="font-weight: 600; color: var(--navy);">\${escapeHtml(log.user_name || 'System')}</td>
+              <td><span style="background: #f1f5f9; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; color: #334155; border: 1px solid #cbd5e1;">\${escapeHtml(log.action)}</span></td>
+              <td style="font-size: 13px; color: #334155;">\${escapeHtml(log.details)}</td>
             </tr>
           \`;
         }).join('');

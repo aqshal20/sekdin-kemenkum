@@ -82,7 +82,7 @@ async function loadPartial(selector, path) {
   }
 }
 
-const API_URL = "http://localhost:3000/api";
+const API_URL = "/api";
 
 function getAuthToken() { return localStorage.getItem("sekdin-token"); }
 function getUserRole()  { return localStorage.getItem("user-role"); }

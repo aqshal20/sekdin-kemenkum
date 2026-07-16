@@ -706,7 +706,7 @@
           div.innerHTML = `
             <div style="font-weight: bold; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
               <span style="font-size: 13px; line-height: 1.2; word-break: break-all;">
-                <span style="color: ${prioColor}; font-size: 11px; border: 1px solid ${prioColor}; padding: 1px 4px; border-radius: 4px; margin-right: 4px;">${c.priority || 'Sedang'}</span>
+                <span style="color: ${prioColor}; font-size: 11px; border: 1px solid ${prioColor}; padding: 1px 4px; border-radius: 4px; margin-right: 4px;">${escapeHtml(c.priority || 'Sedang')}</span>
                 ${displayName}
               </span>
               <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
@@ -798,23 +798,23 @@
           </div>
           <div class="user-detail-row">
             <span class="user-detail-label">Nama Lengkap</span>
-            <span class="user-detail-value">${conv.participant_fullname || '-'}</span>
+            <span class="user-detail-value">${escapeHtml(conv.participant_fullname || '-')}</span>
           </div>
           <div class="user-detail-row">
             <span class="user-detail-label">Email</span>
-            <span class="user-detail-value">${conv.participant_email || '-'}</span>
+            <span class="user-detail-value">${escapeHtml(conv.participant_email || '-')}</span>
           </div>
           <div class="user-detail-row">
             <span class="user-detail-label">NIK</span>
-            <span class="user-detail-value">${conv.participant_nik || '-'}</span>
+            <span class="user-detail-value">${escapeHtml(conv.participant_nik || '-')}</span>
           </div>
           <div class="user-detail-row">
             <span class="user-detail-label">No. Telepon / WhatsApp</span>
-            <span class="user-detail-value">${conv.participant_phone || '-'}</span>
+            <span class="user-detail-value">${escapeHtml(conv.participant_phone || '-')}</span>
           </div>
           <div class="user-detail-row" style="margin-top: 10px;">
             <span class="user-detail-label">Tipe Layanan</span>
-            <span class="user-detail-value" style="background: #eff6ff; color: var(--blue); border-color: #bfdbfe; font-weight: 600;">${conv.service_type || '-'}</span>
+            <span class="user-detail-value" style="background: #eff6ff; color: var(--blue); border-color: #bfdbfe; font-weight: 600;">${escapeHtml(conv.service_type || '-')}</span>
           </div>
         `;
         
@@ -996,7 +996,7 @@
         const timeStr = formatTime(m.created_at);
 
         div.innerHTML = `
-          <div class="msg-sender" style="display: flex; align-items: center;">${senderName}${internalLabel}</div>
+          <div class="msg-sender" style="display: flex; align-items: center;">${escapeHtml(senderName)}${internalLabel}</div>
           ${messageContent}
           <div class="msg-time">${timeStr}</div>
         `;

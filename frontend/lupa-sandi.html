@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lupa Kata Sandi | Sekdin-Poltekpin</title>
+    <meta name="description" content="Reset kata sandi portal Sekdin-Poltekpin." />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      .gov-topbar {
+        position: fixed; top: 0; left: 0; right: 0; height: 38px;
+        background: linear-gradient(90deg, #cc0000, #a00000);
+        display: flex; align-items: center; padding: 0 5vw; z-index: 50;
+        font-size: 12px; color: rgba(255,255,255,0.95); font-weight: 600;
+        gap: 10px;
+      }
+      .back-to-login {
+        display: block;
+        text-align: center;
+        margin-top: 24px;
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--navy);
+        text-decoration: none;
+      }
+      .back-to-login:hover { text-decoration: underline; }
+    </style>
+  </head>
+  <body class="auth" data-page="lupa-sandi">
+    <div class="gov-topbar">
+      <span>🏛</span>
+      <span>Politeknik Pengayoman Indonesia — Kementerian Hukum RI</span>
+    </div>
+    <div data-site-header></div>
+
+    <main>
+      <div class="auth-card fade-in">
+        <!-- Header -->
+        <div style="text-align: center; margin-bottom: 28px;">
+          <div style="width: 60px; height: 60px; border-radius: 12px; background: #fffbeb; display: grid; place-items: center; font-size: 28px; margin: 0 auto 14px; box-shadow: 0 4px 6px rgba(251, 191, 36, 0.1);">
+            🔑
+          </div>
+          <h1 style="font-size: 22px; margin-bottom: 4px; color: #003366;">Lupa Kata Sandi?</h1>
+          <p class="auth-subtitle">Masukkan email terdaftar untuk menerima kode OTP pemulihan sandi</p>
+        </div>
+
+        <div id="alert-error" class="notice notice-error" style="display:none; margin-bottom:20px;"></div>
+        <div id="alert-success" class="notice notice-success" style="display:none; margin-bottom:20px; border-left: 4px solid #10b981; background: #ecfdf5;"></div>
+
+        <!-- Form 1: Request OTP -->
+        <form id="forgot-form">
+          <div style="margin-bottom: 20px;">
+            <label for="email">Alamat Email Terdaftar</label>
+            <input id="email" type="email" required placeholder="contoh@poltekpin.ac.id" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 15px;" />
+          </div>
+          <button type="submit" class="btn btn-primary btn-full" style="padding: 13px;">Kirim Kode OTP</button>
+        </form>
+
+        <!-- Form 2: Reset Password (Hidden by default) -->
+        <form id="reset-form" style="display:none;">
+          <hr style="margin: 25px 0; border:0; border-top:1px dashed #cbd5e1;">
+          <div style="margin-bottom: 15px;">
+            <label for="otp">Kode OTP (Cek Email)</label>
+            <input id="otp" type="text" required placeholder="6 digit angka" maxlength="6" pattern="[0-9]{6}" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 15px; letter-spacing: 4px; text-align: center; font-weight: bold; color: var(--navy);" />
+          </div>
+          <div style="margin-bottom: 20px;">
+            <label for="new-password">Kata Sandi Baru</label>
+            <input id="new-password" type="password" required placeholder="Minimal 8 karakter" minlength="8" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-family: inherit; font-size: 15px;" />
+          </div>
+          <button type="submit" class="btn btn-primary btn-full" style="padding: 13px; background: #10b981; border-color: #059669; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">💾 Simpan Kata Sandi Baru</button>
+        </form>
+
+        <a href="login.html" class="back-to-login">⬅ Kembali ke halaman Login</a>
+      </div>
+    </main>
+
+    <div data-site-footer></div>
+    <script src="app.js"></script>
+    <script>
+      const forgotForm = document.getElementById("forgot-form");
+      const resetForm = document.getElementById("reset-form");
+      const alertErr = document.getElementById("alert-error");
+      const alertSucc = document.getElementById("alert-success");
+      
+      function showMsg(el, msg) {
+        alertErr.style.display = "none"; alertSucc.style.display = "none";
+        el.textContent = msg; el.style.display = "block";
+      }
+
+      forgotForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = forgotForm.querySelector("button");
+        btn.disabled = true; btn.textContent = "⏳ Mengirim...";
+        try {
+          const res = await fetch(API_URL + "/forgot-password", {
+            method: "POST", headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ email: document.getElementById("email").value.trim() })
+          });
+          const data = await res.json();
+          if (res.ok) {
+            showMsg(alertSucc, data.message);
+            forgotForm.querySelector("button").style.display = "none";
+            document.getElementById("email").disabled = true;
+            resetForm.style.display = "block";
+          } else showMsg(alertErr, data.message);
+        } catch (err) { showMsg(alertErr, "Koneksi ke server gagal."); }
+        finally { btn.disabled = false; btn.textContent = "Kirim Kode OTP"; }
+      };
+
+      resetForm.onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = resetForm.querySelector("button");
+        btn.disabled = true; btn.textContent = "⏳ Menyimpan...";
+        try {
+          const res = await fetch(API_URL + "/reset-password", {
+            method: "POST", headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({ 
+              email: document.getElementById("email").value.trim(),
+              otp: document.getElementById("otp").value.trim(),
+              newPassword: document.getElementById("new-password").value
+            })
+          });
+          const data = await res.json();
+          if (res.ok) {
+            alert("Kata sandi berhasil diubah! Silakan login.");
+            window.location.href = "login.html";
+          } else showMsg(alertErr, data.message);
+        } catch (err) { showMsg(alertErr, "Koneksi ke server gagal."); }
+        finally { btn.disabled = false; btn.textContent = "💾 Simpan Kata Sandi Baru"; }
+      };
+    </script>
+  </body>
+</html>

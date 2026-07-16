@@ -1947,3 +1947,11 @@ body.auth {
   .custom-alert-title { font-size: 17px; }
   .custom-alert-message { font-size: 14px; }
 }
+
+
+/* Enhanced Active State */
+.topbar-nav a.active {
+  background: rgba(255, 255, 255, 0.2);
+  font-weight: bold;
+  border-bottom: 2px solid #fbbf24;
+}

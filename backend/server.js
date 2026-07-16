@@ -70,6 +70,19 @@ const sendOTPEmail = async (email, otp) => {
 };
 
 const sendReplyEmail = async (email, ticketId, messageSnippet) => {
+
+const sendResetEmail = async (email, otp) => {
+  const host = process.env.SMTP_HOST, port = process.env.SMTP_PORT || 587, user = process.env.SMTP_USER, pass = process.env.SMTP_PASS;
+  if (!host || !user || !pass) { console.log(`[MOCK RESET] OTP: ${otp} to ${email}`); return; }
+  try {
+    const transporter = nodemailer.createTransport({ host, port: parseInt(port), secure: process.env.SMTP_SECURE === "true", auth: { user, pass } });
+    await transporter.sendMail({
+      from: `"Sekdin Poltekpin" <${user}>`, to: email, subject: "Reset Kata Sandi",
+      html: `<div style="font-family:sans-serif;padding:20px;"><h2>Reset Sandi</h2><p>Kode OTP reset Anda:</p><h1 style="color:#c9a227;">${otp}</h1><p>Berlaku 15 menit.</p></div>`
+    });
+  } catch (err) { console.error("Reset email error:", err); }
+};
+
   const host = process.env.SMTP_HOST;
   const port = process.env.SMTP_PORT || 587;
   const user = process.env.SMTP_USER;
@@ -186,6 +199,14 @@ const io = new Server(server, {
 app.use(express.json());
 app.use(cors());
 
+const rateLimit = require("express-rate-limit");
+const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 5, message: { message: "Terlalu banyak percobaan" } });
+app.use("/api/verify-otp", authLimiter);
+app.use("/api/resend-otp", authLimiter);
+app.use("/api/login", authLimiter);
+app.use("/api/register", authLimiter);
+
+
 // Configure multer storage
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
@@ -226,7 +247,11 @@ const pool = new Pool({
   port: process.env.DB_PORT || 5432,
 });
 
-const JWT_SECRET = process.env.JWT_SECRET || "supersecretkey";
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  console.error("FATAL: JWT_SECRET tidak ditemukan di .env");
+  process.exit(1);
+}
 
 
 // Helper to log activities
@@ -305,7 +330,7 @@ app.post("/api/register", async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = require("crypto").randomInt(100000, 999999).toString();
     const expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
     const result = await pool.query(
@@ -353,7 +378,7 @@ app.post("/api/verify-otp", async (req, res) => {
 
     if (new Date() > new Date(user.otp_expiry)) {
       // Regenerate OTP and send again
-      const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
+      const newOtp = require("crypto").randomInt(100000, 999999).toString();
       const expiry = new Date(Date.now() + 10 * 60 * 1000);
       
       await pool.query(
@@ -408,7 +433,7 @@ app.post("/api/resend-otp", async (req, res) => {
       }
     }
 
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otp = require("crypto").randomInt(100000, 999999).toString();
     const expiry = new Date(Date.now() + 10 * 60 * 1000);
 
     await pool.query(
@@ -436,7 +461,7 @@ app.post("/api/login", async (req, res) => {
       // Check verification (except for admin users)
       if (!user.role.startsWith("admin") && !user.is_verified) {
         // Send OTP just in case
-        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        const otp = require("crypto").randomInt(100000, 999999).toString();
         const expiry = new Date(Date.now() + 10 * 60 * 1000);
         await pool.query(
           "UPDATE users SET otp_code = $1, otp_expiry = $2 WHERE id = $3",

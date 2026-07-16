@@ -73,3 +73,6 @@ WHERE NOT EXISTS (SELECT 1 FROM announcements WHERE title = 'Jadwal layanan admi
 INSERT INTO announcements (title, category, content) 
 SELECT 'Sosialisasi sistem pengaduan terintegrasi', 'Agenda', 'Kegiatan sosialisasi dilakukan secara daring untuk seluruh civitas akademika. Tautan dan jadwal akan disampaikan melalui email resmi.'
 WHERE NOT EXISTS (SELECT 1 FROM announcements WHERE title = 'Sosialisasi sistem pengaduan terintegrasi');
+ALTER TABLE pengaduan ADD COLUMN IF NOT EXISTS ip_address VARCHAR(45);
+CREATE TABLE IF NOT EXISTS activity_logs (id SERIAL PRIMARY KEY, user_id INTEGER, user_name VARCHAR(255), action VARCHAR(255), details TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
+ALTER TABLE messages ADD COLUMN IF NOT EXISTS is_internal BOOLEAN DEFAULT FALSE;
