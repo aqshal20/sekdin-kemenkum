@@ -1682,35 +1682,53 @@ body.auth {
 
 @media (max-width: 720px) {
   :root {
-    --header-h: 132px;
-    --topbar-h: 36px;
+    --header-h: auto;
+    --topbar-h: auto;
+  }
+
+  body {
+    padding-top: 0; /* Let normal flow handle header on mobile */
   }
 
   .site-header {
-    height: calc(var(--header-h) - var(--topbar-h));
+    position: relative;
+    top: 0;
+    height: auto;
   }
 
   .topbar {
     flex-direction: column;
-    align-items: flex-start;
+    align-items: center;
     padding: 14px 5vw;
     height: auto;
-    gap: 10px;
+    gap: 14px;
+    text-align: center;
+  }
+
+  .brand {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .brand-title {
+    text-align: center;
   }
 
   .site-nav {
     width: 100%;
-    justify-content: flex-start;
-    gap: 3px;
+    justify-content: center;
+    gap: 6px;
   }
 
   .site-nav a {
-    font-size: 12.5px;
-    padding: 6px 12px;
+    font-size: 12px;
+    padding: 8px 10px;
+    white-space: normal;
+    text-align: center;
   }
 
   main {
-    padding: 24px 5vw 60px;
+    padding: 16px 4vw 40px;
   }
 
   .hero-content { padding: 32px 24px; }
@@ -1724,6 +1742,14 @@ body.auth {
   .footer-bottom {
     flex-direction: column;
     text-align: center;
+  }
+
+  .gov-topbar {
+    position: relative !important;
+    height: auto !important;
+    padding: 8px 5vw !important;
+    text-align: center;
+    justify-content: center;
   }
 
   .gov-topbar .topbar-links {
@@ -1948,6 +1974,67 @@ body.auth {
   .custom-alert-message { font-size: 14px; }
 }
 
+
+/* Force responsiveness for tables, forms, and cards on mobile globally */
+@media (max-width: 768px) {
+  /* Tables */
+  .users-table-container, 
+  .table-section, 
+  .dash-table-container,
+  div[style*="overflow-x: auto"] {
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    margin-bottom: 15px;
+  }
+  
+  table.users-table, 
+  table.dash-table {
+    min-width: 600px !important;
+  }
+
+  /* Grid Layouts */
+  .stats-grid, 
+  .charts-grid, 
+  .metrics-row, 
+  .profile-layout, 
+  .admin-grid, 
+  .inbox-container {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+    min-height: auto !important;
+  }
+
+  /* Forms & Inputs */
+  .field-row, 
+  .form-row {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  /* Adjust dialog & boxes */
+  .auth-card, 
+  .custom-alert-box {
+    width: 100% !important;
+    padding: 20px 16px !important;
+    margin: 10px 0;
+  }
+
+  /* Sidebar/Detail inbox/pengaduan */
+  .inbox-sidebar, 
+  .admin-grid > div:first-child {
+    height: 280px !important;
+    overflow-y: auto !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border) !important;
+  }
+
+  .inbox-detail, 
+  .admin-grid > div:nth-child(2) {
+    height: auto !important;
+    overflow-y: visible !important;
+  }
+}
 
 /* Enhanced Active State */
 .topbar-nav a.active {

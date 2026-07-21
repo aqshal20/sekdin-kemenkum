@@ -494,6 +494,50 @@
           </div>
         </div>
 
+        <!-- ====== WHATSAPP STATUS CARD (Compact) ====== -->
+        <div id="wa-status-card" style="
+          background: #fff;
+          border: 1px solid var(--border-lt);
+          border-radius: 16px;
+          padding: 16px 24px;
+          box-shadow: var(--shadow-xs);
+          margin-bottom: 24px;
+          display: none;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          flex-wrap: wrap;
+        ">
+          <div style="display:flex;align-items:center;gap:14px;">
+            <div style="
+              width:44px;height:44px;border-radius:12px;
+              background: linear-gradient(135deg, #10b981, #059669);
+              color: white;
+              display:flex;align-items:center;justify-content:center;
+              font-size:22px; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2);
+            " id="wa-card-icon">💬</div>
+            <div>
+              <div style="color:var(--navy);font-weight:800;font-size:15px;font-family:'Plus Jakarta Sans',sans-serif;">Status WhatsApp Bot</div>
+              <div id="wa-status-text-compact" style="color:var(--muted);font-size:13px;font-weight:600;margin-top:2px;display:flex;align-items:center;gap:6px;">
+                <span id="wa-status-dot-compact" style="width:8px;height:8px;border-radius:50%;background:#94a3b8;display:inline-block;"></span>
+                Memeriksa status...
+              </div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <button onclick="refreshWAStatus()" class="btn-ghost" style="padding:8px 14px;font-size:13px;">🔄 Refresh</button>
+            <button id="btn-open-wa-modal" style="
+              display:none;align-items:center;gap:6px;
+              padding:8px 16px;
+              background:var(--navy);color:#fff;
+              border:none;border-radius:10px;
+              font-size:13px;font-weight:700;cursor:pointer;
+              font-family:'Plus Jakarta Sans',sans-serif;
+              box-shadow: 0 4px 10px rgba(0, 59, 109, 0.15);
+            ">📱 Scan QR</button>
+          </div>
+        </div>
+
         <!-- ====== CHARTS ====== -->
         <div class="charts-grid">
           <!-- Bar Chart: Service Type -->
@@ -604,6 +648,34 @@
 
     <div data-site-footer></div>
 
+    <!-- ====== WA Modal ====== -->
+    <div class="custom-alert-overlay" id="wa-qr-modal" style="display:none; z-index: 100000;">
+      <div class="custom-alert-box" style="max-width: 480px; text-align: center; padding-bottom: 24px;">
+        <div style="background: linear-gradient(135deg, #003b6d, #00264d); color: white; padding: 20px; display: flex; justify-content: space-between; align-items: center;">
+          <h3 style="margin:0; font-size: 16px; font-weight: 700; color: white;">Autentikasi WhatsApp</h3>
+          <button onclick="closeWAModal()" style="background:none;border:none;color:rgba(255,255,255,0.7);font-size:24px;cursor:pointer;">&times;</button>
+        </div>
+        <div style="padding: 32px 24px;">
+          <div id="wa-qr-placeholder" style="text-align:center;color:var(--muted); margin: 0 auto; width: 220px; height: 220px; background:#f8fafc; border-radius:12px; display:flex; flex-direction:column; align-items:center; justify-content:center; border: 2px dashed var(--border);">
+            <div style="font-size:48px;margin-bottom:10px;opacity:0.25;">📱</div>
+            <div style="font-size:12.5px;font-weight:600;">Memuat QR...</div>
+          </div>
+          <img id="wa-qr-image" src="" alt="QR WhatsApp" style="
+            display:none;
+            width:220px;height:220px;
+            border-radius:12px;
+            border:3px solid #003b6d;
+            box-shadow:0 8px 24px rgba(0,59,109,0.15);
+            margin: 0 auto;
+          " />
+          <div id="wa-info-text-modal" style="font-size:13.5px;color:var(--ink);line-height:1.6; margin-top: 24px; text-align: center;">
+            <strong style="color:#b45309">Scan QR Code</strong><br>Buka WhatsApp di HP → <em>Perangkat Tertaut</em> → Scan QR di atas.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
     <script src="app.js"></script>
     <script>
     (function () {
@@ -909,6 +981,117 @@
         loadDashboard();
         setInterval(loadDashboard, REFRESH_INTERVAL * 1000);
       });
+    })();
+    </script>
+
+    <!-- ====== WhatsApp Status Script ====== -->
+    <script>
+    (function() {
+      const waCard   = document.getElementById("wa-status-card");
+      const waDot    = document.getElementById("wa-status-dot-compact");
+      const waText   = document.getElementById("wa-status-text-compact");
+      const waIcon   = document.getElementById("wa-card-icon");
+      const waQRImg  = document.getElementById("wa-qr-image");
+      const waQRPH   = document.getElementById("wa-qr-placeholder");
+      const btnOpenMod = document.getElementById("btn-open-wa-modal");
+      const waModal  = document.getElementById("wa-qr-modal");
+      const waModalText = document.getElementById("wa-info-text-modal");
+
+      window.closeWAModal = () => { waModal.style.display = "none"; };
+      btnOpenMod.onclick = () => { waModal.style.display = "flex"; };
+
+      const STATUS_MAP = {
+        ready: {
+          dot: "#22c55e", text: "Terhubung ✓", iconBg: "linear-gradient(135deg, #10b981, #059669)",
+          modalInfo: `<strong style="color:#15803d">✅ WhatsApp Bot Aktif</strong><br>Siap mengirim pesan OTP & Notifikasi.`
+        },
+        qr: {
+          dot: "#f59e0b", text: "Scan QR Diperlukan", iconBg: "linear-gradient(135deg, #f59e0b, #d97706)",
+          modalInfo: `<strong style="color:#b45309">📱 Scan QR Code</strong><br>Buka WhatsApp di HP → <em>Perangkat Tertaut</em> → Scan QR di atas.`
+        },
+        authenticated: {
+          dot: "#3b82f6", text: "Mengautentikasi...", iconBg: "linear-gradient(135deg, #3b82f6, #2563eb)",
+          modalInfo: `<strong style="color:#1d4ed8">🔄 Menghubungkan...</strong><br>Sedang sinkronisasi data.`
+        },
+        disconnected: {
+          dot: "#ef4444", text: "Terputus", iconBg: "linear-gradient(135deg, #ef4444, #dc2626)",
+          modalInfo: `<strong style="color:#b91c1c">❌ Bot Terputus</strong><br>Sesi kedaluwarsa atau server offline.`
+        }
+      };
+
+      function applyStatus(s) {
+        const cfg = STATUS_MAP[s] || STATUS_MAP.disconnected;
+        waDot.style.background = cfg.dot;
+        waText.innerHTML       = `<span style="width:8px;height:8px;border-radius:50%;background:${cfg.dot};display:inline-block;"></span> ${cfg.text}`;
+        waIcon.style.background = cfg.iconBg;
+        waModalText.innerHTML  = cfg.modalInfo;
+
+        if (s === 'qr') {
+          btnOpenMod.style.display = "inline-flex";
+        } else {
+          btnOpenMod.style.display = "none";
+          waModal.style.display = "none";
+        }
+      }
+
+      function applyQR(qrImage) {
+        if (qrImage) {
+          waQRImg.src             = qrImage;
+          waQRImg.style.display   = "block";
+          waQRPH.style.display    = "none";
+        } else {
+          waQRImg.style.display   = "none";
+          waQRPH.style.display    = "block";
+          waQRPH.innerHTML = `<div style="font-size:48px;margin-bottom:10px;opacity:0.25;">📱</div><div style="font-size:12.5px;font-weight:600;">Tidak ada QR</div>`;
+        }
+      }
+
+      window.refreshWAStatus = async function() {
+        waText.textContent = "Memeriksa...";
+        try {
+          const res = await fetch(`${API_URL}/admin/whatsapp-status`, {
+            headers: { "Authorization": `Bearer ${getAuthToken()}` }
+          });
+          if (!res.ok) return;
+          const data = await res.json();
+          applyStatus(data.status);
+          applyQR(data.qrImage);
+        } catch(e) {
+          applyStatus("disconnected");
+          applyQR(null);
+        }
+      };
+
+      async function initWACard() {
+        // Only show for admin
+        const token = getAuthToken();
+        if (!token) return;
+        try {
+          const res = await fetch(`${API_URL}/admin/whatsapp-status`, {
+            headers: { "Authorization": `Bearer ${token}` }
+          });
+          if (res.status === 403) return; // not admin
+          if (!res.ok) return;
+          const data = await res.json();
+          waCard.style.display = "block";
+          applyStatus(data.status);
+          applyQR(data.qrImage);
+        } catch(e) { /* ignore */ }
+      }
+
+      // Real-time update via Socket.IO
+      if (typeof io !== "undefined") {
+        const socket = io(API_URL.replace("/api", ""), { transports: ["websocket","polling"] });
+        socket.emit("join", "admin_room");
+        socket.on("whatsapp_status", (data) => {
+          applyStatus(data.status);
+          applyQR(data.qrImage);
+        });
+      }
+
+      // Poll every 30s as fallback
+      initWACard();
+      setInterval(refreshWAStatus, 30000);
     })();
     </script>
   </body>

@@ -14,7 +14,7 @@ const dns = require("dns");
 dns.setDefaultResultOrder('ipv4first');
 require("dotenv").config({ path: path.join(__dirname, ".env") });
 const nodemailer = require("nodemailer");
-const { initializeWhatsApp, sendWhatsAppMessage } = require("./whatsapp");
+const { initializeWhatsApp, sendWhatsAppMessage, getWhatsAppStatus, setIO } = require("./whatsapp");
 
 const sendOTPEmail = async (email, otp) => {
   const host = process.env.SMTP_HOST;
@@ -201,8 +201,9 @@ app.use(cors());
 
 const rateLimit = require("express-rate-limit");
 const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 5, message: { message: "Terlalu banyak percobaan" } });
-app.use("/api/verify-otp", authLimiter);
 app.use("/api/resend-otp", authLimiter);
+app.use("/api/resend-otp-whatsapp", authLimiter);
+app.use("/api/verify-otp", authLimiter);
 app.use("/api/login", authLimiter);
 app.use("/api/register", authLimiter);
 
@@ -286,6 +287,9 @@ const authenticateToken = (req, res, next) => {
 };
 
 // --- SOCKET.IO LOGIC ---
+// Inject io into whatsapp module so it can emit QR events
+setIO(io);
+
 io.on("connection", (socket) => {
   console.log("A user connected");
 
@@ -338,12 +342,8 @@ app.post("/api/register", async (req, res) => {
       [email, hashedPassword, nik, fullname, phone, false, otp, expiry, "participant"],
     );
 
-    // Send OTP based on selected method
-    if (otpMethod === 'whatsapp' && phone) {
-      sendWhatsAppMessage(phone, `Halo *${fullname}*,\nTerima kasih telah mendaftar di portal Sekdin Poltekpin.\n\nBerikut adalah kode OTP Anda: *${otp}*\n\nKode ini berlaku selama 10 menit. Jangan bagikan kode ini kepada siapapun.`);
-    } else {
-      sendOTPEmail(email, otp).catch(err => console.error("Async SMTP send error in registration:", err));
-    }
+    // Send OTP based on selected method (always email for initial registration)
+    sendOTPEmail(email, otp).catch(err => console.error("Async SMTP send error in registration:", err));
 
     res.status(201).json({
       message: "Registrasi berhasil. Kode OTP telah dikirim.",
@@ -450,6 +450,57 @@ app.post("/api/resend-otp", async (req, res) => {
   }
 });
 
+app.post("/api/resend-otp-whatsapp", async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    return res.status(400).json({ message: "Email wajib diisi" });
+  }
+
+  try {
+    const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+    if (result.rows.length === 0) {
+      return res.status(400).json({ message: "Email tidak ditemukan" });
+    }
+
+    const user = result.rows[0];
+    if (user.is_verified) {
+      return res.status(400).json({ message: "Akun ini sudah terverifikasi" });
+    }
+
+    if (!user.phone) {
+      return res.status(400).json({ message: "Nomor WhatsApp/telepon tidak ditemukan di akun Anda." });
+    }
+
+    // Cooldown check: 60 seconds
+    if (user.otp_expiry) {
+      const lastSent = new Date(user.otp_expiry).getTime() - (10 * 60 * 1000);
+      const cooldownMs = 60 * 1000;
+      const timePassed = Date.now() - lastSent;
+      if (timePassed < cooldownMs) {
+        const secondsLeft = Math.ceil((cooldownMs - timePassed) / 1000);
+        return res.status(429).json({
+          message: `Silakan tunggu ${secondsLeft} detik sebelum meminta kode OTP kembali.`
+        });
+      }
+    }
+
+    const otp = require("crypto").randomInt(100000, 999999).toString();
+    const expiry = new Date(Date.now() + 10 * 60 * 1000);
+
+    await pool.query(
+      "UPDATE users SET otp_code = $1, otp_expiry = $2 WHERE id = $3",
+      [otp, expiry, user.id]
+    );
+
+    sendWhatsAppMessage(user.phone, `Halo *${user.fullname}*,\nBerikut adalah kode OTP Anda: *${otp}*\n\nKode ini berlaku selama 10 menit. Jangan bagikan kode ini kepada siapapun.`);
+
+    res.status(200).json({ message: "Kode OTP baru telah dikirim ke nomor WhatsApp Anda." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Gagal mengirim ulang OTP via WhatsApp" });
+  }
+});
+
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
   try {
@@ -494,12 +545,20 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
+// --- WHATSAPP STATUS ENDPOINT (Admin only) ---
+app.get("/api/admin/whatsapp-status", authenticateToken, (req, res) => {
+  if (!req.user.isAdmin) {
+    return res.status(403).json({ message: "Akses ditolak" });
+  }
+  res.json(getWhatsAppStatus());
+});
+
 // --- PROFILE ENDPOINTS ---
 
 app.get("/api/profile", authenticateToken, async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT id, email, fullname, nik, phone, role, created_at FROM users WHERE id = $1",
+      "SELECT id, email, fullname, nik, phone, role, avatar_url, created_at FROM users WHERE id = $1",
       [req.user.id]
     );
     if (result.rows.length === 0) {
@@ -512,39 +571,67 @@ app.get("/api/profile", authenticateToken, async (req, res) => {
   }
 });
 
-app.put("/api/profile", authenticateToken, async (req, res) => {
-  const { fullname, phone, oldPassword, newPassword } = req.body;
+app.put("/api/profile", authenticateToken, upload.single("avatar"), async (req, res) => {
+  const body = req.body || {};
+  const { fullname, phone, oldPassword, newPassword, removeAvatar } = body;
+  const avatarFile = req.file;
 
   try {
     const userResult = await pool.query("SELECT * FROM users WHERE id = $1", [req.user.id]);
     if (userResult.rows.length === 0) {
+      if (avatarFile) fs.unlinkSync(path.join(__dirname, "uploads", avatarFile.filename));
       return res.status(404).json({ message: "Pengguna tidak ditemukan" });
     }
     const user = userResult.rows[0];
 
+    // Determine new avatar_url if uploaded, or if requested to remove
+    let avatarUrl = user.avatar_url;
+    
+    if (removeAvatar === 'true') {
+      avatarUrl = null;
+      if (user.avatar_url && user.avatar_url.startsWith('/uploads/')) {
+        const oldFile = path.join(__dirname, user.avatar_url);
+        if (fs.existsSync(oldFile)) {
+          try { fs.unlinkSync(oldFile); } catch(e) {}
+        }
+      }
+    } else if (avatarFile) {
+      avatarUrl = `/uploads/${avatarFile.filename}`;
+      // Optionally delete old avatar file here if we want to save space
+      if (user.avatar_url && user.avatar_url.startsWith('/uploads/')) {
+        const oldFile = path.join(__dirname, user.avatar_url);
+        if (fs.existsSync(oldFile)) {
+          try { fs.unlinkSync(oldFile); } catch(e) {}
+        }
+      }
+    }
+
     if (newPassword) {
       if (!oldPassword) {
+        if (avatarFile) fs.unlinkSync(path.join(__dirname, "uploads", avatarFile.filename));
         return res.status(400).json({ message: "Kata sandi lama wajib diisi untuk mengubah kata sandi" });
       }
       const isMatch = await bcrypt.compare(oldPassword, user.password);
       if (!isMatch) {
+        if (avatarFile) fs.unlinkSync(path.join(__dirname, "uploads", avatarFile.filename));
         return res.status(400).json({ message: "Kata sandi lama salah" });
       }
       const hashedNewPassword = await bcrypt.hash(newPassword, 10);
       
       const updateResult = await pool.query(
-        "UPDATE users SET fullname = $1, phone = $2, password = $3 WHERE id = $4 RETURNING id, email, fullname, role, phone",
-        [fullname || user.fullname, phone || user.phone, hashedNewPassword, req.user.id]
+        "UPDATE users SET fullname = $1, phone = $2, password = $3, avatar_url = $4 WHERE id = $5 RETURNING id, email, fullname, role, phone, avatar_url",
+        [fullname || user.fullname, phone || user.phone, hashedNewPassword, avatarUrl, req.user.id]
       );
       return res.json({ message: "Profil dan kata sandi berhasil diperbarui", user: updateResult.rows[0] });
     } else {
       const updateResult = await pool.query(
-        "UPDATE users SET fullname = $1, phone = $2 WHERE id = $3 RETURNING id, email, fullname, role, phone",
-        [fullname || user.fullname, phone || user.phone, req.user.id]
+        "UPDATE users SET fullname = $1, phone = $2, avatar_url = $3 WHERE id = $4 RETURNING id, email, fullname, role, phone, avatar_url",
+        [fullname || user.fullname, phone || user.phone, avatarUrl, req.user.id]
       );
       return res.json({ message: "Profil berhasil diperbarui", user: updateResult.rows[0] });
     }
   } catch (error) {
+    if (avatarFile) fs.unlinkSync(path.join(__dirname, "uploads", avatarFile.filename));
     console.error(error);
     res.status(500).json({ message: "Gagal memperbarui profil" });
   }
@@ -875,7 +962,7 @@ app.post("/api/messages", authenticateToken, upload.single("attachment"), async 
         sendReplyEmail(pEmail, pTicket2, snippet2).catch(err => console.error("Async reply email error:", err));
 
         if (pPhone) {
-          sendWhatsAppMessage(pPhone, `Halo *${pName || 'Bapak/Ibu'}*,\n\nAdmin Sekdin Poltekpin baru saja merespon tiket Anda dengan ID *#${pTicket2}*.\n\n*Balasan:*\n_"${snippet2}"_\n\nSilakan masuk ke portal Sekdin Poltekpin untuk melihat pesan selengkapnya.`);
+          sendWhatsAppMessage(pPhone, `Halo *${pName || 'Bapak/Ibu'}*,\n\nAdmin Sekdin Kemenkum baru saja merespon tiket Anda dengan ID *#${pTicket2}*.\n\n*Balasan:*\n_"${snippet2}"_\n\nSilakan masuk ke portal Sekdin Poltekpin untuk melihat pesan selengkapnya.`);
         }
       }
     }

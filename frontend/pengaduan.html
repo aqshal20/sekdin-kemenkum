@@ -1062,7 +1062,7 @@
           ? `<div class="msg-bubble" ${msg.is_auto ? 'style="background: #fff8e1; color: #b45309; border: 1px solid #fde68a;"' : ''}>${escapeHtml(msg.message)}${attachmentHtml}</div>`
           : `<div class="msg-bubble">${attachmentHtml}</div>`;
 
-        let senderDisplay = isMe ? 'Anda' : (msg.sender_role === 'admin' ? 'Admin' : (msg.sender_email || 'Petugas'));
+        let senderDisplay = isMe ? 'Anda' : 'Admin Sekdin Kemenkum';
         if (msg.is_auto) {
            senderDisplay = 'Sistem Balasan Otomatis';
         }

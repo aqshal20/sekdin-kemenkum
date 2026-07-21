@@ -1138,7 +1138,7 @@
 
               return {
                 "No": index + 1,
-                "Log Waktu": formattedTime,
+                "Tanggal/Waktu Pengajuan": formattedTime,
                 "ID Percakapan": item.ticket_id || item.id,
                 "Nama Lengkap Penanya": item.participant_fullname || "-",
                 "NIK": item.participant_nik || "-",
@@ -1159,7 +1159,7 @@
 
             worksheet["!cols"] = [
               { wch: 5 },   // No
-              { wch: 25 },  // Log Waktu
+              { wch: 28 },  // Tanggal/Waktu Pengajuan
               { wch: 15 },  // ID Percakapan
               { wch: 25 },  // Nama Lengkap Penanya
               { wch: 20 },  // NIK

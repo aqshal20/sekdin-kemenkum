@@ -498,32 +498,8 @@
               </div>
             </div>
 
-            <!-- OTP Method Selection -->
-            <div class="otp-method-section">
-              <div class="otp-method-label">🔔 Metode Pengiriman OTP</div>
-              <div class="otp-method-grid">
-
-                <label class="otp-method-card active-wa" id="card-wa">
-                  <input type="radio" name="otpMethod" value="whatsapp" checked />
-                  <div class="card-check">✓</div>
-                  <div class="card-emoji">💬</div>
-                  <div class="card-name">WhatsApp</div>
-                  <div class="card-desc">Instan & mudah</div>
-                </label>
-
-                <label class="otp-method-card" id="card-email">
-                  <input type="radio" name="otpMethod" value="email" />
-                  <div class="card-check">✓</div>
-                  <div class="card-emoji">✉️</div>
-                  <div class="card-name">Email</div>
-                  <div class="card-desc">Periksa inbox</div>
-                </label>
-
-              </div>
-              <p id="method-hint" style="font-size: 11.5px; color: #94a3b8; margin-top: 8px; text-align: center;">
-                💡 OTP via WhatsApp memerlukan nomor yang terdaftar di WhatsApp
-              </p>
-            </div>
+            <!-- OTP Method Selection (Removed. Default is Email now.) -->
+            <input type="hidden" name="otpMethod" value="email" checked />
 
             <button class="register-btn" type="submit" id="register-btn">
               <span>📝</span>
@@ -562,9 +538,14 @@
               <span>Verifikasi Sekarang</span>
             </button>
 
-            <div style="margin-top: 14px; font-size: 13px; text-align: center; color: #64748b;">
+            <div style="margin-top: 14px; font-size: 13px; text-align: center; color: #64748b;" id="otp-actions-container">
               Tidak menerima kode?
-              <a href="#" id="resend-otp-link" style="color: var(--navy); font-weight: 700; margin-left: 4px;">Kirim ulang OTP</a>
+              <span id="cooldown-text" style="font-weight: 700; color: var(--navy); margin-left: 4px;">Kirim ulang (60s)</span>
+              <div id="alternative-otp-options" style="display: none; margin-top: 10px; gap: 10px; justify-content: center;">
+                <a href="#" id="resend-email-btn" style="color: var(--navy); font-weight: 700; text-decoration: underline; font-size: 12.5px;">Kirim Ulang via Email</a>
+                <span style="color: #cbd5e1;">|</span>
+                <a href="#" id="resend-wa-btn" style="color: #16a34a; font-weight: 700; text-decoration: underline; font-size: 12.5px;">Kirim via WhatsApp</a>
+              </div>
             </div>
           </form>
 
@@ -587,12 +568,15 @@
       const registerError = document.getElementById("register-error");
       const registerBtn   = document.getElementById("register-btn");
       const otpBtn        = document.getElementById("otp-btn");
-      const resendOtpLink = document.getElementById("resend-otp-link");
+      const cooldownText  = document.getElementById("cooldown-text");
+      const altOtpOptions = document.getElementById("alternative-otp-options");
+      const resendEmailBtn = document.getElementById("resend-email-btn");
+      const resendWaBtn    = document.getElementById("resend-wa-btn");
       const registerTitle = document.getElementById("register-title");
       const registerNotice= document.getElementById("register-notice");
 
       let registeredEmail = "";
-      let selectedMethod  = "whatsapp";
+      let selectedMethod  = "email";
 
       const urlParams  = new URLSearchParams(window.location.search);
       const queryEmail = urlParams.get("email");
@@ -604,30 +588,6 @@
 
       let isCooldown = false;
       let cooldownTimer = null;
-
-      // ── OTP Method Card Toggle ──
-      const cardWa    = document.getElementById("card-wa");
-      const cardEmail = document.getElementById("card-email");
-      const methodHint = document.getElementById("method-hint");
-
-      function setActiveCard(method) {
-        selectedMethod = method;
-        cardWa.classList.remove("active-wa");
-        cardEmail.classList.remove("active-email");
-        if (method === "whatsapp") {
-          cardWa.classList.add("active-wa");
-          methodHint.textContent = "💡 OTP via WhatsApp memerlukan nomor yang terdaftar di WhatsApp";
-        } else {
-          cardEmail.classList.add("active-email");
-          methodHint.textContent = "💡 Periksa folder Spam jika email tidak ditemukan dalam 1 menit";
-        }
-      }
-
-      document.querySelectorAll('input[name="otpMethod"]').forEach(radio => {
-        radio.addEventListener('change', (e) => setActiveCard(e.target.value));
-      });
-      // Init visual state
-      setActiveCard("whatsapp");
 
       // ── OTP Box Auto-jump ──
       const otpBoxes = document.querySelectorAll('.otp-single');
@@ -683,20 +643,20 @@
       function startCooldown(seconds) {
         if (cooldownTimer) clearInterval(cooldownTimer);
         isCooldown = true;
-        resendOtpLink.style.pointerEvents = "none";
-        resendOtpLink.style.opacity = "0.5";
+        cooldownText.style.display = "inline";
+        altOtpOptions.style.display = "none";
+        
         let remaining = seconds;
-        resendOtpLink.textContent = `Kirim ulang (${remaining}s)`;
+        cooldownText.textContent = `Kirim ulang (${remaining}s)`;
         cooldownTimer = setInterval(() => {
           remaining--;
           if (remaining <= 0) {
             clearInterval(cooldownTimer);
             isCooldown = false;
-            resendOtpLink.style.pointerEvents = "auto";
-            resendOtpLink.style.opacity = "1";
-            resendOtpLink.textContent = "Kirim ulang OTP";
+            cooldownText.style.display = "none";
+            altOtpOptions.style.display = "flex";
           } else {
-            resendOtpLink.textContent = `Kirim ulang (${remaining}s)`;
+            cooldownText.textContent = `Kirim ulang (${remaining}s)`;
           }
         }, 1000);
       }
@@ -736,7 +696,7 @@
         const email    = document.getElementById("email").value.trim();
         const password = document.getElementById("password").value;
         const confirm  = document.getElementById("confirm-password").value;
-        const otpMethod = document.querySelector('input[name="otpMethod"]:checked').value;
+        const otpMethod = "email";
 
         if (!fullname) return showError("Nama lengkap wajib diisi.");
         if (nik.length !== 16) return showError("NIK harus 16 digit angka.");
@@ -784,8 +744,8 @@
         finally { otpBtn.disabled = false; otpBtn.innerHTML = '<span>✅</span><span>Verifikasi Sekarang</span>'; }
       });
 
-      // ── Resend OTP ──
-      resendOtpLink.addEventListener("click", async (e) => {
+      // ── Resend OTP Email ──
+      resendEmailBtn.addEventListener("click", async (e) => {
         e.preventDefault();
         if (isCooldown) return;
         registerError.style.display = "none";
@@ -796,13 +756,59 @@
             body: JSON.stringify({ email: registeredEmail }),
           });
           const data = await res.json();
-          if (res.ok) { alert(data.message || "OTP berhasil dikirim ulang."); startCooldown(60); }
+          if (res.ok) { 
+            alert(data.message || "OTP berhasil dikirim ulang ke Email."); 
+            
+            // Switch title and desc in view to email sent info
+            registerTitle.textContent = "Verifikasi Email";
+            const icon = document.getElementById('otp-sent-icon');
+            const desc = document.getElementById('otp-sent-desc');
+            icon.textContent = '✉️';
+            icon.className = 'otp-sent-icon email';
+            desc.innerHTML = `Kode OTP telah dikirim ke email <strong>${registeredEmail}</strong>.<br>Periksa kotak masuk atau folder Spam.`;
+            
+            startCooldown(60); 
+          }
           else {
             alert(data.message || "Gagal mengirim ulang OTP.");
             const match = data.message && data.message.match(/tunggu (\d+) detik/i);
             if (match) startCooldown(parseInt(match[1]));
           }
         } catch { alert("Gagal mengirim ulang OTP."); }
+      });
+
+      // ── Resend OTP WhatsApp ──
+      resendWaBtn.addEventListener("click", async (e) => {
+        e.preventDefault();
+        if (isCooldown) return;
+        registerError.style.display = "none";
+        try {
+          const res = await fetch(`${API_URL}/resend-otp-whatsapp`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: registeredEmail }),
+          });
+          const data = await res.json();
+          if (res.ok) { 
+            alert(data.message || "OTP berhasil dikirim ulang ke WhatsApp."); 
+            
+            // Switch title and desc in view to WhatsApp sent info
+            registerTitle.textContent = "Verifikasi WhatsApp";
+            const icon = document.getElementById('otp-sent-icon');
+            const desc = document.getElementById('otp-sent-desc');
+            icon.textContent = '💬';
+            icon.className = 'otp-sent-icon wa';
+            const phoneVal = document.getElementById("phone").value.trim() || "nomor Anda";
+            desc.innerHTML = `Kode OTP telah dikirim ke WhatsApp <strong>${phoneVal}</strong>.<br>Silakan periksa pesan masuk Anda.`;
+            
+            startCooldown(60); 
+          }
+          else {
+            alert(data.message || "Gagal mengirim ulang OTP ke WhatsApp.");
+            const match = data.message && data.message.match(/tunggu (\d+) detik/i);
+            if (match) startCooldown(parseInt(match[1]));
+          }
+        } catch { alert("Gagal mengirim ulang OTP ke WhatsApp."); }
       });
 
       function showError(msg) {
