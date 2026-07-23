@@ -7,6 +7,7 @@ const http = require("http");
 const path = require("path");
 const { Server } = require("socket.io");
 const multer = require("multer");
+const XLSX = require("xlsx");
 const fs = require("fs");
 const dns = require("dns");
 
@@ -200,12 +201,14 @@ app.use(express.json());
 app.use(cors());
 
 const rateLimit = require("express-rate-limit");
-const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 5, message: { message: "Terlalu banyak percobaan" } });
+const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, message: { message: "Terlalu banyak percobaan, silakan coba lagi dalam 15 menit." } });
+const loginLimiter = rateLimit({ windowMs: 10 * 60 * 1000, max: 15, message: { message: "Terlalu banyak percobaan login, silakan coba lagi dalam 10 menit." } });
+
 app.use("/api/resend-otp", authLimiter);
 app.use("/api/resend-otp-whatsapp", authLimiter);
 app.use("/api/verify-otp", authLimiter);
-app.use("/api/login", authLimiter);
 app.use("/api/register", authLimiter);
+app.use("/api/login", loginLimiter);
 
 
 // Configure multer storage
@@ -232,6 +235,21 @@ const upload = multer({
       return cb(null, true);
     }
     cb(new Error("Format berkas tidak diizinkan. Hanya menerima PDF, Word, dan Gambar."));
+  }
+});
+
+// Instance Multer khusus untuk Excel (BKN)
+const uploadExcel = multer({
+  storage: storage,
+  limits: { fileSize: 15 * 1024 * 1024 }, // Limit to 15MB for large excels
+  fileFilter: function (req, file, cb) {
+    const allowedTypes = /xlsx|xls|csv/;
+    const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+    const mimetype = allowedTypes.test(file.mimetype) || file.mimetype.includes('spreadsheetml') || file.mimetype.includes('excel');
+    if (extname || mimetype) {
+      return cb(null, true);
+    }
+    cb(new Error("Format berkas tidak diizinkan. Hanya menerima file Excel (xlsx/xls/csv)."));
   }
 });
 
@@ -322,25 +340,44 @@ app.post("/api/register", async (req, res) => {
 
   try {
     // Check if NIK already exists
-    const checkNik = await pool.query("SELECT id FROM users WHERE nik = $1", [nik]);
+    const checkNik = await pool.query("SELECT id, is_verified FROM users WHERE nik = $1", [nik]);
     if (checkNik.rows.length > 0) {
-      return res.status(400).json({ message: "NIK sudah terdaftar" });
+      if (checkNik.rows[0].is_verified) {
+        return res.status(400).json({ message: "NIK sudah terdaftar dan terverifikasi." });
+      }
     }
 
     // Check if Email already exists
-    const checkEmail = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
+    const checkEmail = await pool.query("SELECT id, is_verified FROM users WHERE email = $1", [email]);
+    let unverifiedUserId = null;
+    
     if (checkEmail.rows.length > 0) {
-      return res.status(400).json({ message: "Email sudah terdaftar" });
+      if (checkEmail.rows[0].is_verified) {
+        return res.status(400).json({ message: "Email sudah terdaftar dan terverifikasi." });
+      } else {
+        // Record exists but not verified. We will overwrite this record.
+        unverifiedUserId = checkEmail.rows[0].id;
+      }
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const otp = require("crypto").randomInt(100000, 999999).toString();
     const expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    const result = await pool.query(
-      "INSERT INTO users (email, password, nik, fullname, phone, is_verified, otp_code, otp_expiry, role) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, email, role, fullname",
-      [email, hashedPassword, nik, fullname, phone, false, otp, expiry, "participant"],
-    );
+    let result;
+    if (unverifiedUserId) {
+      // Overwrite existing unverified account
+      result = await pool.query(
+        "UPDATE users SET password=$1, nik=$2, fullname=$3, phone=$4, otp_code=$5, otp_expiry=$6 WHERE id=$7 RETURNING id, email, role, fullname",
+        [hashedPassword, nik, fullname, phone, otp, expiry, unverifiedUserId]
+      );
+    } else {
+      // Create new account
+      result = await pool.query(
+        "INSERT INTO users (email, password, nik, fullname, phone, is_verified, otp_code, otp_expiry, role) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, email, role, fullname",
+        [email, hashedPassword, nik, fullname, phone, false, otp, expiry, "umum"]
+      );
+    }
 
     // Send OTP based on selected method (always email for initial registration)
     sendOTPEmail(email, otp).catch(err => console.error("Async SMTP send error in registration:", err));
@@ -504,11 +541,22 @@ app.post("/api/resend-otp-whatsapp", async (req, res) => {
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
   try {
-    const result = await pool.query("SELECT * FROM users WHERE email = $1", [
-      email,
-    ]);
-    const user = result.rows[0];
+    const result = await pool.query("SELECT * FROM users WHERE email = $1", [email]);
+    let user = result.rows[0];
+    
     if (user && (await bcrypt.compare(password, user.password))) {
+      // Auto-upgrade check for 'umum' based on NIK in bkn_data
+      if (user.role === "umum" && user.nik) {
+        const bknCheck = await pool.query("SELECT reg_number FROM bkn_data WHERE nik = $1", [user.nik]);
+        if (bknCheck.rows.length > 0) {
+          user.role = "participant";
+          await pool.query(
+            "UPDATE users SET role = 'participant', bkn_reg_number = $1 WHERE id = $2", 
+            [bknCheck.rows[0].reg_number, user.id]
+          );
+        }
+      }
+
       // Check verification (except for admin users)
       if (!user.role.startsWith("admin") && !user.is_verified) {
         // Send OTP just in case
@@ -557,14 +605,37 @@ app.get("/api/admin/whatsapp-status", authenticateToken, (req, res) => {
 
 app.get("/api/profile", authenticateToken, async (req, res) => {
   try {
-    const result = await pool.query(
+    let result = await pool.query(
       "SELECT id, email, fullname, nik, phone, role, avatar_url, created_at FROM users WHERE id = $1",
       [req.user.id]
     );
     if (result.rows.length === 0) {
       return res.status(404).json({ message: "Pengguna tidak ditemukan" });
     }
-    res.json(result.rows[0]);
+    
+    let user = result.rows[0];
+
+    // Auto-upgrade check for 'umum' based on NIK in bkn_data (Sync when viewing profile)
+    if (user.role === "umum" && user.nik) {
+      const bknCheck = await pool.query("SELECT reg_number FROM bkn_data WHERE nik = $1", [user.nik]);
+      if (bknCheck.rows.length > 0) {
+        user.role = "participant";
+        await pool.query(
+          "UPDATE users SET role = 'participant', bkn_reg_number = $1 WHERE id = $2", 
+          [bknCheck.rows[0].reg_number, user.id]
+        );
+      }
+    }
+
+    // Jika dia participant, ambil data nilainya dari bkn_data
+    if (user.role === "participant" && user.nik) {
+      const nilaiCheck = await pool.query("SELECT * FROM bkn_data WHERE nik = $1", [user.nik]);
+      if (nilaiCheck.rows.length > 0) {
+        user.nilai_ujian = nilaiCheck.rows[0];
+      }
+    }
+
+    res.json(user);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Terjadi kesalahan server" });
@@ -1198,6 +1269,99 @@ const requireMainAdmin = (req, res, next) => {
   next();
 };
 
+
+// --- ADMIN IMPORT BKN ENDPOINT ---
+app.post("/api/admin/import-bkn", authenticateToken, requireMainAdmin, uploadExcel.single("bkn_file"), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: "File Excel BKN tidak ditemukan" });
+  }
+
+  try {
+    const workbook = XLSX.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    
+    // WORKAROUND BKN EXPORT BUG:
+    // Terkadang file export BKN memiliki metadata !ref yang korup (contoh: A1:A4, padahal ada 10.000 baris).
+    // Kita harus mencari cell terjauh dan me-recompute range secara manual.
+    const keys = Object.keys(sheet).filter(k => !k.startsWith('!'));
+    if (keys.length > 0) {
+      let maxRow = 0;
+      let maxCol = 0;
+      keys.forEach(k => {
+        const decoded = XLSX.utils.decode_cell(k);
+        if (decoded.r > maxRow) maxRow = decoded.r;
+        if (decoded.c > maxCol) maxCol = decoded.c;
+      });
+      // Set rentang baru dari A1 (0,0) sampai maksimal baris dan kolom yang ditemukan
+      sheet['!ref'] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: maxRow, c: maxCol } });
+    }
+
+    // Baca sebagai json, header di index baris ke-3 (karena index 0,1,2 adalah judul)
+    const rawData = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+    
+    // Temukan baris mana yang merupakan header sebenarnya
+    let headerRowIndex = -1;
+    for (let i = 0; i < 20; i++) {
+      if (!rawData[i]) continue;
+      // Periksa apakah di row ini ada kolom bertuliskan NIK dan NO REGISTER
+      const rowString = JSON.stringify(rawData[i]).toUpperCase();
+      if (rowString.includes("NIK") && rowString.includes("NO REGISTER")) {
+        headerRowIndex = i;
+        break;
+      }
+    }
+
+    if (headerRowIndex === -1) {
+      fs.unlinkSync(req.file.path);
+      return res.status(400).json({ message: "Format Excel tidak valid. Kolom 'NIK' atau 'NO REGISTER' tidak ditemukan." });
+    }
+
+    const headers = rawData[headerRowIndex].map(h => String(h).trim().toUpperCase());
+    const nikIdx = headers.findIndex(h => h === "NIK" || h.includes("NIK"));
+    const regIdx = headers.findIndex(h => h === "NO REGISTER" || h === "NO REG" || h.includes("REGISTER"));
+    const namaIdx = headers.findIndex(h => h === "NAMA" || h.includes("NAMA"));
+
+    if (nikIdx === -1 || regIdx === -1) {
+      fs.unlinkSync(req.file.path);
+      return res.status(400).json({ message: "Kolom NIK atau NO REGISTER tidak lengkap di file BKN tersebut." });
+    }
+
+    let insertedCount = 0;
+
+    for (let i = headerRowIndex + 1; i < rawData.length; i++) {
+      const row = rawData[i];
+      if (!row || row.length === 0) continue;
+
+      const nik = String(row[nikIdx] || "").trim();
+      const regNumber = String(row[regIdx] || "").trim();
+      const fullname = String(row[namaIdx] || "Peserta").trim();
+
+      if (nik && regNumber) {
+        // Upsert data ke bkn_data
+        await pool.query(
+          `INSERT INTO bkn_data (nik, reg_number, fullname) 
+           VALUES ($1, $2, $3)
+           ON CONFLICT (nik) DO UPDATE 
+           SET reg_number = EXCLUDED.reg_number, 
+               fullname = EXCLUDED.fullname`,
+          [nik, regNumber, fullname]
+        );
+        insertedCount++;
+      }
+    }
+
+    fs.unlinkSync(req.file.path);
+    
+    await logActivity(req.user.id, req.user.fullname, "Import Data BKN", `Berhasil sinkronisasi ${insertedCount} peserta`);
+
+    res.json({ message: `Berhasil mengimpor ${insertedCount} data peserta BKN.` });
+  } catch (error) {
+    if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+    console.error(error);
+    res.status(500).json({ message: "Gagal mengimpor file Excel" });
+  }
+});
 
 app.get("/api/admin/activity-logs", authenticateToken, requireMainAdmin, async (req, res) => {
   try {

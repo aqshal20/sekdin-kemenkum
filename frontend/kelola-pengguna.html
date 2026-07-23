@@ -546,7 +546,10 @@
           <div class="section-title" style="margin: 0;">
             <h2 style="font-size: 20px;">Daftar Pengguna Aktif</h2>
           </div>
-          <button class="btn-new" id="btn-open-modal">＋ &nbsp;Pengguna Baru</button>
+          <div style="display: flex; gap: 10px;">
+            <button class="btn-new" id="btn-import-bkn" style="background: var(--navy); border-color: var(--navy-dk);">📥 Import Data BKN</button>
+            <button class="btn-new" id="btn-open-modal">＋ &nbsp;Pengguna Baru</button>
+          </div>
         </div>
 
         <!-- Search & Filter -->
@@ -560,7 +563,8 @@
               <label for="filter-role" style="font-size: 12.5px; font-weight: 700; color: var(--navy);">Peran:</label>
               <select id="filter-role" style="padding: 7px 12px; border-radius: 8px; border: 1.5px solid var(--border); font-size: 13px; font-family: inherit; color: var(--navy); background: white; cursor: pointer;">
                 <option value="all">Semua Peran</option>
-                <option value="participant">Peserta</option>
+                <option value="umum">Masyarakat Umum</option>
+                <option value="participant">Peserta Terverifikasi</option>
                 <option value="operator_informasi">Operator Info</option>
                 <option value="operator_pengaduan">Operator Pengaduan</option>
                 <option value="admin">Admin Utama</option>
@@ -665,6 +669,35 @@
       </section>
     </main>
 
+    <!-- Modal Import BKN -->
+    <div class="modal-overlay" id="import-bkn-modal" style="display:none; position:fixed; inset:0; background:rgba(10,18,35,0.6); backdrop-filter:blur(6px); z-index:1000; align-items:center; justify-content:center; padding:20px;">
+      <div class="modal-box" style="background:white; border-radius:20px; width:100%; max-width:500px; box-shadow:var(--shadow-lg); overflow:hidden;">
+        <div class="modal-header" style="background:var(--navy); color:white; padding:20px 24px; display:flex; justify-content:space-between; align-items:center;">
+          <h3 style="margin:0; font-size:18px; font-weight:700;">📥 Import Data BKN</h3>
+          <button class="modal-close" onclick="closeImportModal()" style="background:none; border:none; color:rgba(255,255,255,0.7); font-size:24px; cursor:pointer;">×</button>
+        </div>
+        <form id="import-bkn-form">
+          <div class="modal-body" style="padding:24px;">
+            <div id="import-error" class="notice notice-error" style="display:none; margin-bottom:16px;"></div>
+            <div id="import-success" class="notice notice-success" style="display:none; margin-bottom:16px; border-left:4px solid #10b981; background:#ecfdf5; padding:10px; font-size:13px;"></div>
+            
+            <p style="font-size: 13.5px; color: var(--muted); margin-bottom: 20px;">
+              Unggah file Excel (<strong>.xlsx</strong>) hasil unduhan dari portal SSCASN/BKN. Sistem akan membaca kolom NIK, No Register, dan Nama, lalu menautkannya secara otomatis dengan akun pendaftar yang sudah ada.
+            </p>
+
+            <div class="form-group full" style="margin-bottom:18px;">
+              <label for="bkn-file" style="font-weight: 700; color: var(--navy); display: block; margin-bottom: 8px;">Pilih File Excel BKN</label>
+              <input type="file" id="bkn-file" accept=".xlsx, .xls" required style="width: 100%; padding: 10px; border: 2px dashed var(--border); border-radius: 12px; cursor: pointer; font-size: 13px;" />
+            </div>
+          </div>
+          <div class="modal-footer" style="padding: 16px 24px; background: #f8fafc; border-top: 1px solid #e9edf2; display: flex; justify-content: flex-end; gap: 10px;">
+            <button type="button" class="btn-cancel" onclick="closeImportModal()" style="padding: 10px 20px; background: #fff; border: 1.5px solid var(--border); border-radius: 10px; font-size: 13.5px; font-weight: 600; cursor: pointer;">Batal</button>
+            <button type="submit" class="btn-save" id="btn-submit-import" style="padding: 10px 22px; background: var(--navy); color: #fff; border: none; border-radius: 10px; font-size: 13.5px; font-weight: 700; cursor: pointer;">Mulai Sinkronisasi</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
     <!-- ============================================================
          MODAL FORM TAMBAH / EDIT PENGGUNA
     ============================================================ -->
@@ -761,8 +794,17 @@
                   <input type="checkbox" name="role" value="participant">
                   <div class="role-option-icon">👤</div>
                   <div class="role-option-text">
-                    <strong>Peserta / User</strong>
-                    <small>Akun publik biasa</small>
+                    <strong>Peserta Terverifikasi</strong>
+                    <small>Lulus BKN</small>
+                  </div>
+                  <div class="checkmark">✓</div>
+                </label>
+                <label class="role-option role-opt-user" onclick="toggleRole(this)">
+                  <input type="checkbox" name="role" value="umum">
+                  <div class="role-option-icon">🌍</div>
+                  <div class="role-option-text">
+                    <strong>Masyarakat Umum</strong>
+                    <small>Akun standar</small>
                   </div>
                   <div class="checkmark">✓</div>
                 </label>
@@ -842,7 +884,7 @@
 
       function getSelectedRoles() {
         const checked = Array.from(document.querySelectorAll('#role-checkboxes input[name="role"]:checked'));
-        return checked.map(cb => cb.value).join(',') || 'participant';
+        return checked.map(cb => cb.value).join(',') || 'umum';
       }
 
       // ============================================================
@@ -866,8 +908,75 @@
         setTimeout(() => {
           userModal.style.display = 'none';
           createUserForm.reset();
-          setRoles('participant');
+          setRoles('umum');
         }, 300);
+      }
+
+      // --- IMPORT BKN MODAL ---
+      const importModal = document.getElementById("import-bkn-modal");
+      const importForm = document.getElementById("import-bkn-form");
+      const btnImport = document.getElementById("btn-import-bkn");
+
+      if (btnImport) {
+        btnImport.onclick = () => {
+          importModal.style.display = 'flex';
+          document.getElementById("import-error").style.display = "none";
+          document.getElementById("import-success").style.display = "none";
+          if(importForm) importForm.reset();
+        };
+      }
+
+      window.closeImportModal = function() {
+        if(importModal) importModal.style.display = 'none';
+      };
+
+      if (importForm) {
+        importForm.onsubmit = async (e) => {
+          e.preventDefault();
+          const errEl = document.getElementById("import-error");
+          const sucEl = document.getElementById("import-success");
+          const btnSub = document.getElementById("btn-submit-import");
+          const file = document.getElementById("bkn-file").files[0];
+
+          errEl.style.display = "none";
+          sucEl.style.display = "none";
+
+          if (!file) return;
+
+          btnSub.disabled = true;
+          btnSub.textContent = "Mengimpor...";
+
+          const formData = new FormData();
+          formData.append("bkn_file", file);
+
+          try {
+            const res = await fetch(`${API_URL}/admin/import-bkn`, {
+              method: "POST",
+              headers: { "Authorization": `Bearer ${getAuthToken()}` },
+              body: formData
+            });
+            const data = await res.json();
+            
+            if (res.ok) {
+              sucEl.textContent = data.message;
+              sucEl.style.display = "block";
+              setTimeout(() => {
+                closeImportModal();
+                if (typeof loadUsers === 'function') loadUsers();
+                if (typeof loadActivityLogs === 'function') loadActivityLogs();
+              }, 2000);
+            } else {
+              errEl.textContent = data.message || "Gagal mengimpor file.";
+              errEl.style.display = "block";
+            }
+          } catch(err) {
+            errEl.textContent = "Koneksi ke server gagal.";
+            errEl.style.display = "block";
+          } finally {
+            btnSub.disabled = false;
+            btnSub.textContent = "Mulai Sinkronisasi";
+          }
+        };
       }
 
       function openCreateModal() {
@@ -1020,13 +1129,14 @@
       //  ROLE BADGE
       // ============================================================
       function getRoleBadge(role) {
-        if (!role) return '<span class="role-badge role-participant">Peserta</span>';
+        if (!role) return '<span class="role-badge role-participant" style="background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;">Umum</span>';
         return role.split(',').map(r => {
           switch(r.trim()) {
             case 'admin':              return '<span class="role-badge role-admin">Admin Utama</span>';
             case 'operator_informasi': return '<span class="role-badge role-admin-info">Operator Info</span>';
             case 'operator_pengaduan': return '<span class="role-badge role-admin-aduan">Operator Pengaduan</span>';
             case 'participant':        return '<span class="role-badge role-participant">Peserta</span>';
+            case 'umum':               return '<span class="role-badge role-participant" style="background:#f1f5f9;color:#475569;border:1px solid #cbd5e1;">Umum</span>';
             default:                   return '';
           }
         }).join(' ');
