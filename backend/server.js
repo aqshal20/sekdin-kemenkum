@@ -188,17 +188,36 @@ const sendStatusChangeEmail = async (email, status, category, serviceType) => {
   console.log(`==================================================\n`);
 };
 
+const helmet = require("helmet");
+
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:8080',
+  'https://sekdin-kemenkum.com' // Ubah dengan domain asli nanti
+];
+
 const app = express();
+app.use(helmet());
 const server = http.createServer(app);
+// Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-  },
+    origin: allowedOrigins,
+    methods: ["GET", "POST"]
+  }
 });
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: function(origin, callback){
+    if(!origin) return callback(null, true);
+    if(allowedOrigins.indexOf(origin) === -1){
+      const msg = 'CORS tidak mengizinkan akses dari origin ini.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  }
+}));
 
 const rateLimit = require("express-rate-limit");
 const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, message: { message: "Terlalu banyak percobaan, silakan coba lagi dalam 15 menit." } });
@@ -1503,6 +1522,14 @@ app.use((err, req, res, next) => {
     }
   }
   next(err);
+});
+
+// Global Error Handler untuk menyembunyikan stack trace dari client
+app.use((err, req, res, next) => {
+  console.error("Terjadi error:", err.stack);
+  res.status(500).json({ 
+    message: "Terjadi kesalahan internal pada server. Silakan hubungi administrator." 
+  });
 });
 
 // Final fallback for SPA: serve index.html for any unmatched routes
