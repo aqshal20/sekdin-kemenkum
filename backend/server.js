@@ -15,7 +15,7 @@ const dns = require("dns");
 dns.setDefaultResultOrder('ipv4first');
 require("dotenv").config({ path: path.join(__dirname, ".env") });
 const nodemailer = require("nodemailer");
-const { initializeWhatsApp, sendWhatsAppMessage, getWhatsAppStatus, setIO } = require("./whatsapp");
+// const { initializeWhatsApp, sendWhatsAppMessage, getWhatsAppStatus, setIO } = require("./whatsapp");
 
 const sendOTPEmail = async (email, otp) => {
   const host = process.env.SMTP_HOST;
@@ -193,11 +193,17 @@ const helmet = require("helmet");
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:8080',
+  'http://127.0.0.1:3000',
+  'http://127.0.0.1:8080',
   'https://sekdin-kemenkum.com' // Ubah dengan domain asli nanti
 ];
 
 const app = express();
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: false
+}));
 const server = http.createServer(app);
 // Socket.IO
 const io = new Server(server, {
@@ -208,16 +214,7 @@ const io = new Server(server, {
 });
 
 app.use(express.json());
-app.use(cors({
-  origin: function(origin, callback){
-    if(!origin) return callback(null, true);
-    if(allowedOrigins.indexOf(origin) === -1){
-      const msg = 'CORS tidak mengizinkan akses dari origin ini.';
-      return callback(new Error(msg), false);
-    }
-    return callback(null, true);
-  }
-}));
+app.use(cors());
 
 const rateLimit = require("express-rate-limit");
 const authLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20, message: { message: "Terlalu banyak percobaan, silakan coba lagi dalam 15 menit." } });
@@ -325,7 +322,7 @@ const authenticateToken = (req, res, next) => {
 
 // --- SOCKET.IO LOGIC ---
 // Inject io into whatsapp module so it can emit QR events
-setIO(io);
+// setIO(io);
 
 io.on("connection", (socket) => {
   console.log("A user connected");
@@ -548,7 +545,7 @@ app.post("/api/resend-otp-whatsapp", async (req, res) => {
       [otp, expiry, user.id]
     );
 
-    sendWhatsAppMessage(user.phone, `Halo *${user.fullname}*,\nBerikut adalah kode OTP Anda: *${otp}*\n\nKode ini berlaku selama 10 menit. Jangan bagikan kode ini kepada siapapun.`);
+    // sendWhatsAppMessage(user.phone, `Halo *${user.fullname}*,\nBerikut adalah kode OTP Anda: *${otp}*\n\nKode ini berlaku selama 10 menit. Jangan bagikan kode ini kepada siapapun.`);
 
     res.status(200).json({ message: "Kode OTP baru telah dikirim ke nomor WhatsApp Anda." });
   } catch (error) {
@@ -617,7 +614,7 @@ app.get("/api/admin/whatsapp-status", authenticateToken, (req, res) => {
   if (!req.user.isAdmin) {
     return res.status(403).json({ message: "Akses ditolak" });
   }
-  res.json(getWhatsAppStatus());
+  res.json({ connected: false, message: "WhatsApp dinonaktifkan." });
 });
 
 // --- PROFILE ENDPOINTS ---
@@ -1052,7 +1049,7 @@ app.post("/api/messages", authenticateToken, upload.single("attachment"), async 
         sendReplyEmail(pEmail, pTicket2, snippet2).catch(err => console.error("Async reply email error:", err));
 
         if (pPhone) {
-          sendWhatsAppMessage(pPhone, `Halo *${pName || 'Bapak/Ibu'}*,\n\nAdmin Sekdin Kemenkum baru saja merespon tiket Anda dengan ID *#${pTicket2}*.\n\n*Balasan:*\n_"${snippet2}"_\n\nSilakan masuk ke portal Sekdin Poltekpin untuk melihat pesan selengkapnya.`);
+          // sendWhatsAppMessage(pPhone, `Halo *${pName || 'Bapak/Ibu'}*,\n\nAdmin Sekdin Kemenkum baru saja merespon tiket Anda dengan ID *#${pTicket2}*.\n\n*Balasan:*\n_"${snippet2}"_\n\nSilakan masuk ke portal Sekdin Poltekpin untuk melihat pesan selengkapnya.`);
         }
       }
     }
@@ -1538,7 +1535,7 @@ app.use((req, res) => {
 });
 
 // Initialize WhatsApp
-initializeWhatsApp();
+// initializeWhatsApp();
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, () => {
