@@ -301,8 +301,16 @@ async function initDatabaseSchema() {
       role VARCHAR(50) NOT NULL DEFAULT 'participant',
       created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
     );`,
-    `ALTER TABLE users ADD COLUMN IF NOT EXISTS bkn_reg_number VARCHAR(100);`,
-    `ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url VARCHAR(255);`,
+    `DO $$ BEGIN
+       IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='bkn_reg_number') THEN
+         EXECUTE 'ALTER TABLE users ADD COLUMN bkn_reg_number VARCHAR(100)';
+       END IF;
+     END $$;`,
+    `DO $$ BEGIN
+       IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='users' AND column_name='avatar_url') THEN
+         EXECUTE 'ALTER TABLE users ADD COLUMN avatar_url VARCHAR(255)';
+       END IF;
+     END $$;`,
     `CREATE TABLE IF NOT EXISTS pengaduan (
       id SERIAL PRIMARY KEY,
       ticket_id VARCHAR(50) UNIQUE,
@@ -315,7 +323,11 @@ async function initDatabaseSchema() {
       feedback TEXT,
       created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
     );`,
-    `ALTER TABLE pengaduan ADD COLUMN IF NOT EXISTS ip_address VARCHAR(45);`,
+    `DO $$ BEGIN
+       IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='pengaduan' AND column_name='ip_address') THEN
+         EXECUTE 'ALTER TABLE pengaduan ADD COLUMN ip_address VARCHAR(45)';
+       END IF;
+     END $$;`,
     `CREATE TABLE IF NOT EXISTS lampiran (
       id SERIAL PRIMARY KEY,
       pengaduan_id INTEGER REFERENCES pengaduan(id) ON DELETE CASCADE,
@@ -332,7 +344,11 @@ async function initDatabaseSchema() {
       attachment TEXT,
       created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
     );`,
-    `ALTER TABLE messages ADD COLUMN IF NOT EXISTS is_internal BOOLEAN DEFAULT FALSE;`,
+    `DO $$ BEGIN
+       IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='messages' AND column_name='is_internal') THEN
+         EXECUTE 'ALTER TABLE messages ADD COLUMN is_internal BOOLEAN DEFAULT FALSE';
+       END IF;
+     END $$;`,
     `CREATE TABLE IF NOT EXISTS announcements (
       id SERIAL PRIMARY KEY,
       title VARCHAR(255) NOT NULL,
@@ -375,11 +391,15 @@ async function initDatabaseSchema() {
     try {
       await pool.query(sql);
     } catch (err) {
-      console.warn("⚠️ Schema migration statement note:", err.message);
+      // Only log unexpected errors, skip permission/already-exists errors silently
+      if (!err.message.includes('already exists') && !err.message.includes('owner')) {
+        console.warn('⚠️ Schema migration note:', err.message);
+      }
     }
   }
 }
 initDatabaseSchema();
+
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
