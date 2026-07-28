@@ -3,14 +3,13 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Portal Layanan &amp; Helpdesk | Sekdin-Poltekpin</title>
-    <meta name="description" content="Portal resmi layanan terpadu dan helpdesk Politeknik Pengayoman Indonesia." />
+    <title>Portal Peserta &amp; Layanan Terpadu | Sekdin-Poltekpin</title>
+    <meta name="description" content="Portal resmi peserta seleksi kedinasan dan layanan terpadu Politeknik Pengayoman Indonesia." />
     <link rel="stylesheet" href="style.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-    <!-- Gov Topbar inline style override to ensure it shows -->
     <style>
       .gov-topbar {
         position: fixed;
@@ -62,8 +61,8 @@
       <div class="gov-topbar-divider"></div>
       <span style="font-size:11.5px; color: rgba(255,255,255,0.75);" id="topbar-date"></span>
       <div class="topbar-links">
-        <a href="https://www.Pengayoman.go.id" target="_blank" rel="noreferrer">Pengayoman.go.id</a>
-        <a href="https://www.Kemenkum.go.id" target="_blank" rel="noreferrer">Kemenkum.go.id</a>
+        <a href="https://sekdin.kemenkum.go.id" target="_blank" rel="noreferrer">Portal Informasi ↗</a>
+        <a href="https://www.kemenkum.go.id" target="_blank" rel="noreferrer">Kemenkum.go.id</a>
       </div>
     </div>
 
@@ -72,71 +71,82 @@
     <main id="utama">
       <!-- ========== HERO ========== -->
       <section class="hero fade-in" aria-label="Selamat Datang" style="
-        background: linear-gradient(135deg, rgba(0, 51, 102, 0.92) 0%, rgba(27, 75, 143, 0.85) 100%), 
+        background: linear-gradient(135deg, rgba(0, 51, 102, 0.94) 0%, rgba(27, 75, 143, 0.88) 100%), 
                     url('assets/gedung-kb-kecil.jpg') center/cover no-repeat;
       ">
         <div class="hero-content">
-          <div class="hero-badge" style="background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3);">Pusat Bantuan & Layanan Terpadu</div>
-          <h1 style="font-size: 42px; text-shadow: 0 4px 12px rgba(0,0,0,0.3);">Selamat Datang di Portal<br><em style="color: #fdf8e7; text-shadow: 0 4px 12px rgba(0,0,0,0.3);">Layanan & Helpdesk</em></h1>
-          <p style="color: rgba(255, 255, 255, 0.95); font-size: 16px; text-shadow: 0 2px 4px rgba(0,0,0,0.2);">
-            Portal resmi Sekolah Dinas Politeknik Pengayoman Indonesia. Untuk menanyakan informasi atau menyampaikan pengaduan yang transparan dan akuntabel, harap masuk (login) ke dalam sistem terlebih dahulu.
+          <div class="hero-badge" style="background: rgba(255, 255, 255, 0.2); border: 1px solid rgba(255, 255, 255, 0.3);">Portal Terpadu Peserta &amp; Helpdesk</div>
+          <h1 style="font-size: 40px; text-shadow: 0 4px 12px rgba(0,0,0,0.3);">Selamat Datang di Portal<br><em style="color: #fdf8e7; text-shadow: 0 4px 12px rgba(0,0,0,0.3);">Peserta &amp; Layanan Terpadu</em></h1>
+          <p style="color: rgba(255, 255, 255, 0.95); font-size: 15px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); line-height: 1.6;">
+            Portal resmi Sekolah Dinas Politeknik Pengayoman Indonesia. Masuk menggunakan akun SSCASN BKN untuk memantau hasil &amp; nilai ujian, progres alur seleksi, serta layanan bantuan (helpdesk) terpadu.
           </p>
           <div class="hero-actions">
-            <a class="btn btn-gold btn-lg" href="login.html" id="btn-login-hero" style="box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
-              🔐 Login / Masuk
+            <a class="btn btn-gold btn-lg" href="login.html" id="btn-login-hero" style="box-shadow: 0 8px 24px rgba(0,0,0,0.2); font-weight: 800;">
+              🔐 Masuk via SSCASN BKN
             </a>
-            <a class="btn btn-outline btn-lg" href="register.html" id="btn-register-hero" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.4); backdrop-filter: blur(8px);">
-              📝 Daftar Akun
+            <a class="btn btn-outline btn-lg" href="https://sekdin.kemenkum.go.id" target="_blank" rel="noreferrer" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.4); backdrop-filter: blur(8px);">
+              📰 Portal Informasi ↗
             </a>
           </div>
         </div>
 
         <div class="hero-sidebar" style="background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(12px); border-left: 1px solid rgba(255,255,255,0.15);">
           <div class="hero-stat" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2);">
-            <div class="hero-stat-value" style="color: #fff;">24/7</div>
-            <div class="hero-stat-label" style="color: rgba(255,255,255,0.8);">Informasi pengumuman tersedia kapan saja secara daring</div>
+            <div class="hero-stat-value" style="color: #fff;">SSCASN BKN</div>
+            <div class="hero-stat-label" style="color: rgba(255,255,255,0.8);">Terintegrasi langsung dengan API Resmi BKN</div>
           </div>
           <div class="hero-stat" style="background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2);">
-            <div class="hero-stat-value" style="color: #fff;">≤ 3 Hari</div>
-            <div class="hero-stat-label" style="color: rgba(255,255,255,0.8);">Estimasi tindak lanjut pengaduan oleh petugas berwenang</div>
+            <div class="hero-stat-value" style="color: #fff;">Real-Time</div>
+            <div class="hero-stat-label" style="color: rgba(255,255,255,0.8);">Pantau nilai CAT &amp; alur tahapan tes kapan saja</div>
           </div>
           <div class="status-live">
             <span class="status-dot"></span>
-            <span style="color: rgba(255,255,255,0.9);">Layanan aktif: Senin–Jumat 08.00–16.00 WIB</span>
+            <span style="color: rgba(255,255,255,0.9);">Layanan Helpdesk Aktif: Senin–Jumat 08.00–16.00 WIB</span>
           </div>
         </div>
       </section>
 
-      <!-- ========== MENU UTAMA ========== -->
+      <!-- ========== MENU UTAMA LAYANAN ========== -->
       <section style="margin-top: 40px;" aria-label="Menu Utama">
         <div class="section-title">
-          <h2>Menu Layanan</h2>
+          <h2>Fasilitas &amp; Layanan Portal Peserta</h2>
           <div></div>
         </div>
-        <div class="cards">
-          <div class="card menu-card fade-in" data-nav="pengaduan">
-            <div class="card-icon">📨</div>
-            <h3>Kirim Pengaduan</h3>
-            <p>Sampaikan pengaduan atau pertanyaan Anda langsung kepada petugas yang berwenang.</p>
-            <a class="btn btn-primary" href="pengaduan.html" id="menu-pengaduan">Buka Pengaduan</a>
+        <div class="cards" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px;">
+          <div class="card menu-card fade-in">
+            <div class="card-icon">📊</div>
+            <h3>Hasil &amp; Nilai Ujian</h3>
+            <p>Lihat rincian skor CAT BKN (TWK, TIU, TKP) serta nilai tes kesehatan, samapta, dan wawancara.</p>
+            <a class="btn btn-primary" href="nilai.html">Lihat Transkrip Nilai</a>
+          </div>
+          <div class="card menu-card fade-in delay-1">
+            <div class="card-icon">🗺️</div>
+            <h3>Alur &amp; Tahapan Tes</h3>
+            <p>Pantau posisi dan status perkembangan tahapan seleksi Anda secara transparan.</p>
+            <a class="btn btn-primary" href="tahapan.html">Cek Progress Tahapan</a>
           </div>
           <div class="card menu-card fade-in delay-2">
-            <div class="card-icon">📥</div>
-            <h3>Kotak Masuk (Operator)</h3>
-            <p>Akses khusus bagi operator dan admin untuk membalas serta menindaklanjuti laporan.</p>
-            <a class="btn btn-primary" href="kotak-masuk.html" id="menu-kotak-masuk">Buka Kotak Masuk</a>
+            <div class="card-icon">💬</div>
+            <h3>Layanan Helpdesk</h3>
+            <p>Sampaikan pertanyaan, kendala teknis, atau sanggah langsung kepada petugas pengelola.</p>
+            <a class="btn btn-primary" href="pengaduan.html">Buka Helpdesk</a>
+          </div>
+          <div class="card menu-card fade-in delay-3">
+            <div class="card-icon">📰</div>
+            <h3>Portal Informasi</h3>
+            <p>Akses pengumuman resmi, berita, dan jadwal pelaksanaan seleksi kedinasan Kemenkumham.</p>
+            <a class="btn btn-outline" href="https://sekdin.kemenkum.go.id" target="_blank" rel="noreferrer" style="color: #003366; border-color: #003366;">Buka Portal Informasi ↗</a>
           </div>
         </div>
       </section>
 
       <!-- ========== INFO STRIP ========== -->
       <section style="margin-top: 40px;" aria-label="Informasi Layanan">
-        <div class="notice" style="border-radius: 12px; padding: 18px 24px; gap: 14px;">
+        <div class="notice" style="border-radius: 12px; padding: 18px 24px; gap: 14px; background: #eff6ff; border-left: 4px solid #2563eb;">
           <span style="font-size: 22px; flex-shrink:0;">ℹ️</span>
           <div>
-            <strong style="display:block; margin-bottom:4px; color:#003366;">Tentang Portal Ini</strong>
-            Sekdin-Poltekpin adalah portal resmi Sekolah Dinas Politeknik Pengayoman Indonesia di bawah Kementerian Hukum Republik Indonesia. 
-            Seluruh pengaduan dicatat dan ditindaklanjuti sesuai standar layanan. Pelapor akan menerima nomor tiket dan estimasi waktu tindak lanjut.
+            <strong style="display:block; margin-bottom:4px; color:#003366;">Integrasi Otomatis SSCASN BKN</strong>
+            Peserta yang mendaftar Sekolah Dinas Politeknik Pengayoman Indonesia dapat langsung masuk ke portal ini menggunakan akun <strong>SSCASN BKN</strong> tanpa mendaftar ulang. Data nilai dan alur seleksi Anda akan terhubung secara otomatis.
           </div>
         </div>
       </section>

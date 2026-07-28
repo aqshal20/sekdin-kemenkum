@@ -190,7 +190,7 @@
             localStorage.setItem("sekdin-token", data.token);
             localStorage.setItem("user-role", data.user.role);
             localStorage.setItem("user-data", JSON.stringify(data.user));
-            window.location.href = "pengaduan.html";
+            window.location.href = "profil.html";
           } else {
             loginError.textContent = data.message || "Gagal masuk via BKN.";
             loginError.style.display = "block";
@@ -236,10 +236,13 @@
             localStorage.setItem("user-data", JSON.stringify(data.user));
             if (data.user.role && data.user.role.startsWith("admin")) {
               window.location.href = "kotak-masuk.html";
+            } else if (data.user.role === "participant" || data.user.role === "peserta") {
+              window.location.href = "profil.html";
             } else {
               window.location.href = "pengaduan.html";
             }
           } else {
+
             if (response.status === 403 && data.unverified) {
               alert(data.message || "Akun Anda belum terverifikasi.");
               window.location.href = `register.html?email=${encodeURIComponent(email)}&unverified=true`;

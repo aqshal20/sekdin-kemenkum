@@ -609,53 +609,13 @@
           </div>
         </div>
 
-        <!-- ── Progress Card (Hanya Peserta) ── -->
-        <div class="progress-card" id="progress-card" style="display:none; background: #fff; border: 1px solid var(--border-lt); border-radius: 16px; padding: 24px; margin-bottom: 24px; box-shadow: var(--shadow-xs); overflow: hidden;">
-          <div style="margin-bottom: 24px; text-align: center;">
-            <h3 style="font-size: 18px; color: var(--navy); margin: 0 0 4px;">Tahapan Seleksi Nasional</h3>
-            <p style="font-size: 13px; color: var(--muted); margin: 0;">Rekap progres seluruh tahapan seleksi Anda</p>
-          </div>
-          
-          <div class="steps-rail" id="steps-rail" style="display: flex; align-items: flex-start; justify-content: space-between; position: relative;">
-            <!-- Connector Line -->
-            <div style="position: absolute; top: 18px; left: 10%; right: 10%; height: 3px; background: #e2e8f0; z-index: 0;"></div>
-            <!-- Progress Line (Dynamically styled, example 25%) -->
-            <div style="position: absolute; top: 18px; left: 10%; width: 25%; height: 3px; background: #22c55e; z-index: 0;"></div>
-            
-            <div class="step-item done" style="position: relative; z-index: 1; text-align: center; flex: 1;">
-              <div class="step-circle" style="width: 40px; height: 40px; border-radius: 50%; background: #22c55e; color: #fff; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; border: 4px solid #fff; box-shadow: 0 0 0 2px #22c55e;">1</div>
-              <div style="font-size: 13px; font-weight: 700; color: var(--navy); line-height: 1.2;">Administrasi</div>
-              <div style="font-size: 11px; color: var(--muted); margin-top: 2px;">Terverifikasi</div>
-            </div>
 
-            <div class="step-item active" style="position: relative; z-index: 1; text-align: center; flex: 1;">
-              <div class="step-circle" style="width: 40px; height: 40px; border-radius: 50%; background: #fff; color: var(--navy); margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; border: 4px solid #fff; box-shadow: 0 0 0 2px var(--navy);">2</div>
-              <div style="font-size: 13px; font-weight: 700; color: var(--navy); line-height: 1.2;">SKD</div>
-              <div style="font-size: 11px; color: var(--muted); margin-top: 2px;">CAT BKN</div>
-            </div>
-
-            <div class="step-item pending" style="position: relative; z-index: 1; text-align: center; flex: 1;">
-              <div class="step-circle" style="width: 40px; height: 40px; border-radius: 50%; background: #f8fafc; color: #94a3b8; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; border: 4px solid #fff; box-shadow: 0 0 0 2px #e2e8f0;">3</div>
-              <div style="font-size: 13px; font-weight: 700; color: var(--muted); line-height: 1.2;">Kesehatan &<br>Psikotes</div>
-            </div>
-
-            <div class="step-item pending" style="position: relative; z-index: 1; text-align: center; flex: 1;">
-              <div class="step-circle" style="width: 40px; height: 40px; border-radius: 50%; background: #f8fafc; color: #94a3b8; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; border: 4px solid #fff; box-shadow: 0 0 0 2px #e2e8f0;">4</div>
-              <div style="font-size: 13px; font-weight: 700; color: var(--muted); line-height: 1.2;">Kesamaptaan</div>
-            </div>
-
-            <div class="step-item pending" style="position: relative; z-index: 1; text-align: center; flex: 1;">
-              <div class="step-circle" style="width: 40px; height: 40px; border-radius: 50%; background: #f8fafc; color: #94a3b8; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; border: 4px solid #fff; box-shadow: 0 0 0 2px #e2e8f0;">5</div>
-              <div style="font-size: 13px; font-weight: 700; color: var(--muted); line-height: 1.2;">Wawancara</div>
-            </div>
-          </div>
-        </div>
 
         <!-- ── Tabs Navigation ── -->
         <div class="profil-tabs" id="profil-tabs-container">
-          <button class="profil-tab-btn active" onclick="switchTab('tab-data-utama', this)">Data Utama</button>
-          <button class="profil-tab-btn" id="tab-btn-nilai" onclick="switchTab('tab-nilai-ujian', this)" style="display:none;">Nilai Ujian</button>
+          <button class="profil-tab-btn active" onclick="switchTab('tab-data-utama', this)">Data Utama &amp; Akses Portal</button>
         </div>
+
 
         <!-- ── Info Grid (Data Utama) ── -->
         <div id="tab-data-utama" class="tab-pane active">
@@ -758,29 +718,37 @@
                 </div>
                 <div class="info-row-pro" style="flex-direction:column;align-items:flex-start;gap:8px;border-left:1px solid #f1f5f9;border-bottom:none;">
                   <div class="info-row-label">Aksi Keamanan</div>
-                  <button class="btn-profil-pwd" id="open-password-modal-btn-2" style="font-size:12.5px;padding:7px 14px;">🔑 Ubah Kata Sandi</button>
+                  <button class="btn-profil-pwd" id="open-password-modal-btn-2" style="font-size:12.5px;padding:7px 14px;">🔑 Ubah Sandi</button>
                 </div>
+              </div>
+            </div>
+
+            <!-- Akses Cepat Portal (Khusus Peserta Terdaftar BKN) -->
+            <div class="profil-card full" id="card-akses-peserta" style="display: none; border-left: 4px solid #2563eb; background: linear-gradient(135deg, #f8fafc 0%, #eff6ff 100%);">
+              <div class="profil-card-head">
+                <div class="profil-card-head-icon blue">🚀</div>
+                <div>
+                  <h3>Akses Portal Seleksi Kedinasan</h3>
+                  <p>Layanan transkrip nilai &amp; alur tahapan tes</p>
+                </div>
+              </div>
+              <div class="profil-card-body" style="display: flex; flex-direction: column; gap: 12px; padding-top: 10px;">
+                <a href="nilai.html" class="btn btn-primary btn-full" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; padding: 12px; text-decoration: none;">
+                  📊 Buka Transkrip Nilai Ujian (CAT BKN &amp; Instansi) ➔
+                </a>
+                <a href="tahapan.html" class="btn btn-outline btn-full" style="display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 700; padding: 12px; text-decoration: none; color: #003366; border-color: #003366; background: #fff;">
+                  🗺️ Cek Progres Alur Tahapan Tes ➔
+                </a>
               </div>
             </div>
 
           </div>
         </div>
 
-        <!-- ── Tab Nilai Ujian ── -->
-        <div id="tab-nilai-ujian" class="tab-pane">
-          <div class="profil-card" style="padding: 24px; box-shadow: 0 4px 20px rgba(0,59,109,0.06);">
-            <div style="margin-bottom: 24px; border-bottom: 1px solid var(--border-lt); padding-bottom: 16px;">
-              <h3 style="font-size: 18px; color: var(--navy); margin: 0 0 4px;">Hasil Seleksi Kompetensi</h3>
-              <p style="font-size: 13px; color: var(--muted); margin: 0;">Berikut adalah rekapitulasi nilai ujian Anda. Data ini akan diperbarui secara berkala oleh panitia.</p>
-            </div>
-            
-            <div class="nilai-list" id="container-nilai-ujian">
-              <div style="text-align:center; padding:30px; color:var(--muted); font-size:14px;">Memuat data nilai...</div>
-            </div>
-          </div>
-        </div>
+      </div>
+    </main>
 
-      </div></main>
+
 
     <!-- ── Modal Edit Profil ── -->
     <div class="modal-overlay" id="profile-modal">
@@ -894,8 +862,117 @@
     <div data-site-footer></div>
     <script src="app.js"></script>
     <script>
-      if (!isAuthenticated()) window.location.href = "login.html";
+      function renderUserData(user) {
+        if (!user) return;
+        const roleMap = {
+          admin: "Admin Utama",
+          admin_informasi: "Admin Informasi",
+          admin_pengaduan: "Admin Pengaduan",
+          operator_informasi: "Operator Informasi",
+          operator_pengaduan: "Operator Pengaduan",
+          participant: "Peserta Terverifikasi",
+          umum: "Masyarakat Umum"
+        };
+        const roleName = roleMap[user.role] || "Peserta Terverifikasi";
+        const roleBadgeColor = user.role?.startsWith("admin") || user.role?.startsWith("operator") ? "badge-amber" : (user.role === "participant" ? "badge-green" : "badge-gray");
+        const isPeserta = user.role === "participant";
 
+        const setTxt = (id, txt) => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = txt;
+        };
+
+        setTxt("display-fullname", user.fullname || "Peserta");
+        setTxt("display-role", roleName);
+        setTxt("info-email", user.email || "-");
+        setTxt("info-nik", user.nik || "-");
+        setTxt("info-role-detail", roleName);
+        setTxt("info-fullname", user.fullname || "-");
+        setTxt("info-phone", user.phone || "-");
+
+        const roleBdg = document.getElementById("info-role-badge");
+        if (roleBdg) {
+          roleBdg.textContent = roleName;
+          roleBdg.className = `info-row-badge ${roleBadgeColor}`;
+        }
+
+        const phoneBdg = document.getElementById("phone-badge");
+        if (phoneBdg) {
+          phoneBdg.textContent = user.phone ? "Terdaftar" : "Belum diisi";
+          phoneBdg.className = `info-row-badge ${user.phone ? "badge-green" : "badge-gray"}`;
+        }
+
+        const dateEl = document.getElementById("info-date");
+        if (dateEl) {
+          dateEl.textContent = user.created_at ? new Date(user.created_at).toLocaleDateString("id-ID", {
+            day: "numeric", month: "long", year: "numeric"
+          }) : "Terdaftar";
+        }
+
+        const cardAkses = document.getElementById("card-akses-peserta");
+        if (cardAkses) cardAkses.style.display = isPeserta ? "block" : "none";
+
+        const avatarEl = document.getElementById("avatar-initials");
+        const btnRemove = document.getElementById("btn-remove-avatar");
+        if (avatarEl) {
+          if (user.avatar_url) {
+            const fullAvatarUrl = `${API_URL.replace('/api', '')}${user.avatar_url}`;
+            avatarEl.style.backgroundImage = `url('${fullAvatarUrl}')`;
+            avatarEl.textContent = "";
+            avatarEl.style.backgroundSize = "cover";
+            avatarEl.style.backgroundPosition = "center";
+            if (btnRemove) btnRemove.style.display = "block";
+
+            avatarEl.onclick = () => {
+              const modal = document.getElementById("view-avatar-modal");
+              const img = document.getElementById("view-avatar-img");
+              if (img) img.src = fullAvatarUrl;
+              if (modal) modal.style.display = "flex";
+            };
+          } else {
+            const initials = (user.fullname || user.email || "P").substring(0, 2).toUpperCase();
+            avatarEl.style.backgroundImage = "none";
+            avatarEl.textContent = initials;
+            if (btnRemove) btnRemove.style.display = "none";
+            avatarEl.onclick = null;
+          }
+        }
+
+        const fnInput = document.getElementById("fullname");
+        if (fnInput) fnInput.value = user.fullname || "";
+        const phInput = document.getElementById("phone");
+        if (phInput) phInput.value = user.phone || "";
+      }
+
+      async function loadProfile() {
+        const token = localStorage.getItem("sekdin-token");
+        if (!token) return;
+
+        // 1. Instant rendering from localStorage
+        try {
+          const cached = localStorage.getItem("user-data");
+          if (cached) renderUserData(JSON.parse(cached));
+        } catch(e){}
+
+        // 2. Live fetch from backend API
+        try {
+          const res = await fetch(`${API_URL}/profile`, {
+            headers: { "Authorization": `Bearer ${token}` }
+          });
+          if (!res.ok) return;
+          const user = await res.json();
+          localStorage.setItem("user-role", user.role);
+          localStorage.setItem("user-data", JSON.stringify(user));
+          renderUserData(user);
+        } catch (err) {
+          console.error("Gagal memuat profil:", err);
+        }
+      }
+
+      // Execute loadProfile immediately
+      loadProfile();
+
+      // Modal Handlers
       const profileModal  = document.getElementById("profile-modal");
       const passwordModal = document.getElementById("password-modal");
       const profileError  = document.getElementById("profile-error");
@@ -905,353 +982,190 @@
       const saveProfileBtn  = document.getElementById("save-profile-btn");
       const savePasswordBtn = document.getElementById("save-password-btn");
 
-      function openModal(m)  { m.style.display = "flex"; }
-      function closeModal(m) { m.style.display = "none"; }
+      function openModal(m)  { if (m) m.style.display = "flex"; }
+      function closeModal(m) { if (m) m.style.display = "none"; }
 
-      document.getElementById("open-profile-modal-btn").onclick  = () => { profileError.style.display = "none"; openModal(profileModal); };
-      document.getElementById("open-password-modal-btn").onclick = () => { passwordError.style.display = "none"; openModal(passwordModal); };
-      document.getElementById("open-password-modal-btn-2").onclick = () => { passwordError.style.display = "none"; openModal(passwordModal); };
-      document.getElementById("close-profile-modal-btn").onclick  = () => closeModal(profileModal);
-      document.getElementById("close-password-modal-btn").onclick = () => closeModal(passwordModal);
-      document.getElementById("cancel-profile-btn").onclick  = () => closeModal(profileModal);
-      document.getElementById("cancel-password-btn").onclick = () => closeModal(passwordModal);
+      const b1 = document.getElementById("open-profile-modal-btn");
+      if (b1) b1.onclick = () => { if (profileError) profileError.style.display = "none"; openModal(profileModal); };
+      const b2 = document.getElementById("open-password-modal-btn");
+      if (b2) b2.onclick = () => { if (passwordError) passwordError.style.display = "none"; openModal(passwordModal); };
+      const b3 = document.getElementById("open-password-modal-btn-2");
+      if (b3) b3.onclick = () => { if (passwordError) passwordError.style.display = "none"; openModal(passwordModal); };
+
+      const c1 = document.getElementById("close-profile-modal-btn");
+      if (c1) c1.onclick = () => closeModal(profileModal);
+      const c2 = document.getElementById("close-password-modal-btn");
+      if (c2) c2.onclick = () => closeModal(passwordModal);
+      const c3 = document.getElementById("cancel-profile-btn");
+      if (c3) c3.onclick = () => closeModal(profileModal);
+      const c4 = document.getElementById("cancel-password-btn");
+      if (c4) c4.onclick = () => closeModal(passwordModal);
 
       window.addEventListener("click", (e) => {
-        if (e.target === profileModal)  closeModal(profileModal);
+        if (e.target === profileModal) closeModal(profileModal);
         if (e.target === passwordModal) closeModal(passwordModal);
       });
 
-      // Toggle password visibility
       document.querySelectorAll(".field-toggle-pwd").forEach(btn => {
         btn.addEventListener("click", () => {
           const inp = document.getElementById(btn.dataset.target);
-          inp.type = inp.type === "password" ? "text" : "password";
-          btn.textContent = inp.type === "password" ? "👁" : "🙈";
+          if (inp) {
+            inp.type = inp.type === "password" ? "text" : "password";
+            btn.textContent = inp.type === "password" ? "👁" : "🙈";
+          }
         });
       });
 
-      // Password strength meter
-      document.getElementById("new-password").addEventListener("input", function() {
-        const val = this.value;
-        const fill = document.getElementById("pwd-strength-fill");
-        const label = document.getElementById("pwd-strength-label");
-        let score = 0;
-        if (val.length >= 6)  score++;
-        if (val.length >= 10) score++;
-        if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score++;
-        if (/[0-9]/.test(val)) score++;
-        if (/[^A-Za-z0-9]/.test(val)) score++;
+      const newPwdInp = document.getElementById("new-password");
+      if (newPwdInp) {
+        newPwdInp.addEventListener("input", function() {
+          const val = this.value;
+          const fill = document.getElementById("pwd-strength-fill");
+          const label = document.getElementById("pwd-strength-label");
+          if (!fill || !label) return;
+          let score = 0;
+          if (val.length >= 6) score++;
+          if (val.length >= 10) score++;
+          if (/[A-Z]/.test(val) && /[a-z]/.test(val)) score++;
+          if (/[0-9]/.test(val)) score++;
+          if (/[^A-Za-z0-9]/.test(val)) score++;
 
-        const levels = [
-          { w: "0%",   bg: "#e2e8f0", txt: "Masukkan kata sandi baru" },
-          { w: "20%",  bg: "#ef4444", txt: "Sangat lemah" },
-          { w: "40%",  bg: "#f97316", txt: "Lemah" },
-          { w: "60%",  bg: "#eab308", txt: "Cukup" },
-          { w: "80%",  bg: "#22c55e", txt: "Kuat" },
-          { w: "100%", bg: "#15803d", txt: "Sangat kuat 🔒" },
-        ];
-        const idx = val.length === 0 ? 0 : Math.max(1, Math.min(score + 1, 5));
-        fill.style.width = levels[idx].w;
-        fill.style.background = levels[idx].bg;
-        label.textContent = levels[idx].txt;
-        label.style.color = levels[idx].bg === "#e2e8f0" ? "var(--muted)" : levels[idx].bg;
-      });
-
-      // Switch Tabs
-      window.switchTab = function(targetId, btn) {
-        document.querySelectorAll('.profil-tab-btn').forEach(el => el.classList.remove('active'));
-        btn.classList.add('active');
-        document.querySelectorAll('.tab-pane').forEach(el => el.classList.remove('active'));
-        document.getElementById(targetId).classList.add('active');
-      };
-
-      // Load Profile
-      async function loadProfile() {
-        try {
-          const res = await fetch(`${API_URL}/profile`, {
-            headers: { "Authorization": `Bearer ${getAuthToken()}` }
-          });
-          if (!res.ok) { alert("Gagal memuat profil."); return; }
-          const user = await res.json();
-
-          // Auto-update localStorage with fresh role and data from backend
-          const prevRole = localStorage.getItem("user-role");
-          localStorage.setItem("user-role", user.role);
-          localStorage.setItem("user-data", JSON.stringify(user));
-
-          // Jika terjadi auto-upgrade role dari umum ke participant, paksa refresh agar menu/header ikut update
-          if (prevRole === "umum" && user.role === "participant") {
-            window.location.reload();
-            return;
-          }
-
-          const roleMap = {
-            admin: "Admin Utama",
-            admin_informasi: "Admin Informasi",
-            admin_pengaduan: "Admin Pengaduan",
-            operator_informasi: "Operator Informasi",
-            operator_pengaduan: "Operator Pengaduan",
-            participant: "Peserta Terverifikasi",
-            umum: "Masyarakat Umum"
-          };
-          const roleName = roleMap[user.role] || "Pengguna";
-          const roleBadgeColor = user.role?.startsWith("admin") || user.role?.startsWith("operator") ? "badge-amber" : (user.role === "participant" ? "badge-green" : "badge-gray");
-          const isPeserta = user.role === "participant";
-
-          // Visibility Logic
-          document.getElementById("tab-btn-nilai").style.display = isPeserta ? "block" : "none";
-          document.getElementById("progress-card").style.display = isPeserta ? "block" : "none";
-          
-          if (!isPeserta) {
-            switchTab('tab-data-utama', document.querySelector('.profil-tab-btn'));
-          }
-
-          // Display values
-          document.getElementById("display-fullname").textContent = user.fullname || "Belum diisi";
-          document.getElementById("display-role").textContent = roleName;
-          document.getElementById("info-email").textContent = user.email;
-          document.getElementById("info-nik").textContent = user.nik || "-";
-          document.getElementById("info-role-detail").textContent = roleName;
-          document.getElementById("info-role-badge").textContent = roleName;
-          document.getElementById("info-role-badge").className = `info-row-badge ${roleBadgeColor}`;
-          document.getElementById("info-fullname").textContent = user.fullname || "-";
-
-          const phoneVal = user.phone || null;
-          document.getElementById("info-phone").textContent = phoneVal || "-";
-          const phoneBadge = document.getElementById("phone-badge");
-          phoneBadge.textContent = phoneVal ? "Terdaftar" : "Belum diisi";
-          phoneBadge.className = `info-row-badge ${phoneVal ? "badge-green" : "badge-gray"}`;
-
-          const dateStr = new Date(user.created_at).toLocaleDateString("id-ID", {
-            day: "numeric", month: "long", year: "numeric"
-          });
-          document.getElementById("info-date").textContent = dateStr;
-
-          // Render Data Nilai (BKN)
-          if (user.role === "participant" && user.nilai_ujian) {
-            const nl = user.nilai_ujian;
-            const container = document.getElementById("container-nilai-ujian");
-            if (container) {
-              container.innerHTML = `
-                <div class="nilai-item">
-                  <div class="nilai-item-left">
-                    <div class="nilai-icon" style="color: #0284c7;">💻</div>
-                    <div>
-                      <div class="nilai-label">Seleksi Kompetensi Dasar (SKD)</div>
-                      <div class="nilai-desc">TWK, TIU, dan TKP berbasis CAT</div>
-                    </div>
-                  </div>
-                  <div class="nilai-score-box">
-                    <div class="nilai-score">${nl.nilai_skd || '-'}</div>
-                    <div class="nilai-status ${(nl.status_skd && nl.status_skd.includes('Memenuhi')) ? 'status-lulus' : 'status-tunggu'}">${nl.status_skd || 'Menunggu'}</div>
-                  </div>
-                </div>
-
-                <div class="nilai-item">
-                  <div class="nilai-item-left">
-                    <div class="nilai-icon" style="color: #16a34a;">🩺</div>
-                    <div>
-                      <div class="nilai-label">Tes Kesehatan</div>
-                      <div class="nilai-desc">Pemeriksaan fisik dan laboratorium</div>
-                    </div>
-                  </div>
-                  <div class="nilai-score-box">
-                    <div class="nilai-score" style="font-size: 18px;">${nl.nilai_kesehatan || '-'}</div>
-                    <div class="nilai-status ${(nl.status_kesehatan && nl.status_kesehatan.includes('Memenuhi')) ? 'status-lulus' : 'status-tunggu'}">${nl.status_kesehatan || 'Menunggu'}</div>
-                  </div>
-                </div>
-
-                <div class="nilai-item">
-                  <div class="nilai-item-left">
-                    <div class="nilai-icon" style="color: #9333ea;">🧠</div>
-                    <div>
-                      <div class="nilai-label">Psikotes</div>
-                      <div class="nilai-desc">Penilaian kepribadian dan mental</div>
-                    </div>
-                  </div>
-                  <div class="nilai-score-box">
-                    <div class="nilai-score">${nl.nilai_psikotes || '-'}</div>
-                    <div class="nilai-status ${(nl.status_psikotes && nl.status_psikotes.includes('Lulus')) ? 'status-lulus' : 'status-tunggu'}">${nl.status_psikotes || 'Menunggu'}</div>
-                  </div>
-                </div>
-
-                <div class="nilai-item">
-                  <div class="nilai-item-left">
-                    <div class="nilai-icon" style="color: #ea580c;">🏃</div>
-                    <div>
-                      <div class="nilai-label">Tes Kesamaptaan / Kebugaran</div>
-                      <div class="nilai-desc">Lari, Pull-up, Push-up, Shuttle Run</div>
-                    </div>
-                  </div>
-                  <div class="nilai-score-box">
-                    <div class="nilai-score">${nl.nilai_kebugaran || '-'}</div>
-                    <div class="nilai-status ${(nl.status_kebugaran && nl.status_kebugaran.includes('Lulus')) ? 'status-lulus' : 'status-tunggu'}">${nl.status_kebugaran || 'Menunggu'}</div>
-                  </div>
-                </div>
-
-                <div class="nilai-item">
-                  <div class="nilai-item-left">
-                    <div class="nilai-icon" style="color: #475569;">🗣️</div>
-                    <div>
-                      <div class="nilai-label">Wawancara dan Keterampilan</div>
-                      <div class="nilai-desc">Tes Potensi dan Kompetensi Bidang</div>
-                    </div>
-                  </div>
-                  <div class="nilai-score-box">
-                    <div class="nilai-score">${nl.nilai_wawancara || '-'}</div>
-                    <div class="nilai-status ${(nl.status_wawancara && nl.status_wawancara.includes('Lulus')) ? 'status-lulus' : 'status-tunggu'}" style="background: #f1f5f9; color: #64748b;">${nl.status_wawancara || 'Belum Dilaksanakan'}</div>
-                  </div>
-                </div>
-              `;
-            }
-          }
-
-          // Avatar initials or Image
-          const avatarEl = document.getElementById("avatar-initials");
-          const btnRemoveAvatar = document.getElementById("btn-remove-avatar");
-          const viewAvatarModal = document.getElementById("view-avatar-modal");
-          const viewAvatarImg = document.getElementById("view-avatar-img");
-
-          if (user.avatar_url) {
-            const fullAvatarUrl = `${API_URL.replace('/api', '')}${user.avatar_url}`;
-            avatarEl.style.backgroundImage = `url('${fullAvatarUrl}')`;
-            avatarEl.textContent = "";
-            avatarEl.style.backgroundSize = "cover";
-            avatarEl.style.backgroundPosition = "center";
-            btnRemoveAvatar.style.display = "block";
-
-            // Click avatar to view
-            avatarEl.onclick = () => {
-              viewAvatarImg.src = fullAvatarUrl;
-              viewAvatarModal.style.display = "flex";
-            };
-          } else {
-            const initials = (user.fullname || user.email).substring(0, 2).toUpperCase();
-            avatarEl.style.backgroundImage = "none";
-            avatarEl.textContent = initials;
-            btnRemoveAvatar.style.display = "none";
-            avatarEl.onclick = null;
-          }
-
-          // Pre-fill form inputs
-          document.getElementById("fullname").value = user.fullname || "";
-          document.getElementById("phone").value = user.phone || "";
-          document.getElementById("avatar-upload").value = ""; // clear file
-          document.getElementById("remove-avatar-flag").value = "false";
-        } catch (err) {
-          console.error(err);
-        }
+          const levels = [
+            { w: "0%", bg: "#e2e8f0", txt: "Masukkan kata sandi baru" },
+            { w: "20%", bg: "#ef4444", txt: "Sangat lemah" },
+            { w: "40%", bg: "#f97316", txt: "Lemah" },
+            { w: "60%", bg: "#eab308", txt: "Cukup" },
+            { w: "80%", bg: "#22c55e", txt: "Kuat" },
+            { w: "100%", bg: "#15803d", txt: "Sangat kuat 🔒" },
+          ];
+          const idx = val.length === 0 ? 0 : Math.max(1, Math.min(score + 1, 5));
+          fill.style.width = levels[idx].w;
+          fill.style.background = levels[idx].bg;
+          label.textContent = levels[idx].txt;
+          label.style.color = levels[idx].bg === "#e2e8f0" ? "var(--muted)" : levels[idx].bg;
+        });
       }
 
-      // Remove avatar
-      document.getElementById("btn-remove-avatar").onclick = () => {
-        if(confirm("Apakah Anda yakin ingin menghapus foto profil?")) {
-          document.getElementById("remove-avatar-flag").value = "true";
-          document.getElementById("avatar-upload").value = "";
-          document.getElementById("btn-remove-avatar").style.display = "none";
-        }
-      };
+      // Remove avatar handler
+      const btnRemAv = document.getElementById("btn-remove-avatar");
+      if (btnRemAv) {
+        btnRemAv.onclick = () => {
+          if (confirm("Apakah Anda yakin ingin menghapus foto profil?")) {
+            const flag = document.getElementById("remove-avatar-flag");
+            if (flag) flag.value = "true";
+            const up = document.getElementById("avatar-upload");
+            if (up) up.value = "";
+            btnRemAv.style.display = "none";
+          }
+        };
+      }
 
-      // Submit Edit Profil
-      document.getElementById("profile-edit-form").onsubmit = async (e) => {
-        e.preventDefault();
-        profileError.style.display = "none";
-        const fullname = document.getElementById("fullname").value.trim();
-        const phone    = document.getElementById("phone").value.trim();
-        const fileInput = document.getElementById("avatar-upload");
-        const removeFlag = document.getElementById("remove-avatar-flag").value;
-        const file = fileInput.files[0];
+      // Edit Profile Submit
+      const fProf = document.getElementById("profile-edit-form");
+      if (fProf) {
+        fProf.onsubmit = async (e) => {
+          e.preventDefault();
+          if (profileError) profileError.style.display = "none";
+          const fullname = (document.getElementById("fullname")?.value || "").trim();
+          const phone = (document.getElementById("phone")?.value || "").trim();
+          const fileInput = document.getElementById("avatar-upload");
+          const removeFlag = document.getElementById("remove-avatar-flag")?.value || "false";
+          const file = fileInput?.files ? fileInput.files[0] : null;
 
-        if (!fullname) { showErr(profileError, profileErrorMsg, "Nama lengkap wajib diisi."); return; }
+          if (!fullname) { showErr(profileError, profileErrorMsg, "Nama lengkap wajib diisi."); return; }
 
-        saveProfileBtn.disabled = true;
-        saveProfileBtn.innerHTML = "⏳ Menyimpan...";
+          if (saveProfileBtn) {
+            saveProfileBtn.disabled = true;
+            saveProfileBtn.innerHTML = "⏳ Menyimpan...";
+          }
 
-        try {
-          const formData = new FormData();
-          formData.append("fullname", fullname);
-          formData.append("phone", phone);
-          formData.append("removeAvatar", removeFlag);
-          
-          if (file) {
-            if (file.size > 5 * 1024 * 1024) {
-              showErr(profileError, profileErrorMsg, "Ukuran foto terlalu besar. Maksimal 5MB.");
+          try {
+            const formData = new FormData();
+            formData.append("fullname", fullname);
+            formData.append("phone", phone);
+            formData.append("removeAvatar", removeFlag);
+            if (file) formData.append("avatar", file);
+
+            const res = await fetch(`${API_URL}/profile`, {
+              method: "PUT",
+              headers: { "Authorization": `Bearer ${getAuthToken()}` },
+              body: formData
+            });
+            const data = await res.json();
+            if (res.ok) {
+              localStorage.setItem("user-data", JSON.stringify(data.user));
+              closeModal(profileModal);
+              loadProfile();
+              window.dispatchEvent(new Event('profileUpdated'));
+            } else {
+              showErr(profileError, profileErrorMsg, data.message || "Gagal memperbarui profil.");
+            }
+          } catch { showErr(profileError, profileErrorMsg, "Koneksi ke server gagal."); }
+          finally {
+            if (saveProfileBtn) {
               saveProfileBtn.disabled = false;
               saveProfileBtn.innerHTML = "💾 Simpan Perubahan";
-              return;
             }
-            formData.append("avatar", file);
           }
-
-          const res = await fetch(`${API_URL}/profile`, {
-            method: "PUT",
-            headers: { "Authorization": `Bearer ${getAuthToken()}` },
-            body: formData
-          });
-          const data = await res.json();
-          if (res.ok) {
-            localStorage.setItem("user-data", JSON.stringify(data.user));
-            closeModal(profileModal);
-            loadProfile();
-            window.dispatchEvent(new Event('profileUpdated'));
-          } else {
-            showErr(profileError, profileErrorMsg, data.message || "Gagal memperbarui profil.");
-          }
-        } catch { showErr(profileError, profileErrorMsg, "Koneksi ke server gagal."); }
-        finally {
-          saveProfileBtn.disabled = false;
-          saveProfileBtn.innerHTML = "💾 Simpan Perubahan";
-        }
-      };
-
-      // Submit Ubah Sandi
-      document.getElementById("password-edit-form").onsubmit = async (e) => {
-        e.preventDefault();
-        passwordError.style.display = "none";
-        const oldPassword        = document.getElementById("old-password").value;
-        const newPassword        = document.getElementById("new-password").value;
-        const confirmNewPassword = document.getElementById("confirm-new-password").value;
-
-        if (newPassword.length < 6) { showErr(passwordError, passwordErrorMsg, "Kata sandi baru minimal 6 karakter."); return; }
-        if (newPassword !== confirmNewPassword) { showErr(passwordError, passwordErrorMsg, "Konfirmasi kata sandi tidak cocok."); return; }
-
-        savePasswordBtn.disabled = true;
-        savePasswordBtn.innerHTML = "⏳ Menyimpan...";
-        try {
-          const formData = new FormData();
-          formData.append("fullname", document.getElementById("fullname").value.trim());
-          formData.append("phone", document.getElementById("phone").value.trim());
-          formData.append("oldPassword", oldPassword);
-          formData.append("newPassword", newPassword);
-
-          const res = await fetch(`${API_URL}/profile`, {
-            method: "PUT",
-            headers: { "Authorization": `Bearer ${getAuthToken()}` },
-            body: formData
-          });
-          const data = await res.json();
-          if (res.ok) {
-            ["old-password", "new-password", "confirm-new-password"].forEach(id => document.getElementById(id).value = "");
-            document.getElementById("pwd-strength-fill").style.width = "0%";
-            document.getElementById("pwd-strength-label").textContent = "Masukkan kata sandi baru";
-            closeModal(passwordModal);
-            alert("Kata sandi berhasil diperbarui!");
-          } else {
-            showErr(passwordError, passwordErrorMsg, data.message || "Gagal memperbarui kata sandi.");
-          }
-        } catch { showErr(passwordError, passwordErrorMsg, "Koneksi ke server gagal."); }
-        finally {
-          savePasswordBtn.disabled = false;
-          savePasswordBtn.innerHTML = "🔑 Perbarui Sandi";
-        }
-      };
-
-      function showErr(el, msgEl, msg) {
-        msgEl.textContent = msg;
-        el.style.display = "flex";
+        };
       }
 
-      loadProfile();
+      // Edit Password Submit
+      const fPwd = document.getElementById("password-edit-form");
+      if (fPwd) {
+        fPwd.onsubmit = async (e) => {
+          e.preventDefault();
+          if (passwordError) passwordError.style.display = "none";
+          const oldPassword = document.getElementById("old-password")?.value || "";
+          const newPassword = document.getElementById("new-password")?.value || "";
+          const confirmNewPassword = document.getElementById("confirm-new-password")?.value || "";
+
+          if (newPassword.length < 6) { showErr(passwordError, passwordErrorMsg, "Kata sandi baru minimal 6 karakter."); return; }
+          if (newPassword !== confirmNewPassword) { showErr(passwordError, passwordErrorMsg, "Konfirmasi kata sandi tidak cocok."); return; }
+
+          if (savePasswordBtn) {
+            savePasswordBtn.disabled = true;
+            savePasswordBtn.innerHTML = "⏳ Menyimpan...";
+          }
+
+          try {
+            const formData = new FormData();
+            formData.append("fullname", document.getElementById("fullname")?.value?.trim() || "");
+            formData.append("phone", document.getElementById("phone")?.value?.trim() || "");
+            formData.append("oldPassword", oldPassword);
+            formData.append("newPassword", newPassword);
+
+            const res = await fetch(`${API_URL}/profile`, {
+              method: "PUT",
+              headers: { "Authorization": `Bearer ${getAuthToken()}` },
+              body: formData
+            });
+            const data = await res.json();
+            if (res.ok) {
+              ["old-password", "new-password", "confirm-new-password"].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = "";
+              });
+              closeModal(passwordModal);
+              alert("Kata sandi berhasil diperbarui!");
+            } else {
+              showErr(passwordError, passwordErrorMsg, data.message || "Gagal memperbarui kata sandi.");
+            }
+          } catch { showErr(passwordError, passwordErrorMsg, "Koneksi ke server gagal."); }
+          finally {
+            if (savePasswordBtn) {
+              savePasswordBtn.disabled = false;
+              savePasswordBtn.innerHTML = "🔑 Perbarui Sandi";
+            }
+          }
+        };
+      }
+
+      function showErr(el, msgEl, msg) {
+        if (msgEl) msgEl.textContent = msg;
+        if (el) el.style.display = "flex";
+      }
     </script>
+
   </body>
 </html>
