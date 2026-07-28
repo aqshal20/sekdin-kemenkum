@@ -183,17 +183,26 @@ async function initLayout() {
 
   // Role-based nav visibility
   const kotakMasukLink      = document.querySelector('[data-nav="kotak-masuk"]');
+
   const dashboardLink       = document.querySelector('[data-nav="dashboard"]');
   const kelolaPenggunaLink  = document.querySelector('[data-nav="kelola-pengguna"]');
   const pengaduanNavs       = document.querySelectorAll('[data-nav="pengaduan"]');
   const profilLink          = document.querySelector('[data-nav="profil"]');
   const loginLink           = document.querySelector('[data-nav="login"]');
+  const nilaiLink           = document.querySelector('[data-nav="nilai"]');
+  const tahapanLink         = document.querySelector('[data-nav="tahapan"]');
+
+  const isParticipant       = getUserRole() === "participant" || getUserRole() === "peserta";
 
   if (!isAdmin && kotakMasukLink) kotakMasukLink.style.display = "none";
   if (!isAdmin && dashboardLink) dashboardLink.style.display = "none";
   if (getUserRole() !== "admin" && kelolaPenggunaLink) kelolaPenggunaLink.style.display = "none";
   if (isAdmin) pengaduanNavs.forEach(el => el.style.display = "none");
   if (!isLogged && profilLink) profilLink.style.display = "none";
+  
+  // Only show Nilai & Tahapan links for BKN Participants
+  if (!isParticipant && nilaiLink) nilaiLink.style.display = "none";
+  if (!isParticipant && tahapanLink) tahapanLink.style.display = "none";
 
   // Login ↔ Logout toggle
   if (loginLink) {
@@ -216,7 +225,15 @@ async function initLayout() {
     if (!isLogged) {
       return showModalAlert("Anda harus masuk terlebih dahulu untuk mengakses halaman ini.", "login.html");
     } else if (isAdmin) {
-      return showModalAlert("Akses ditolak. Halaman Pengaduan hanya untuk pengguna umum.", "kotak-masuk.html");
+      return showModalAlert("Akses ditolak. Halaman Helpdesk hanya untuk peserta / pengguna.", "kotak-masuk.html");
+    }
+  }
+
+  if (page === "nilai" || page === "tahapan") {
+    if (!isLogged) {
+      return showModalAlert("Anda harus masuk terlebih dahulu dengan Akun SSCASN BKN untuk mengakses halaman ini.", "login.html");
+    } else if (!isParticipant) {
+      return showModalAlert("Akses ditolak. Halaman Hasil Nilai & Tahapan Tes khusus untuk Peserta SSCASN BKN.", "index.html");
     }
   }
 
@@ -238,3 +255,4 @@ async function initLayout() {
 }
 
 initLayout().catch(err => console.error("Gagal memuat layout:", err));
+

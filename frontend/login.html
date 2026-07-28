@@ -17,6 +17,15 @@
         font-size: 12px; color: rgba(255,255,255,0.95); font-weight: 600;
         gap: 10px;
       }
+      .tab-btn.active {
+        background: #ffffff !important;
+        color: #003366 !important;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+      }
+      .tab-btn {
+        background: transparent;
+        color: #64748b;
+      }
     </style>
   </head>
   <body class="auth" data-page="login">
@@ -29,51 +38,82 @@
     <main>
       <div class="auth-card fade-in">
         <!-- Header -->
-        <div style="text-align: center; margin-bottom: 28px;">
+        <div style="text-align: center; margin-bottom: 24px;">
           <div style="width: 60px; height: 60px; border-radius: 12px; background: #e8eef8; display: grid; place-items: center; font-size: 28px; margin: 0 auto 14px;">
             🔐
           </div>
           <h1 style="font-size: 22px; margin-bottom: 4px; color: #003366;">Masuk ke Sistem</h1>
-          <p class="auth-subtitle">Gunakan akun Admin atau Akun Peserta untuk mengakses layanan</p>
+          <p class="auth-subtitle">Silakan pilih jenis akun Anda untuk masuk ke portal</p>
         </div>
 
-        <!-- Notice -->
-        <div class="notice" style="margin-bottom: 20px; font-size: 13px;">
-          <span>ℹ️</span>
-          <span>Pastikan Anda menggunakan email yang terdaftar dan terverifikasi.</span>
+        <!-- Switcher Login Type -->
+        <div class="login-type-switch" style="display: flex; gap: 6px; margin-bottom: 22px; background: #f1f5f9; padding: 4px; border-radius: 10px;">
+          <button type="button" id="tab-peserta" class="tab-btn active" onclick="switchLoginTab('peserta')" style="flex: 1; padding: 11px 8px; border: none; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.2s;">
+            🎓 Peserta SSCASN BKN
+          </button>
+          <button type="button" id="tab-umum" class="tab-btn" onclick="switchLoginTab('umum')" style="flex: 1; padding: 11px 8px; border: none; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.2s;">
+            👤 Umum
+          </button>
         </div>
 
-        <!-- Error -->
-        <div id="login-error" class="error" style="margin-bottom: 16px;">
-          Email atau kata sandi salah.
+        <!-- Error Alert -->
+        <div id="login-error" class="error" style="margin-bottom: 16px; display: none;">
+          Gagal masuk.
         </div>
 
-        <!-- Form -->
-        <form id="login-form" method="POST">
-          <div>
-            <label for="email">Alamat Email</label>
-            <input id="email" name="email" type="email" required placeholder="contoh@poltekpin.ac.id" />
+        <!-- Form 1: Peserta BKN -->
+        <form id="bkn-login-form" method="POST">
+          <div class="notice" style="margin-bottom: 18px; font-size: 13px; background: #eff6ff; border-left: 4px solid #2563eb; color: #1e40af; padding: 12px 14px; border-radius: 6px;">
+            <span>ℹ️</span>
+            <span>Gunakan <strong>NIK / Username</strong> dan <strong>Kata Sandi</strong> yang terdaftar di portal <strong>SSCASN BKN</strong>. Peserta tidak perlu mendaftar ulang.</span>
           </div>
           <div>
+            <label for="bkn-user">NIK / Username BKN</label>
+            <input id="bkn-user" name="user" type="text" required placeholder="Masukkan NIK atau Username SSCASN" />
+          </div>
+          <div style="margin-top: 14px;">
+            <label for="bkn-password">Kata Sandi BKN</label>
+            <input id="bkn-password" name="password" type="password" required placeholder="Masukkan kata sandi akun SSCASN BKN" />
+          </div>
+          <label class="toggle" style="margin-top: 10px;">
+            <input id="toggle-bkn-password" type="checkbox" />
+            Tampilkan kata sandi
+          </label>
+          <button class="btn btn-primary btn-full" type="submit" id="bkn-login-btn" style="margin-top: 16px; padding: 13px; font-weight: 700; background: #003366;">
+            🔐 Masuk via SSCASN BKN
+          </button>
+        </form>
+
+        <!-- Form 2: Umum / Admin -->
+        <form id="login-form" method="POST" style="display: none;">
+          <div class="notice" style="margin-bottom: 18px; font-size: 13px;">
+            <span>ℹ️</span>
+            <span>Masuk menggunakan alamat email terdaftar dan terverifikasi.</span>
+          </div>
+          <div>
+            <label for="email">Alamat Email</label>
+            <input id="email" name="email" type="email" placeholder="contoh@poltekpin.ac.id" />
+          </div>
+          <div style="margin-top: 14px;">
             <label for="password">Kata Sandi</label>
-            <input id="password" name="password" type="password" required placeholder="Masukkan kata sandi Anda" />
+            <input id="password" name="password" type="password" placeholder="Masukkan kata sandi Anda" />
             <div style="text-align: right; margin-top: 6px;">
               <a href="lupa-sandi.html" style="font-size: 13px; color: var(--navy); text-decoration: none; font-weight: 600;">Lupa kata sandi?</a>
             </div>
           </div>
-          <label class="toggle" style="margin-top: 2px;">
+          <label class="toggle" style="margin-top: 10px;">
             <input id="toggle-password" type="checkbox" />
             Tampilkan kata sandi
           </label>
-          <button class="btn btn-primary btn-full" type="submit" id="login-btn" style="margin-top: 6px; padding: 13px;">
+          <button class="btn btn-primary btn-full" type="submit" id="login-btn" style="margin-top: 16px; padding: 13px; font-weight: 700;">
             🔐 Masuk ke Portal
           </button>
         </form>
 
         <hr class="auth-divider" />
 
-        <div class="auth-footer-text">
-          Belum punya akun? <a href="register.html">Daftar di sini</a>
+        <div id="footer-register" class="auth-footer-text">
+          Belum punya akun? <a href="register.html">Daftar Akun Umum di sini</a>
         </div>
         <div class="auth-footer-text" style="margin-top: 10px;">
           <a href="index.html" style="color: var(--muted); border-bottom-color: transparent;">← Kembali ke Beranda</a>
@@ -84,11 +124,95 @@
     <div data-site-footer></div>
     <script src="app.js"></script>
     <script>
-      const loginForm     = document.getElementById("login-form");
-      const loginError    = document.getElementById("login-error");
-      const togglePwd     = document.getElementById("toggle-password");
+      let currentTab = "peserta";
+
+      function switchLoginTab(tab) {
+        currentTab = tab;
+        const tabPeserta = document.getElementById("tab-peserta");
+        const tabUmum = document.getElementById("tab-umum");
+        const formBkn = document.getElementById("bkn-login-form");
+        const formUmum = document.getElementById("login-form");
+        const loginError = document.getElementById("login-error");
+        const footerRegister = document.getElementById("footer-register");
+
+        loginError.style.display = "none";
+
+        if (tab === "peserta") {
+          tabPeserta.classList.add("active");
+          tabUmum.classList.remove("active");
+          formBkn.style.display = "block";
+          formUmum.style.display = "none";
+          document.getElementById("bkn-user").required = true;
+          document.getElementById("bkn-password").required = true;
+          document.getElementById("email").required = false;
+          document.getElementById("password").required = false;
+          footerRegister.style.display = "none";
+        } else {
+          tabUmum.classList.add("active");
+          tabPeserta.classList.remove("active");
+          formUmum.style.display = "block";
+          formBkn.style.display = "none";
+          document.getElementById("bkn-user").required = false;
+          document.getElementById("bkn-password").required = false;
+          document.getElementById("email").required = true;
+          document.getElementById("password").required = true;
+          footerRegister.style.display = "block";
+        }
+      }
+
+      // Initialize default tab
+      switchLoginTab("peserta");
+
+      // BKN Login Form Listener
+      const bknForm = document.getElementById("bkn-login-form");
+      const bknBtn = document.getElementById("bkn-login-btn");
+      const loginError = document.getElementById("login-error");
+      const toggleBknPwd = document.getElementById("toggle-bkn-password");
+      const bknPwdInput = document.getElementById("bkn-password");
+
+      bknForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        loginError.style.display = "none";
+        bknBtn.disabled = true;
+        bknBtn.textContent = "⏳ Verifikasi ke BKN...";
+
+        const user = document.getElementById("bkn-user").value.trim();
+        const password = document.getElementById("bkn-password").value.trim();
+
+        try {
+          const response = await fetch(`${API_URL}/login-peserta-bkn`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user, password }),
+          });
+          const data = await response.json();
+          if (response.ok) {
+            localStorage.setItem("sekdin-token", data.token);
+            localStorage.setItem("user-role", data.user.role);
+            localStorage.setItem("user-data", JSON.stringify(data.user));
+            window.location.href = "pengaduan.html";
+          } else {
+            loginError.textContent = data.message || "Gagal masuk via BKN.";
+            loginError.style.display = "block";
+          }
+        } catch (err) {
+          loginError.textContent = "Koneksi ke server gagal. Coba lagi nanti.";
+          loginError.style.display = "block";
+        } finally {
+          bknBtn.disabled = false;
+          bknBtn.innerHTML = "🔐 Masuk via SSCASN BKN";
+        }
+      });
+
+      toggleBknPwd.addEventListener("change", () => {
+        bknPwdInput.type = toggleBknPwd.checked ? "text" : "password";
+      });
+
+      // Standard / General Login Form Listener
+      const loginForm = document.getElementById("login-form");
+      const togglePwd = document.getElementById("toggle-password");
       const passwordInput = document.getElementById("password");
-      const loginBtn      = document.getElementById("login-btn");
+      const loginBtn = document.getElementById("login-btn");
 
       loginForm.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -96,7 +220,7 @@
         loginBtn.disabled = true;
         loginBtn.textContent = "⏳ Memproses...";
 
-        const email    = document.getElementById("email").value.trim();
+        const email = document.getElementById("email").value.trim();
         const password = document.getElementById("password").value.trim();
 
         try {

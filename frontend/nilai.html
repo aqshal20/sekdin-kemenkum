@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Hasil & Nilai Ujian | Sekdin-Poltekpin</title>
+    <meta name="description" content="Transkrip Hasil dan Nilai Ujian Seleksi Kedinasan Politeknik Pengayoman Indonesia." />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      .gov-topbar {
+        position: fixed; top: 0; left: 0; right: 0; height: 38px;
+        background: linear-gradient(90deg, #cc0000, #a00000);
+        display: flex; align-items: center; padding: 0 5vw; z-index: 50;
+        font-size: 12px; color: rgba(255,255,255,0.95); font-weight: 600;
+        gap: 10px;
+      }
+      .score-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 20px;
+        margin-top: 24px;
+      }
+      .score-card {
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 24px;
+        box-shadow: var(--shadow-soft);
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+      .score-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-hover);
+      }
+      .score-value {
+        font-size: 36px;
+        font-weight: 800;
+        color: #003366;
+        line-height: 1;
+        margin: 12px 0 6px;
+      }
+      .sub-score-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px dashed #e2e8f0;
+        font-size: 14px;
+      }
+      .sub-score-item:last-child {
+        border-bottom: none;
+      }
+      .progress-bar-bg {
+        width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-top: 6px;
+      }
+      .progress-bar-fill {
+        height: 100%; background: linear-gradient(90deg, #2563eb, #1d4ed8); border-radius: 4px; transition: width 0.8s ease;
+      }
+      .status-pill {
+        display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 12px;
+      }
+      .status-pill-success { background: #dcfce7; color: #15803d; }
+      .status-pill-info { background: #dbeafe; color: #1e40af; }
+    </style>
+  </head>
+  <body data-page="nilai">
+    <div class="gov-topbar">
+      <span>🏛</span>
+      <span>Politeknik Pengayoman Indonesia — Kementerian Hukum RI</span>
+    </div>
+    <div data-site-header></div>
+
+    <main class="page-container">
+      <div class="content-header" style="margin-bottom: 24px;">
+        <div>
+          <span class="badge" style="background: #e0f2fe; color: #0369a1; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 12px;">📊 TRANSKRIP NILAI CAT BKN &amp; SELEKSI</span>
+          <h1 style="font-size: 26px; font-weight: 800; color: #003366; margin-top: 8px;">Transkrip Hasil &amp; Nilai Ujian</h1>
+          <p class="text-muted" style="font-size: 14px;">Rekapitulasi skor resmi Seleksi Kompetensi Dasar (CAT BKN) dan Ujian Lanjutan Kementerian Hukum RI.</p>
+        </div>
+        <button class="btn btn-secondary" onclick="window.print()" style="display: flex; align-items: center; gap: 6px;">
+          🖨️ Cetak Transkrip Nilai
+        </button>
+      </div>
+
+      <!-- Identity Banner -->
+      <div class="card" style="background: linear-gradient(135deg, #003366 0%, #1e40af 100%); color: white; border-radius: 16px; padding: 24px; margin-bottom: 28px;">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px;">
+          <div>
+            <div style="font-size: 13px; opacity: 0.85; font-weight: 600;">NAMA PESERTA TERDAFTAR</div>
+            <h2 id="participant-name" style="font-size: 22px; font-weight: 800; margin: 4px 0;">Memuat nama peserta...</h2>
+            <div style="font-size: 13px; opacity: 0.9;">
+              NIK: <span id="participant-nik" style="font-weight: 700;">-</span> | 
+              No. Register SSCASN: <span id="participant-reg" style="font-weight: 700;">-</span>
+            </div>
+          </div>
+          <div style="text-align: right; background: rgba(255,255,255,0.12); padding: 14px 20px; border-radius: 12px; backdrop-filter: blur(8px);">
+            <div style="font-size: 12px; opacity: 0.85;">STATUS KELULUSAN AKHIR</div>
+            <div id="final-status" style="font-size: 18px; font-weight: 800; color: #fef08a; margin-top: 2px;">MEMUAT...</div>
+            <div id="final-rank" style="font-size: 12px; opacity: 0.9; margin-top: 2px;">-</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Score Breakdown Grid -->
+      <div class="score-grid">
+        <!-- SKD CAT BKN -->
+        <div class="score-card" style="border-top: 4px solid #2563eb;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 700; font-size: 14px; color: #64748b;">1. SELEKSI KOMPETENSI DASAR (SKD)</span>
+            <span class="status-pill status-pill-success">BKN CAT</span>
+          </div>
+          <div class="score-value" id="skd-total">-</div>
+          <div style="font-size: 12px; color: #16a34a; font-weight: 700; margin-bottom: 16px;" id="skd-status">Status: Lolos Passing Grade</div>
+
+          <div class="sub-score-item">
+            <span>Tes Wawasan Kebangsaan (TWK)</span>
+            <span style="font-weight: 700;" id="skd-twk">- <small class="text-muted">(Min 65)</small></span>
+          </div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" id="bar-twk" style="width: 0%;"></div></div>
+
+          <div class="sub-score-item" style="margin-top: 10px;">
+            <span>Tes Intelegensia Umum (TIU)</span>
+            <span style="font-weight: 700;" id="skd-tiu">- <small class="text-muted">(Min 80)</small></span>
+          </div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" id="bar-tiu" style="width: 0%;"></div></div>
+
+          <div class="sub-score-item" style="margin-top: 10px;">
+            <span>Tes Karakteristik Pribadi (TKP)</span>
+            <span style="font-weight: 700;" id="skd-tkp">- <small class="text-muted">(Min 166)</small></span>
+          </div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" id="bar-tkp" style="width: 0%;"></div></div>
+        </div>
+
+        <!-- Tes Kesehatan -->
+        <div class="score-card" style="border-top: 4px solid #10b981;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 700; font-size: 14px; color: #64748b;">2. TES KESEHATAN MEDIS</span>
+            <span class="status-pill status-pill-success">MEMENUHI SYARAT</span>
+          </div>
+          <div class="score-value" id="kes-skor">-</div>
+          <div style="font-size: 13px; color: #475569; margin-bottom: 14px;" id="kes-kategori">Kategori: Sangat Baik (A)</div>
+
+          <div class="sub-score-item">
+            <span>Pemeriksaan Medis Fisik</span>
+            <span style="font-weight: 700; color: #16a34a;">Memenuhi Syarat (MS)</span>
+          </div>
+          <div class="sub-score-item">
+            <span>Pemeriksaan Laboratorium</span>
+            <span style="font-weight: 700; color: #16a34a;">Memenuhi Syarat (MS)</span>
+          </div>
+          <div class="sub-score-item">
+            <span>Pemeriksaan Radiologi &amp; EKG</span>
+            <span style="font-weight: 700; color: #16a34a;">Memenuhi Syarat (MS)</span>
+          </div>
+        </div>
+
+        <!-- Tes Kesamaptaan -->
+        <div class="score-card" style="border-top: 4px solid #f59e0b;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 700; font-size: 14px; color: #64748b;">3. TES KESAMAPTAAN FISIK</span>
+            <span class="status-pill status-pill-success">MEMENUHI SYARAT</span>
+          </div>
+          <div class="score-value" id="samapta-skor">-</div>
+          <div style="font-size: 13px; color: #475569; margin-bottom: 14px;">Nilai Rata-rata Uji Fisik</div>
+
+          <div class="sub-score-item">
+            <span>Lari 12 Menit</span>
+            <span style="font-weight: 700;" id="samapta-lari">78.0</span>
+          </div>
+          <div class="sub-score-item">
+            <span>Push-Up (1 Menit)</span>
+            <span style="font-weight: 700;" id="samapta-pushup">85.0</span>
+          </div>
+          <div class="sub-score-item">
+            <span>Sit-Up (1 Menit)</span>
+            <span style="font-weight: 700;" id="samapta-situp">84.0</span>
+          </div>
+          <div class="sub-score-item">
+            <span>Chinning / Pull-Up</span>
+            <span style="font-weight: 700;" id="samapta-chinning">83.0</span>
+          </div>
+        </div>
+
+        <!-- Wawancara & WPFK -->
+        <div class="score-card" style="border-top: 4px solid #8b5cf6;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 700; font-size: 14px; color: #64748b;">4. WAWANCARA &amp; WPFK</span>
+            <span class="status-pill status-pill-info">SELESAI</span>
+          </div>
+          <div class="score-value" id="wawancara-skor">-</div>
+          <div style="font-size: 13px; color: #475569; margin-bottom: 14px;">Penilaian Penguji Kemenkumham</div>
+
+          <div class="sub-score-item">
+            <span>Integritas &amp; Wawasan Nusantara</span>
+            <span style="font-weight: 700;">88.0</span>
+          </div>
+          <div class="sub-score-item">
+            <span>Pengamatan Fisik &amp; Keterampilan</span>
+            <span style="font-weight: 700;">85.0</span>
+          </div>
+          <div class="sub-score-item">
+            <span>Komunikasi &amp; Etika</span>
+            <span style="font-weight: 700;">86.5</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Info Box Notice -->
+      <div class="notice" style="margin-top: 32px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 12px; padding: 18px;">
+        <span style="font-size: 20px;">ℹ️</span>
+        <div style="font-size: 13px; color: #475569; line-height: 1.6;">
+          <strong>Catatan Transparansi Nilai:</strong> Nilai SKD BKN bersumber langsung dari database CAT BKN secara real-time. Jika Anda memiliki pertanyaan atau perbedaan data terkait transkrip nilai, silakan ajukan tiket bantuan melalui menu <a href="pengaduan.html" style="font-weight: 700; color: #003366;">Helpdesk Poltekpin</a>.
+        </div>
+      </div>
+    </main>
+
+    <div data-site-footer></div>
+    <script src="app.js"></script>
+    <script>
+      async function loadNilaiData() {
+        const token = localStorage.getItem("sekdin-token");
+        if (!token) return;
+
+        try {
+          const res = await fetch(`${API_URL}/nilai-peserta`, {
+            headers: { "Authorization": `Bearer ${token}` }
+          });
+          if (!res.ok) return;
+          const d = await res.json();
+
+          document.getElementById("participant-name").textContent = d.fullname;
+          document.getElementById("participant-nik").textContent = d.nik;
+          document.getElementById("participant-reg").textContent = d.reg_number;
+          document.getElementById("final-status").textContent = d.status_kelulusan;
+          document.getElementById("final-rank").textContent = d.peringkat;
+
+          // SKD
+          document.getElementById("skd-total").textContent = d.skd.total;
+          document.getElementById("skd-status").textContent = `Status: ${d.skd.status}`;
+          document.getElementById("skd-twk").innerHTML = `${d.skd.twk} <small class="text-muted">(Min ${d.skd.twk_min})</small>`;
+          document.getElementById("skd-tiu").innerHTML = `${d.skd.tiu} <small class="text-muted">(Min ${d.skd.tiu_min})</small>`;
+          document.getElementById("skd-tkp").innerHTML = `${d.skd.tkp} <small class="text-muted">(Min ${d.skd.tkp_min})</small>`;
+
+          document.getElementById("bar-twk").style.width = `${Math.min(100, (d.skd.twk / 150) * 100)}%`;
+          document.getElementById("bar-tiu").style.width = `${Math.min(100, (d.skd.tiu / 175) * 100)}%`;
+          document.getElementById("bar-tkp").style.width = `${Math.min(100, (d.skd.tkp / 225) * 100)}%`;
+
+          // Kesehatan
+          document.getElementById("kes-skor").textContent = d.kesehatan.skor;
+          document.getElementById("kes-kategori").textContent = `Kategori: ${d.kesehatan.kategori}`;
+
+          // Samapta
+          document.getElementById("samapta-skor").textContent = d.kesamaptaan.skor;
+          if (d.kesamaptaan.rincian) {
+            document.getElementById("samapta-lari").textContent = d.kesamaptaan.rincian.lari;
+            document.getElementById("samapta-pushup").textContent = d.kesamaptaan.rincian.pushup;
+            document.getElementById("samapta-situp").textContent = d.kesamaptaan.rincian.situp;
+            document.getElementById("samapta-chinning").textContent = d.kesamaptaan.rincian.chinning;
+          }
+
+          // Wawancara
+          document.getElementById("wawancara-skor").textContent = d.wawancara.skor;
+
+        } catch (err) {
+          console.error("Gagal memuat nilai:", err);
+        }
+      }
+
+      loadNilaiData();
+    </script>
+  </body>
+</html>

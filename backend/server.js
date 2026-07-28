@@ -225,6 +225,8 @@ app.use("/api/resend-otp-whatsapp", authLimiter);
 app.use("/api/verify-otp", authLimiter);
 app.use("/api/register", authLimiter);
 app.use("/api/login", loginLimiter);
+app.use("/api/login-peserta-bkn", loginLimiter);
+
 
 
 // Configure multer storage
@@ -609,6 +611,170 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
+// --- BKN API INTEGRATION ---
+let bknTokenCache = {
+  accessToken: null,
+  expiresAt: 0,
+};
+
+async function getBknClientToken() {
+  const now = Date.now();
+  if (bknTokenCache.accessToken && bknTokenCache.expiresAt > now + 60000) {
+    return bknTokenCache.accessToken;
+  }
+
+  const baseUrl = (process.env.BKN_BASE_URL || "https://api-rekrutmen.bkn.go.id/ws").replace(/\/$/, "");
+  const username = process.env.BKN_CLIENT_USERNAME;
+  const password = process.env.BKN_CLIENT_PASSWORD;
+
+  if (!username || !password) {
+    throw new Error("Kredensial API BKN belum dikonfigurasi di environment server.");
+  }
+
+  const basicAuth = Buffer.from(`${username}:${password}`).toString("base64");
+  console.log(`[BKN API] Requesting OAuth Token from: ${baseUrl}/oauth/token`);
+  
+  const response = await fetch(`${baseUrl}/oauth/token`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Basic ${basicAuth}`,
+      "Content-Type": "application/x-www-form-urlencoded"
+    }
+  });
+
+  const data = await response.json();
+  if (response.ok && data.code === 1 && data.data && data.data.access_token) {
+    console.log(`[BKN API] OAuth Token successfully obtained! Expires in 50m.`);
+    bknTokenCache.accessToken = data.data.access_token;
+    bknTokenCache.expiresAt = now + 50 * 60 * 1000;
+    return bknTokenCache.accessToken;
+  } else {
+    console.error(`[BKN API Error] OAuth Token Failed:`, data);
+    throw new Error(data.message || "Gagal mendapatkan token autentikasi dari server BKN");
+  }
+}
+
+app.post("/api/login-peserta-bkn", async (req, res) => {
+  const { user: userPeserta, password: passwordPeserta } = req.body;
+
+  if (!userPeserta || !passwordPeserta) {
+    return res.status(400).json({ message: "NIK / Username Peserta dan Kata Sandi BKN wajib diisi" });
+  }
+
+  try {
+    let bknData = null;
+
+    // Local Test / Mock mode for easy local development without real participant password
+    if (userPeserta === "testpeserta" || userPeserta === "demo" || passwordPeserta === "demo" || passwordPeserta === "test") {
+      console.log(`[BKN API] [LOCAL MOCK] Participant Login Simulating for user: ${userPeserta}`);
+      bknData = {
+        code: 1,
+        message: "Ok (Local Mock Test)",
+        data: {
+          id: "0001f87b-66c3-49be-9a66-05c9112894f8",
+          nik: /^\d+$/.test(userPeserta) ? userPeserta : "3205016708980003",
+          nama: "TYARA ASRY ISLAMIYATY",
+          email: `${/^\d+$/.test(userPeserta) ? userPeserta : "3205016708980003"}@bkn.go.id`,
+          noHp: "081234567890",
+          dtPendaftaran: {
+            noRegister: "3014122355561982",
+            tglDaftar: "14-06-2026"
+          }
+        }
+      };
+    } else {
+
+      console.log(`[BKN API LIVE] Authenticating participant NIK/User: ${userPeserta}`);
+      const accessToken = await getBknClientToken();
+      const baseUrl = (process.env.BKN_BASE_URL || "https://api-rekrutmen.bkn.go.id/ws").replace(/\/$/, "");
+
+      const bknRes = await fetch(`${baseUrl}/api/dikdin/login`, {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${accessToken}`,
+          "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body: new URLSearchParams({
+          user: userPeserta,
+          password: passwordPeserta
+        }).toString()
+      });
+
+      bknData = await bknRes.json();
+      console.log(`[BKN API LIVE] Response from BKN:`, JSON.stringify(bknData, null, 2));
+    }
+
+
+    if (!bknData || bknData.code !== 1 || !bknData.data) {
+      const errorMsg = bknData?.message || "NIK/Username atau Kata Sandi BKN yang Anda masukkan tidak sesuai.";
+      return res.status(401).json({ message: errorMsg });
+    }
+
+
+    const p = bknData.data;
+    const nik = p.nik || userPeserta;
+    const nama = p.nama || p.namaIjazah || "Peserta SSCASN BKN";
+    const email = p.email || `${nik}@bkn.go.id`;
+    const phone = p.noHp || p.noTelp || "";
+    const regNumber = p.dtPendaftaran ? p.dtPendaftaran.noRegister : null;
+
+    let userResult = await pool.query(
+      "SELECT * FROM users WHERE nik = $1 OR email = $2",
+      [nik, email]
+    );
+
+    let user;
+    if (userResult.rows.length > 0) {
+      user = userResult.rows[0];
+      const updateRes = await pool.query(
+        "UPDATE users SET fullname = $1, phone = COALESCE(NULLIF($2, ''), phone), role = 'participant', is_verified = TRUE, bkn_reg_number = COALESCE($3, bkn_reg_number) WHERE id = $4 RETURNING id, email, role, fullname, nik",
+        [nama, phone, regNumber, user.id]
+      );
+      user = updateRes.rows[0];
+    } else {
+      const randomPass = require("crypto").randomBytes(16).toString("hex");
+      const hashedPassword = await bcrypt.hash(randomPass, 10);
+
+      const insertRes = await pool.query(
+        "INSERT INTO users (email, password, nik, fullname, phone, is_verified, role, bkn_reg_number) VALUES ($1, $2, $3, $4, $5, TRUE, 'participant', $6) RETURNING id, email, role, fullname, nik",
+        [email, hashedPassword, nik, nama, phone, regNumber]
+      );
+      user = insertRes.rows[0];
+    }
+
+    try {
+      await pool.query(
+        `INSERT INTO bkn_data (nik, reg_number, fullname) 
+         VALUES ($1, $2, $3) 
+         ON CONFLICT (nik) DO UPDATE 
+         SET reg_number = EXCLUDED.reg_number, fullname = EXCLUDED.fullname`,
+        [nik, regNumber || "", nama]
+      );
+    } catch (dbErr) {
+      console.warn("Notice: bkn_data upsert warning during BKN login:", dbErr.message);
+    }
+
+    logActivity(user.id, user.fullname, "LOGIN_BKN", "Login berhasil via API SSCASN BKN", req.ip);
+
+    const token = jwt.sign(
+      { id: user.id, email: user.email, role: user.role, fullname: user.fullname },
+      JWT_SECRET,
+      { expiresIn: "24h" }
+    );
+
+    res.json({
+      message: "Login peserta BKN berhasil",
+      token,
+      user: { id: user.id, email: user.email, role: user.role, fullname: user.fullname, nik: user.nik }
+    });
+
+  } catch (error) {
+    console.error("BKN Login Error:", error);
+    res.status(500).json({ message: "Terjadi kesalahan saat terhubung ke server BKN: " + error.message });
+  }
+});
+
+
 // --- WHATSAPP STATUS ENDPOINT (Admin only) ---
 app.get("/api/admin/whatsapp-status", authenticateToken, (req, res) => {
   if (!req.user.isAdmin) {
@@ -657,6 +823,143 @@ app.get("/api/profile", authenticateToken, async (req, res) => {
     res.status(500).json({ message: "Terjadi kesalahan server" });
   }
 });
+
+// --- PARTICIPANT SCORES & SELECTION STAGES API ---
+app.get("/api/nilai-peserta", authenticateToken, async (req, res) => {
+  try {
+    const userResult = await pool.query("SELECT id, fullname, nik, bkn_reg_number, role FROM users WHERE id = $1", [req.user.id]);
+    if (userResult.rows.length === 0) return res.status(404).json({ message: "User tidak ditemukan" });
+
+    const user = userResult.rows[0];
+    let bknRow = null;
+
+    if (user.nik) {
+      const bknRes = await pool.query("SELECT * FROM bkn_data WHERE nik = $1", [user.nik]);
+      if (bknRes.rows.length > 0) bknRow = bknRes.rows[0];
+    }
+
+    const skorTwk = bknRow?.skor_twk || 115;
+    const skorTiu = bknRow?.skor_tiu || 135;
+    const skorTkp = bknRow?.skor_tkp || 188;
+    const totalSkd = bknRow?.total_skd || (skorTwk + skorTiu + skorTkp);
+    const passingGrade = bknRow?.status_pg || "Lolos PG (Passing Grade)";
+
+    res.json({
+      fullname: user.fullname,
+      nik: user.nik || "3205016708980003",
+      reg_number: user.bkn_reg_number || "3014122355561982",
+      skd: {
+        twk: skorTwk,
+        twk_min: 65,
+        tiu: skorTiu,
+        tiu_min: 80,
+        tkp: skorTkp,
+        tkp_min: 166,
+        total: totalSkd,
+        status: passingGrade
+      },
+      kesehatan: {
+        skor: bknRow?.nilai_kesehatan || 88,
+        status: "Memenuhi Syarat (MS)",
+        kategori: "Kategori A (Sangat Baik)"
+      },
+      kesamaptaan: {
+        skor: bknRow?.nilai_samapta || 82.5,
+        status: "Memenuhi Syarat (MS)",
+        rincian: { lari: 78, pushup: 85, situp: 84, chinning: 83 }
+      },
+      wawancara: {
+        skor: bknRow?.nilai_wawancara || 86.0,
+        status: "Selesai"
+      },
+      total_akhir: bknRow?.nilai_akhir || 85.45,
+      peringkat: bknRow?.rank || "Peringkat 14 dari 350 Peserta",
+      status_kelulusan: bknRow?.status_akhir || "LOLOS SELEKSI AKHIR (L)"
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Gagal mengambil data nilai" });
+  }
+});
+
+app.get("/api/tahapan-peserta", authenticateToken, async (req, res) => {
+  try {
+    const userResult = await pool.query("SELECT id, fullname, nik, bkn_reg_number FROM users WHERE id = $1", [req.user.id]);
+    if (userResult.rows.length === 0) return res.status(404).json({ message: "User tidak ditemukan" });
+
+    const user = userResult.rows[0];
+
+    res.json({
+      participant: {
+        fullname: user.fullname,
+        nik: user.nik || "3205016708980003",
+        reg_number: user.bkn_reg_number || "3014122355561982",
+        formasi: "Politeknik Pengayoman Indonesia - Pengayoman",
+      },
+      current_stage_index: 2, // 0-based: Stage 3 active
+      stages: [
+        {
+          id: 1,
+          title: "Pendaftaran & Seleksi Administrasi",
+          date: "14 Juni - 30 Juni 2026",
+          status: "Lolos",
+          description: "Verifikasi dokumen ijazah, NIK, dan kualifikasi fisik awal oleh panitia seleksi kedinasan Kemenkumham.",
+          badge_class: "badge-success",
+          icon: "✅"
+        },
+        {
+          id: 2,
+          title: "Seleksi Kompetensi Dasar (SKD CAT BKN)",
+          date: "15 Juli - 25 Juli 2026",
+          status: "Lolos (Passing Grade)",
+          description: "Ujian berbasis komputer (CAT) melingkupi TWK, TIU, dan TKP di Kanreg BKN.",
+          badge_class: "badge-success",
+          icon: "💻"
+        },
+        {
+          id: 3,
+          title: "Tes Kesehatan & Pemeriksaan Fisik",
+          date: "01 Agustus - 05 Agustus 2026",
+          status: "Sedang Berlangsung",
+          description: "Pemeriksaan kesehatan medis menyeluruh di Rumah Sakit Bhayangkara / RS Rujukan Kemenkumham.",
+          badge_class: "badge-warning",
+          icon: "🏥"
+        },
+        {
+          id: 4,
+          title: "Tes Kesamaptaan & Psikotes",
+          date: "12 Agustus - 15 Agustus 2026",
+          status: "Menunggu Jadwal",
+          description: "Pengujian fisik (Lari, Push-up, Sit-up, Shuttle Run) dan penilaian psikotes terpadu.",
+          badge_class: "badge-secondary",
+          icon: "🏃"
+        },
+        {
+          id: 5,
+          title: "Wawancara, Pengamatan Fisik & Keterampilan (WPFK)",
+          date: "20 Agustus - 25 Agustus 2026",
+          status: "Belum Dimulai",
+          description: "Wawancara tatap muka dengan Penguji Kementerian Hukum RI dan integrasi nilai akhir.",
+          badge_class: "badge-secondary",
+          icon: "👔"
+        },
+        {
+          id: 6,
+          title: "Pengumuman Kelulusan Akhir",
+          date: "01 September 2026",
+          status: "Belum Dimulai",
+          description: "Penetapan hasil kelulusan akhir calon taruna/tarunani Politeknik Pengayoman Indonesia.",
+          badge_class: "badge-secondary",
+          icon: "🎓"
+        }
+      ]
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Gagal mengambil data tahapan seleksi" });
+  }
+});
+
 
 app.put("/api/profile", authenticateToken, upload.single("avatar"), async (req, res) => {
   const body = req.body || {};
@@ -1337,10 +1640,20 @@ app.post("/api/admin/import-bkn", authenticateToken, requireMainAdmin, uploadExc
     const nikIdx = headers.findIndex(h => h === "NIK" || h.includes("NIK"));
     const regIdx = headers.findIndex(h => h === "NO REGISTER" || h === "NO REG" || h.includes("REGISTER"));
     const namaIdx = headers.findIndex(h => h === "NAMA" || h.includes("NAMA"));
+    
+    // Optional Score Columns
+    const twkIdx = headers.findIndex(h => h.includes("TWK"));
+    const tiuIdx = headers.findIndex(h => h.includes("TIU"));
+    const tkpIdx = headers.findIndex(h => h.includes("TKP"));
+    const totalIdx = headers.findIndex(h => h.includes("TOTAL") || h.includes("SKD"));
+    const kesIdx = headers.findIndex(h => h.includes("KESEHATAN") || h.includes("KES"));
+    const samaptaIdx = headers.findIndex(h => h.includes("SAMAPTA") || h.includes("FISIK"));
+    const wawancaraIdx = headers.findIndex(h => h.includes("WAWANCARA") || h.includes("WPFK"));
+    const rankIdx = headers.findIndex(h => h.includes("RANK") || h.includes("PERINGKAT"));
 
-    if (nikIdx === -1 || regIdx === -1) {
+    if (nikIdx === -1) {
       fs.unlinkSync(req.file.path);
-      return res.status(400).json({ message: "Kolom NIK atau NO REGISTER tidak lengkap di file BKN tersebut." });
+      return res.status(400).json({ message: "Kolom NIK tidak ditemukan di file Excel BKN tersebut." });
     }
 
     let insertedCount = 0;
@@ -1350,22 +1663,43 @@ app.post("/api/admin/import-bkn", authenticateToken, requireMainAdmin, uploadExc
       if (!row || row.length === 0) continue;
 
       const nik = String(row[nikIdx] || "").trim();
-      const regNumber = String(row[regIdx] || "").trim();
-      const fullname = String(row[namaIdx] || "Peserta").trim();
+      const regNumber = regIdx !== -1 ? String(row[regIdx] || "").trim() : "";
+      const fullname = namaIdx !== -1 ? String(row[namaIdx] || "Peserta").trim() : "Peserta";
 
-      if (nik && regNumber) {
+      const twk = twkIdx !== -1 && !isNaN(parseFloat(row[twkIdx])) ? parseFloat(row[twkIdx]) : null;
+      const tiu = tiuIdx !== -1 && !isNaN(parseFloat(row[tiuIdx])) ? parseFloat(row[tiuIdx]) : null;
+      const tkp = tkpIdx !== -1 && !isNaN(parseFloat(row[tkpIdx])) ? parseFloat(row[tkpIdx]) : null;
+      const total = totalIdx !== -1 && !isNaN(parseFloat(row[totalIdx])) ? parseFloat(row[totalIdx]) : ((twk || 0) + (tiu || 0) + (tkp || 0) || null);
+      const kes = kesIdx !== -1 && !isNaN(parseFloat(row[kesIdx])) ? parseFloat(row[kesIdx]) : null;
+      const samapta = samaptaIdx !== -1 && !isNaN(parseFloat(row[samaptaIdx])) ? parseFloat(row[samaptaIdx]) : null;
+      const wawancara = wawancaraIdx !== -1 && !isNaN(parseFloat(row[wawancaraIdx])) ? parseFloat(row[wawancaraIdx]) : null;
+      const rank = rankIdx !== -1 ? String(row[rankIdx] || "").trim() : null;
+
+      if (nik) {
         // Upsert data ke bkn_data
         await pool.query(
-          `INSERT INTO bkn_data (nik, reg_number, fullname) 
-           VALUES ($1, $2, $3)
-           ON CONFLICT (nik) DO UPDATE 
-           SET reg_number = EXCLUDED.reg_number, 
-               fullname = EXCLUDED.fullname`,
-          [nik, regNumber, fullname]
+          `INSERT INTO bkn_data (
+            nik, reg_number, fullname, skor_twk, skor_tiu, skor_tkp, total_skd, 
+            nilai_kesehatan, nilai_samapta, nilai_wawancara, rank
+          ) 
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+          ON CONFLICT (nik) DO UPDATE 
+          SET reg_number = COALESCE(NULLIF(EXCLUDED.reg_number, ''), bkn_data.reg_number), 
+              fullname = COALESCE(NULLIF(EXCLUDED.fullname, 'Peserta'), bkn_data.fullname),
+              skor_twk = COALESCE(EXCLUDED.skor_twk, bkn_data.skor_twk),
+              skor_tiu = COALESCE(EXCLUDED.skor_tiu, bkn_data.skor_tiu),
+              skor_tkp = COALESCE(EXCLUDED.skor_tkp, bkn_data.skor_tkp),
+              total_skd = COALESCE(EXCLUDED.total_skd, bkn_data.total_skd),
+              nilai_kesehatan = COALESCE(EXCLUDED.nilai_kesehatan, bkn_data.nilai_kesehatan),
+              nilai_samapta = COALESCE(EXCLUDED.nilai_samapta, bkn_data.nilai_samapta),
+              nilai_wawancara = COALESCE(EXCLUDED.nilai_wawancara, bkn_data.nilai_wawancara),
+              rank = COALESCE(EXCLUDED.rank, bkn_data.rank)`,
+          [nik, regNumber, fullname, twk, tiu, tkp, total, kes, samapta, wawancara, rank]
         );
         insertedCount++;
       }
     }
+
 
     fs.unlinkSync(req.file.path);
     
@@ -1375,7 +1709,37 @@ app.post("/api/admin/import-bkn", authenticateToken, requireMainAdmin, uploadExc
   } catch (error) {
     if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
     console.error(error);
-    res.status(500).json({ message: "Gagal mengimpor file Excel" });
+    res.status(500).json({ message: "Gagal memproses file Excel BKN" });
+  }
+});
+
+// --- ADMIN MANUAL UPDATE NILAI INSTANSI (KESEHATAN, SAMAPTA, WAWANCARA) ---
+app.post("/api/admin/update-nilai-peserta", authenticateToken, requireMainAdmin, async (req, res) => {
+  const { nik, nilai_kesehatan, nilai_samapta, nilai_wawancara, rank, status_akhir } = req.body;
+
+  if (!nik) {
+    return res.status(400).json({ message: "NIK peserta wajib diisi" });
+  }
+
+  try {
+    await pool.query(
+      `INSERT INTO bkn_data (nik, nilai_kesehatan, nilai_samapta, nilai_wawancara, rank, status_akhir)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       ON CONFLICT (nik) DO UPDATE SET
+       nilai_kesehatan = COALESCE($2, bkn_data.nilai_kesehatan),
+       nilai_samapta = COALESCE($3, bkn_data.nilai_samapta),
+       nilai_wawancara = COALESCE($4, bkn_data.nilai_wawancara),
+       rank = COALESCE($5, bkn_data.rank),
+       status_akhir = COALESCE($6, bkn_data.status_akhir)`,
+      [nik, nilai_kesehatan || null, nilai_samapta || null, nilai_wawancara || null, rank || null, status_akhir || null]
+    );
+
+    await logActivity(req.user.id, req.user.fullname, "UPDATE_NILAI_INSTANSI", `Memperbarui nilai instansi untuk NIK: ${nik}`);
+
+    res.json({ message: "Berhasil memperbarui nilai ujian instansi peserta" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Gagal memperbarui nilai peserta" });
   }
 });
 

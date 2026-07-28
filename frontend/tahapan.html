@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Alur & Tahapan Tes | Sekdin-Poltekpin</title>
+    <meta name="description" content="Informasi Progres Alur dan Tahapan Seleksi Kedinasan Politeknik Pengayoman Indonesia." />
+    <link rel="stylesheet" href="style.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      .gov-topbar {
+        position: fixed; top: 0; left: 0; right: 0; height: 38px;
+        background: linear-gradient(90deg, #cc0000, #a00000);
+        display: flex; align-items: center; padding: 0 5vw; z-index: 50;
+        font-size: 12px; color: rgba(255,255,255,0.95); font-weight: 600;
+        gap: 10px;
+      }
+      .timeline-step-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 28px 0;
+        position: relative;
+        padding: 0 10px;
+      }
+      .timeline-step-bar::before {
+        content: '';
+        position: absolute;
+        top: 24px;
+        left: 30px;
+        right: 30px;
+        height: 4px;
+        background: #e2e8f0;
+        z-index: 1;
+      }
+      .timeline-step-item {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        flex: 1;
+      }
+      .timeline-icon-circle {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: #ffffff;
+        border: 3px solid #cbd5e1;
+        display: grid;
+        place-items: center;
+        font-size: 20px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        transition: all 0.3s ease;
+      }
+      .timeline-step-item.completed .timeline-icon-circle {
+        background: #10b981;
+        border-color: #10b981;
+        color: white;
+      }
+      .timeline-step-item.active .timeline-icon-circle {
+        background: #2563eb;
+        border-color: #93c5fd;
+        color: white;
+        transform: scale(1.15);
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+      }
+      .timeline-step-label {
+        margin-top: 10px;
+        font-size: 13px;
+        font-weight: 700;
+        color: #64748b;
+        max-width: 140px;
+      }
+      .timeline-step-item.active .timeline-step-label {
+        color: #003366;
+      }
+      .timeline-step-item.completed .timeline-step-label {
+        color: #15803d;
+      }
+
+      .stage-card {
+        background: #ffffff;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 24px;
+        margin-bottom: 18px;
+        box-shadow: var(--shadow-soft);
+        display: flex;
+        gap: 20px;
+        align-items: flex-start;
+        transition: transform 0.2s;
+      }
+      .stage-card.active-card {
+        border-left: 6px solid #2563eb;
+        background: #f8fafc;
+        box-shadow: 0 4px 16px rgba(37, 99, 235, 0.08);
+      }
+      .stage-card.completed-card {
+        border-left: 6px solid #10b981;
+      }
+      .stage-number {
+        width: 44px; height: 44px; border-radius: 12px; background: #e2e8f0; display: grid; place-items: center; font-weight: 800; font-size: 18px; color: #475569; flex-shrink: 0;
+      }
+      .stage-card.active-card .stage-number { background: #dbeafe; color: #1e40af; }
+      .stage-card.completed-card .stage-number { background: #dcfce7; color: #15803d; }
+    </style>
+  </head>
+  <body data-page="tahapan">
+    <div class="gov-topbar">
+      <span>🏛</span>
+      <span>Politeknik Pengayoman Indonesia — Kementerian Hukum RI</span>
+    </div>
+    <div data-site-header></div>
+
+    <main class="page-container">
+      <div class="content-header" style="margin-bottom: 24px;">
+        <div>
+          <span class="badge" style="background: #eff6ff; color: #1d4ed8; padding: 4px 12px; border-radius: 6px; font-weight: 700; font-size: 12px;">🗺️ TAHAPAN SELEKSI KEDINASAN 2026</span>
+          <h1 style="font-size: 26px; font-weight: 800; color: #003366; margin-top: 8px;">Alur &amp; Progress Tahapan Tes</h1>
+          <p class="text-muted" style="font-size: 14px;">Pantau jadwal, status kelulusan, dan perkembangan setiap tahapan tes yang Anda jalani secara real-time.</p>
+        </div>
+      </div>
+
+      <!-- Overview Banner -->
+      <div class="card" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 16px; padding: 24px; margin-bottom: 28px;">
+        <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px;">
+          <div>
+            <div style="font-size: 12px; color: #64748b; font-weight: 700;">FORMASI &amp; PROGRAM STUDI</div>
+            <h3 id="formasi-title" style="font-size: 20px; font-weight: 800; color: #003366; margin: 4px 0;">Politeknik Pengayoman Indonesia - Pengayoman</h3>
+            <div style="font-size: 13px; color: #475569;">
+              Peserta: <strong id="participant-fullname">-</strong> (NIK: <span id="participant-nik">-</span>)
+            </div>
+          </div>
+          <div style="background: #f1f5f9; padding: 12px 20px; border-radius: 12px; text-align: right;">
+            <div style="font-size: 12px; color: #64748b; font-weight: 700;">PROGRES SAAT INI</div>
+            <div id="current-stage-title" style="font-size: 16px; font-weight: 800; color: #2563eb; margin-top: 2px;">Tahap 3: Tes Kesehatan</div>
+          </div>
+        </div>
+
+        <!-- Interactive Step Indicator -->
+        <div class="timeline-step-bar">
+          <div class="timeline-step-item completed">
+            <div class="timeline-icon-circle">✓</div>
+            <div class="timeline-step-label">Administrasi</div>
+          </div>
+          <div class="timeline-step-item completed">
+            <div class="timeline-icon-circle">✓</div>
+            <div class="timeline-step-label">SKD CAT BKN</div>
+          </div>
+          <div class="timeline-step-item active">
+            <div class="timeline-icon-circle">🏥</div>
+            <div class="timeline-step-label">Tes Kesehatan</div>
+          </div>
+          <div class="timeline-step-item">
+            <div class="timeline-icon-circle">🏃</div>
+            <div class="timeline-step-label">Kesamaptaan</div>
+          </div>
+          <div class="timeline-step-item">
+            <div class="timeline-icon-circle">👔</div>
+            <div class="timeline-step-label">Wawancara</div>
+          </div>
+          <div class="timeline-step-item">
+            <div class="timeline-icon-circle">🎓</div>
+            <div class="timeline-step-label">Pengumuman</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stage Detailed Cards List -->
+      <h3 style="font-size: 18px; font-weight: 800; color: #003366; margin-bottom: 16px;">Rincian Jadwal &amp; Status Setiap Tahap</h3>
+      <div id="stages-container">
+        <!-- Rendered dynamically -->
+      </div>
+    </main>
+
+    <div data-site-footer></div>
+    <script src="app.js"></script>
+    <script>
+      async function loadTahapanData() {
+        const token = localStorage.getItem("sekdin-token");
+        if (!token) return;
+
+        try {
+          const res = await fetch(`${API_URL}/tahapan-peserta`, {
+            headers: { "Authorization": `Bearer ${token}` }
+          });
+          if (!res.ok) return;
+          const data = await res.json();
+
+          document.getElementById("participant-fullname").textContent = data.participant.fullname;
+          document.getElementById("participant-nik").textContent = data.participant.nik;
+          document.getElementById("formasi-title").textContent = data.participant.formasi;
+
+          const container = document.getElementById("stages-container");
+          container.innerHTML = "";
+
+          data.stages.forEach((stg, index) => {
+            const isActive = index === data.current_stage_index;
+            const isCompleted = index < data.current_stage_index;
+
+            let cardClass = "";
+            let statusBadgeStyle = "background: #f1f5f9; color: #64748b;";
+            
+            if (isCompleted) {
+              cardClass = "completed-card";
+              statusBadgeStyle = "background: #dcfce7; color: #15803d;";
+            } else if (isActive) {
+              cardClass = "active-card";
+              statusBadgeStyle = "background: #dbeafe; color: #1e40af;";
+              document.getElementById("current-stage-title").textContent = `Tahap ${stg.id}: ${stg.title}`;
+            }
+
+            const card = document.createElement("div");
+            card.className = `stage-card ${cardClass}`;
+            card.innerHTML = `
+              <div class="stage-number">${stg.icon || stg.id}</div>
+              <div style="flex: 1;">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; flex-wrap: wrap;">
+                  <div>
+                    <h4 style="font-size: 16px; font-weight: 800; color: #003366; margin-bottom: 4px;">${stg.id}. ${stg.title}</h4>
+                    <div style="font-size: 13px; color: #64748b; font-weight: 600;">📅 ${stg.date}</div>
+                  </div>
+                  <span style="padding: 6px 14px; border-radius: 20px; font-weight: 700; font-size: 12px; ${statusBadgeStyle}">
+                    ${stg.status}
+                  </span>
+                </div>
+                <p style="font-size: 14px; color: #475569; margin-top: 10px; line-height: 1.5;">${stg.description}</p>
+              </div>
+            `;
+            container.appendChild(card);
+          });
+
+        } catch (err) {
+          console.error("Gagal memuat tahapan:", err);
+        }
+      }
+
+      loadTahapanData();
+    </script>
+  </body>
+</html>

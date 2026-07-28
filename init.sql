@@ -76,3 +76,25 @@ WHERE NOT EXISTS (SELECT 1 FROM announcements WHERE title = 'Sosialisasi sistem 
 ALTER TABLE pengaduan ADD COLUMN IF NOT EXISTS ip_address VARCHAR(45);
 CREATE TABLE IF NOT EXISTS activity_logs (id SERIAL PRIMARY KEY, user_id INTEGER, user_name VARCHAR(255), action VARCHAR(255), details TEXT, created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);
 ALTER TABLE messages ADD COLUMN IF NOT EXISTS is_internal BOOLEAN DEFAULT FALSE;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS bkn_reg_number VARCHAR(100);
+
+CREATE TABLE IF NOT EXISTS bkn_data (
+    id SERIAL PRIMARY KEY,
+    nik VARCHAR(50) UNIQUE NOT NULL,
+    reg_number VARCHAR(100),
+    fullname VARCHAR(255),
+    skor_twk NUMERIC,
+    skor_tiu NUMERIC,
+    skor_tkp NUMERIC,
+    total_skd NUMERIC,
+    status_pg VARCHAR(100),
+    nilai_kesehatan NUMERIC,
+    nilai_samapta NUMERIC,
+    nilai_wawancara NUMERIC,
+    nilai_akhir NUMERIC,
+    rank VARCHAR(100),
+    status_akhir VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
