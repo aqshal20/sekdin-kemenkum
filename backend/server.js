@@ -285,6 +285,105 @@ const pool = new Pool({
   port: process.env.DB_PORT || 5432,
 });
 
+// Auto-migrate database schema on startup
+async function initDatabaseSchema() {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id SERIAL PRIMARY KEY,
+        email VARCHAR(255) UNIQUE NOT NULL,
+        password VARCHAR(255) NOT NULL,
+        fullname VARCHAR(255),
+        nik VARCHAR(16) UNIQUE,
+        phone VARCHAR(20),
+        is_verified BOOLEAN DEFAULT FALSE,
+        otp_code VARCHAR(6),
+        otp_expiry TIMESTAMP,
+        role VARCHAR(50) NOT NULL DEFAULT 'participant',
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS bkn_reg_number VARCHAR(100);
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar_url VARCHAR(255);
+      
+      CREATE TABLE IF NOT EXISTS pengaduan (
+        id SERIAL PRIMARY KEY,
+        ticket_id VARCHAR(50) UNIQUE,
+        participant_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        service_type VARCHAR(100) NOT NULL,
+        category VARCHAR(100) NOT NULL,
+        priority VARCHAR(20) DEFAULT 'Sedang',
+        status VARCHAR(50) DEFAULT 'Menunggu Respon',
+        rating INTEGER,
+        feedback TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+      ALTER TABLE pengaduan ADD COLUMN IF NOT EXISTS ip_address VARCHAR(45);
+
+      CREATE TABLE IF NOT EXISTS lampiran (
+        id SERIAL PRIMARY KEY,
+        pengaduan_id INTEGER REFERENCES pengaduan(id) ON DELETE CASCADE,
+        file_path VARCHAR(255) NOT NULL,
+        file_name VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS messages (
+        id SERIAL PRIMARY KEY,
+        pengaduan_id INTEGER REFERENCES pengaduan(id) ON DELETE CASCADE,
+        sender_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+        message TEXT NOT NULL,
+        is_read BOOLEAN DEFAULT FALSE,
+        attachment TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+      ALTER TABLE messages ADD COLUMN IF NOT EXISTS is_internal BOOLEAN DEFAULT FALSE;
+
+      CREATE TABLE IF NOT EXISTS announcements (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        category VARCHAR(100) NOT NULL,
+        content TEXT NOT NULL,
+        image_path VARCHAR(255),
+        attachment_path VARCHAR(255),
+        attachment_name VARCHAR(255),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS activity_logs (
+        id SERIAL PRIMARY KEY,
+        user_id INTEGER,
+        user_name VARCHAR(255),
+        action VARCHAR(255),
+        details TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+
+      CREATE TABLE IF NOT EXISTS bkn_data (
+        id SERIAL PRIMARY KEY,
+        nik VARCHAR(50) UNIQUE NOT NULL,
+        reg_number VARCHAR(100),
+        fullname VARCHAR(255),
+        skor_twk NUMERIC,
+        skor_tiu NUMERIC,
+        skor_tkp NUMERIC,
+        total_skd NUMERIC,
+        status_pg VARCHAR(100),
+        nilai_kesehatan NUMERIC,
+        nilai_samapta NUMERIC,
+        nilai_wawancara NUMERIC,
+        nilai_akhir NUMERIC,
+        rank VARCHAR(100),
+        status_akhir VARCHAR(100),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+    console.log("✅ Database schema auto-migration succeeded");
+  } catch (err) {
+    console.error("⚠️ Database schema auto-migration error:", err.message);
+  }
+}
+initDatabaseSchema();
+
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
   console.error("FATAL: JWT_SECRET tidak ditemukan di .env");
