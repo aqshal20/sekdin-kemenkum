@@ -223,7 +223,7 @@ async function initLayout() {
   // Page protection
   if (page === "pengaduan") {
     if (!isLogged) {
-      return showModalAlert("Anda harus masuk terlebih dahulu untuk mengakses halaman ini.", "login.html");
+      return showModalAlert("Untuk mengakses menu Helpdesk & Pengaduan, Anda dapat masuk (login) atau mendaftar akun terlebih dahulu.", "pilihan-login.html", "info");
     } else if (isAdmin) {
       return showModalAlert("Akses ditolak. Halaman Helpdesk hanya untuk peserta / pengguna.", "kotak-masuk.html");
     }
@@ -231,14 +231,14 @@ async function initLayout() {
 
   if (page === "nilai" || page === "tahapan") {
     if (!isLogged) {
-      return showModalAlert("Anda harus masuk terlebih dahulu dengan Akun SSCASN BKN untuk mengakses halaman ini.", "login.html");
+      return showModalAlert("Untuk mengakses Hasil Nilai & Tahapan Seleksi, Anda dapat masuk terlebih dahulu dengan Akun SSCASN BKN.", "pilihan-login.html", "info");
     } else if (!isParticipant) {
       return showModalAlert("Akses ditolak. Halaman Hasil Nilai & Tahapan Tes khusus untuk Peserta SSCASN BKN.", "index.html");
     }
   }
 
   if (page === "profil" && !isLogged) {
-    return showModalAlert("Anda harus masuk untuk melihat profil.", "login.html");
+    return showModalAlert("Silakan masuk terlebih dahulu untuk mengakses profil Anda.", "pilihan-login.html", "info");
   }
 
   if (page === "dashboard") {
