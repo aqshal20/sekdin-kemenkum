@@ -4,297 +4,161 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Akses Portal — Sekdin-Poltekpin Kementerian Hukum RI</title>
-    <meta name="description" content="Pilih jenis akun untuk mengakses Portal Terpadu Peserta dan Layanan Helpdesk Politeknik Pengayoman Indonesia." />
     <link rel="stylesheet" href="style.css" />
     <style>
-      .choice-page {
-        min-height: calc(100vh - var(--header-h) - var(--topbar-h) - 120px);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 48px 20px 64px;
+      .choice-wrap {
+        max-width: 440px;
+        margin: 60px auto 80px;
+        padding: 0 20px;
       }
 
-      .choice-wrapper {
-        width: 100%;
-        max-width: 900px;
-      }
-
-      /* ── Divider Banner ── */
-      .choice-banner {
+      .choice-head {
         text-align: center;
-        margin-bottom: 48px;
-      }
-
-      .choice-banner-kop {
-        display: inline-flex;
-        align-items: center;
-        gap: 12px;
-        background: #fff;
-        border: 1px solid #d1d9e0;
-        border-radius: 8px;
-        padding: 8px 18px;
-        margin-bottom: 24px;
-        box-shadow: 0 2px 8px rgba(0,51,102,0.06);
-      }
-
-      .choice-banner-kop img {
-        width: 32px;
-        height: 32px;
-        object-fit: contain;
-      }
-
-      .choice-banner-kop span {
-        font-size: 12px;
-        font-weight: 700;
-        color: #003366;
-        letter-spacing: 0.3px;
-        text-transform: uppercase;
-      }
-
-      .choice-banner h1 {
-        font-size: 30px;
-        font-weight: 800;
-        color: #003366;
-        margin-bottom: 10px;
-        letter-spacing: -0.5px;
-        line-height: 1.2;
-      }
-
-      .choice-banner p {
-        font-size: 15px;
-        color: #64748b;
-        max-width: 520px;
-        margin: 0 auto;
-        line-height: 1.6;
-      }
-
-      /* ── Divider ── */
-      .choice-divider {
-        display: flex;
-        align-items: center;
-        gap: 16px;
         margin-bottom: 32px;
       }
-      .choice-divider::before,
-      .choice-divider::after {
+
+      .choice-head img {
+        width: 48px;
+        height: 48px;
+        object-fit: contain;
+        margin-bottom: 14px;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .choice-head h1 {
+        font-size: 22px;
+        font-weight: 800;
+        color: #003366;
+        margin-bottom: 6px;
+      }
+
+      .choice-head p {
+        font-size: 14px;
+        color: #64748b;
+        line-height: 1.5;
+      }
+
+      .choice-btn {
+        display: block;
+        width: 100%;
+        padding: 16px 20px;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 700;
+        text-decoration: none;
+        text-align: left;
+        cursor: pointer;
+        border: 1.5px solid transparent;
+        transition: all 0.15s ease;
+        position: relative;
+      }
+
+      .choice-btn .btn-label {
+        display: block;
+        font-size: 15px;
+        font-weight: 700;
+        margin-bottom: 2px;
+      }
+
+      .choice-btn .btn-sub {
+        display: block;
+        font-size: 12.5px;
+        font-weight: 500;
+        opacity: 0.75;
+      }
+
+      .choice-btn .btn-arrow {
+        position: absolute;
+        right: 18px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 18px;
+        opacity: 0.5;
+        transition: opacity 0.15s, right 0.15s;
+      }
+
+      .choice-btn:hover .btn-arrow {
+        opacity: 1;
+        right: 14px;
+      }
+
+      .choice-btn-peserta {
+        background: #003366;
+        color: #ffffff;
+        border-color: #003366;
+      }
+
+      .choice-btn-peserta:hover {
+        background: #00285c;
+        border-color: #00285c;
+      }
+
+      .choice-btn-umum {
+        background: #ffffff;
+        color: #1e293b;
+        border-color: #cbd5e1;
+      }
+
+      .choice-btn-umum:hover {
+        border-color: #003366;
+        background: #f8fafc;
+      }
+
+      .choice-separator {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 16px 0;
+      }
+
+      .choice-separator::before,
+      .choice-separator::after {
         content: "";
         flex: 1;
         height: 1px;
         background: #e2e8f0;
       }
-      .choice-divider span {
-        font-size: 11px;
-        font-weight: 700;
+
+      .choice-separator span {
+        font-size: 11.5px;
         color: #94a3b8;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        white-space: nowrap;
-      }
-
-      /* ── Card Grid ── */
-      .choice-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 20px;
-      }
-
-      .choice-card {
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 14px;
-        padding: 0;
-        display: flex;
-        flex-direction: column;
-        overflow: hidden;
-        box-shadow: 0 2px 12px rgba(0,51,102,0.06);
-        transition: transform 0.18s ease, box-shadow 0.18s ease;
-      }
-
-      .choice-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 30px rgba(0,51,102,0.13);
-      }
-
-      .choice-card-head {
-        padding: 20px 24px 16px;
-        border-bottom: 1px solid #f1f5f9;
-      }
-
-      .choice-card-head.head-primary {
-        background: linear-gradient(135deg, #003366 0%, #1e3a5f 100%);
-      }
-
-      .choice-card-head.head-secondary {
-        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
-      }
-
-      .choice-type-label {
-        font-size: 10px;
-        font-weight: 800;
-        letter-spacing: 1.2px;
-        text-transform: uppercase;
-        margin-bottom: 8px;
-      }
-
-      .choice-type-label.lbl-primary { color: rgba(255,255,255,0.6); }
-      .choice-type-label.lbl-secondary { color: rgba(255,255,255,0.6); }
-
-      .choice-card-title {
-        font-size: 19px;
-        font-weight: 800;
-        color: #ffffff;
-        margin-bottom: 4px;
-        line-height: 1.3;
-      }
-
-      .choice-card-subtitle {
-        font-size: 13px;
-        color: rgba(255,255,255,0.7);
-        line-height: 1.5;
-      }
-
-      .choice-card-body {
-        padding: 20px 24px 24px;
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        gap: 20px;
-      }
-
-      .choice-features {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 9px;
-      }
-
-      .choice-features li {
-        display: flex;
-        align-items: flex-start;
-        gap: 10px;
-        font-size: 13.5px;
-        color: #334155;
-        line-height: 1.45;
-      }
-
-      .choice-features li::before {
-        content: "";
-        display: block;
-        width: 16px;
-        height: 16px;
-        flex-shrink: 0;
-        margin-top: 1px;
-        background: #dcfce7;
-        border-radius: 50%;
-        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 6l3 3 5-5' stroke='%2316a34a' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
-        background-repeat: no-repeat;
-        background-position: center;
-        background-size: 10px;
-      }
-
-      .choice-actions {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-
-      .btn-acc-primary {
-        background: #003366;
-        color: #fff;
-        padding: 13px 20px;
-        border-radius: 9px;
-        font-weight: 700;
-        font-size: 14px;
-        text-decoration: none;
-        text-align: center;
-        display: block;
-        transition: background 0.15s, transform 0.12s;
-        letter-spacing: 0.1px;
-      }
-
-      .btn-acc-primary:hover {
-        background: #002244;
-        transform: translateY(-1px);
-      }
-
-      .btn-acc-secondary {
-        background: #1e293b;
-        color: #fff;
-        padding: 13px 20px;
-        border-radius: 9px;
-        font-weight: 700;
-        font-size: 14px;
-        text-decoration: none;
-        text-align: center;
-        display: block;
-        transition: background 0.15s, transform 0.12s;
-      }
-
-      .btn-acc-secondary:hover {
-        background: #0f172a;
-        transform: translateY(-1px);
-      }
-
-      .btn-acc-ghost {
-        color: #475569;
-        font-size: 13px;
         font-weight: 600;
+        letter-spacing: 0.5px;
+      }
+
+      .choice-register {
         text-align: center;
-        text-decoration: none;
-        padding: 7px;
-        border-radius: 7px;
-        display: block;
-        transition: background 0.15s;
+        margin-top: 20px;
+        font-size: 13px;
+        color: #64748b;
       }
 
-      .btn-acc-ghost:hover {
-        background: #f1f5f9;
+      .choice-register a {
         color: #003366;
+        font-weight: 700;
+        text-decoration: none;
       }
 
-      /* ── Footer link ── */
-      .choice-footer {
+      .choice-register a:hover {
+        text-decoration: underline;
+      }
+
+      .choice-back {
         text-align: center;
-        margin-top: 32px;
-        font-size: 13.5px;
-        color: #94a3b8;
-      }
-
-      .choice-footer a {
-        color: #475569;
-        text-decoration: none;
-        font-weight: 600;
-        transition: color 0.15s;
-      }
-
-      .choice-footer a:hover {
-        color: #003366;
-      }
-
-      /* ── Security note ── */
-      .choice-security-note {
         margin-top: 28px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        font-size: 12px;
-        color: #94a3b8;
-        font-weight: 500;
+        font-size: 13px;
       }
 
-      .choice-security-note::before {
-        content: "";
-        display: inline-block;
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: #22c55e;
-        box-shadow: 0 0 0 3px rgba(34,197,94,0.2);
+      .choice-back a {
+        color: #94a3b8;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .choice-back a:hover {
+        color: #475569;
       }
     </style>
   </head>
@@ -304,84 +168,36 @@
     </div>
     <div data-site-header></div>
 
-    <main class="choice-page">
-      <div class="choice-wrapper fade-in">
+    <main class="choice-wrap fade-in">
 
-        <!-- Header Banner -->
-        <div class="choice-banner">
-          <div class="choice-banner-kop">
-            <img src="assets/Kemenkum.png" alt="Logo Kementerian Hukum RI" />
-            <span>Portal Terpadu Sekdin-Poltekpin</span>
-          </div>
-          <h1>Pilih Jenis Akses Portal</h1>
-          <p>Silakan tentukan kategori akun Anda. Data dan layanan yang tersedia akan disesuaikan dengan jenis akses yang dipilih.</p>
-        </div>
+      <div class="choice-head">
+        <img src="assets/Kemenkum.png" alt="Logo Kementerian Hukum RI" />
+        <h1>Masuk ke Portal</h1>
+        <p>Pilih jenis akun Anda untuk melanjutkan</p>
+      </div>
 
-        <div class="choice-divider">
-          <span>Pilih Akses Sesuai Kategori Anda</span>
-        </div>
+      <!-- Login Peserta -->
+      <a href="login.html?type=peserta" class="choice-btn choice-btn-peserta">
+        <span class="btn-label">Masuk sebagai Peserta</span>
+        <span class="btn-sub">Autentikasi via NIK &amp; Kata Sandi SSCASN BKN</span>
+        <span class="btn-arrow">›</span>
+      </a>
 
-        <!-- Card Grid -->
-        <div class="choice-grid">
+      <div class="choice-separator"><span>atau</span></div>
 
-          <!-- Card 1: Peserta SSCASN BKN -->
-          <div class="choice-card">
-            <div class="choice-card-head head-primary">
-              <div class="choice-type-label lbl-primary">Terintegrasi SSCASN BKN</div>
-              <div class="choice-card-title">Peserta Seleksi Kedinasan</div>
-              <div class="choice-card-subtitle">Peserta terdaftar Seleksi Kedinasan Poltekpin 2026</div>
-            </div>
-            <div class="choice-card-body">
-              <ul class="choice-features">
-                <li>Autentikasi menggunakan <strong>NIK &amp; Kata Sandi SSCASN BKN</strong></li>
-                <li>Akses Transkrip Skor Resmi CAT BKN (TWK, TIU, TKP)</li>
-                <li>Pantau Status &amp; Jadwal Tiap Tahapan Seleksi</li>
-                <li>Tidak diperlukan pendaftaran ulang di portal ini</li>
-              </ul>
-              <div class="choice-actions">
-                <a href="login.html?type=peserta" class="btn-acc-primary">
-                  Masuk sebagai Peserta SSCASN ➔
-                </a>
-              </div>
-            </div>
-          </div>
+      <!-- Login Umum -->
+      <a href="login.html?type=umum" class="choice-btn choice-btn-umum">
+        <span class="btn-label">Masuk sebagai Pengguna Umum</span>
+        <span class="btn-sub">Autentikasi via Email &amp; Kata Sandi terdaftar</span>
+        <span class="btn-arrow">›</span>
+      </a>
 
-          <!-- Card 2: Pengguna Umum / Staff -->
-          <div class="choice-card">
-            <div class="choice-card-head head-secondary">
-              <div class="choice-type-label lbl-secondary">Akun Portal Terpadu</div>
-              <div class="choice-card-title">Pengguna Umum / Staff Instansi</div>
-              <div class="choice-card-subtitle">Masyarakat umum, pelapor, atau petugas pengelola</div>
-            </div>
-            <div class="choice-card-body">
-              <ul class="choice-features">
-                <li>Autentikasi menggunakan <strong>Email &amp; Kata Sandi</strong> terdaftar</li>
-                <li>Layanan Helpdesk &amp; Pengaduan Terpadu</li>
-                <li>Fitur percakapan langsung dengan petugas</li>
-                <li>Registrasi akun baru tersedia secara gratis</li>
-              </ul>
-              <div class="choice-actions">
-                <a href="login.html?type=umum" class="btn-acc-secondary">
-                  Masuk sebagai Pengguna Umum ➔
-                </a>
-                <a href="register.html" class="btn-acc-ghost">
-                  Belum punya akun? Daftar Akun Umum
-                </a>
-              </div>
-            </div>
-          </div>
+      <div class="choice-register">
+        Belum punya akun? <a href="register.html">Daftar Akun Umum</a>
+      </div>
 
-        </div>
-
-        <!-- Security Note -->
-        <div class="choice-security-note">
-          Koneksi aman &mdash; Sistem berjalan di lingkungan terenkripsi Kementerian Hukum RI
-        </div>
-
-        <!-- Back link -->
-        <div class="choice-footer" style="margin-top: 20px;">
-          <a href="index.html">← Kembali ke Halaman Utama</a>
-        </div>
+      <div class="choice-back">
+        <a href="index.html">← Kembali ke Halaman Utama</a>
       </div>
     </main>
 
