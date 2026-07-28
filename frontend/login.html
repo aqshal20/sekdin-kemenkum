@@ -49,10 +49,10 @@
         <!-- Switcher Login Type -->
         <div class="login-type-switch" style="display: flex; gap: 6px; margin-bottom: 22px; background: #f1f5f9; padding: 4px; border-radius: 10px;">
           <button type="button" id="tab-peserta" class="tab-btn active" onclick="switchLoginTab('peserta')" style="flex: 1; padding: 11px 8px; border: none; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.2s;">
-            🎓 Peserta SSCASN BKN
+            Peserta SSCASN BKN
           </button>
           <button type="button" id="tab-umum" class="tab-btn" onclick="switchLoginTab('umum')" style="flex: 1; padding: 11px 8px; border: none; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.2s;">
-            👤 Umum
+            Pengguna Umum / Staff
           </button>
         </div>
 
@@ -64,8 +64,7 @@
         <!-- Form 1: Peserta BKN -->
         <form id="bkn-login-form" method="POST">
           <div class="notice" style="margin-bottom: 18px; font-size: 13px; background: #eff6ff; border-left: 4px solid #2563eb; color: #1e40af; padding: 12px 14px; border-radius: 6px;">
-            <span>ℹ️</span>
-            <span>Gunakan <strong>NIK / Username</strong> dan <strong>Kata Sandi</strong> yang terdaftar di portal <strong>SSCASN BKN</strong>. Peserta tidak perlu mendaftar ulang.</span>
+            <span>Gunakan <strong>NIK / Username</strong> dan <strong>Kata Sandi</strong> yang terdaftar pada portal resmi <strong>SSCASN BKN</strong>. Peserta tidak perlu mendaftar ulang.</span>
           </div>
           <div>
             <label for="bkn-user">NIK / Username BKN</label>
@@ -80,14 +79,13 @@
             Tampilkan kata sandi
           </label>
           <button class="btn btn-primary btn-full" type="submit" id="bkn-login-btn" style="margin-top: 16px; padding: 13px; font-weight: 700; background: #003366;">
-            🔐 Masuk via SSCASN BKN
+            Masuk via SSCASN BKN
           </button>
         </form>
 
         <!-- Form 2: Umum / Admin -->
         <form id="login-form" method="POST" style="display: none;">
           <div class="notice" style="margin-bottom: 18px; font-size: 13px;">
-            <span>ℹ️</span>
             <span>Masuk menggunakan alamat email terdaftar dan terverifikasi.</span>
           </div>
           <div>
@@ -106,9 +104,10 @@
             Tampilkan kata sandi
           </label>
           <button class="btn btn-primary btn-full" type="submit" id="login-btn" style="margin-top: 16px; padding: 13px; font-weight: 700;">
-            🔐 Masuk ke Portal
+            Masuk ke Portal
           </button>
         </form>
+
 
         <hr class="auth-divider" />
 
