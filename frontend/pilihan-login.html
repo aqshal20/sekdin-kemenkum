@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pilih Jenis Akses Portal — Sekdin-Poltekpin Kementerian Hukum RI</title>
+    <link rel="stylesheet" href="style.css" />
+    <style>
+      .login-choice-container {
+        max-width: 960px;
+        margin: 40px auto 60px;
+        padding: 0 20px;
+      }
+      .login-choice-header {
+        text-align: center;
+        margin-bottom: 36px;
+      }
+      .login-choice-header h1 {
+        font-size: 28px;
+        font-weight: 800;
+        color: #003366;
+        margin-bottom: 8px;
+      }
+      .login-choice-header p {
+        font-size: 15px;
+        color: #64748b;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      .login-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 24px;
+      }
+      .choice-card {
+        background: #ffffff;
+        border: 1px solid #cbd5e1;
+        border-radius: 16px;
+        padding: 32px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+        transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+        position: relative;
+        overflow: hidden;
+      }
+      .choice-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 28px rgba(0, 51, 102, 0.12);
+        border-color: #2563eb;
+      }
+      .choice-card.primary-choice {
+        border-top: 5px solid #003366;
+      }
+      .choice-card.secondary-choice {
+        border-top: 5px solid #475569;
+      }
+      .choice-badge {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        padding: 4px 10px;
+        border-radius: 6px;
+        margin-bottom: 16px;
+        width: fit-content;
+      }
+      .badge-bkn { background: #dbeafe; color: #1e40af; }
+      .badge-umum { background: #f1f5f9; color: #475569; }
+      
+      .choice-title {
+        font-size: 20px;
+        font-weight: 800;
+        color: #003366;
+        margin-bottom: 8px;
+      }
+      .choice-desc {
+        font-size: 14px;
+        color: #475569;
+        line-height: 1.6;
+        margin-bottom: 20px;
+      }
+      .choice-features {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 28px;
+        font-size: 13.5px;
+        color: #334155;
+      }
+      .choice-features li {
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .choice-features li::before {
+        content: "✓";
+        color: #16a34a;
+        font-weight: 800;
+      }
+      .btn-choice-primary {
+        background: #003366;
+        color: #ffffff;
+        padding: 13px 20px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 14px;
+        text-decoration: none;
+        text-align: center;
+        display: block;
+        transition: background 0.2s;
+      }
+      .btn-choice-primary:hover {
+        background: #002244;
+      }
+      .btn-choice-outline {
+        background: #ffffff;
+        color: #003366;
+        border: 1.5px solid #003366;
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 14px;
+        text-decoration: none;
+        text-align: center;
+        display: block;
+        transition: background 0.2s;
+      }
+      .btn-choice-outline:hover {
+        background: #f8fafc;
+      }
+    </style>
+  </head>
+  <body data-page="pilihan-login">
+    <div class="gov-topbar">
+      <span>Politeknik Pengayoman Indonesia — Kementerian Hukum RI</span>
+    </div>
+    <div data-site-header></div>
+
+    <main class="login-choice-container fade-in">
+      <div class="login-choice-header">
+        <h1>Pilih Jenis Akses Portal</h1>
+        <p>Silakan pilih kategori akun Anda untuk masuk ke sistem layanan terpadu Politeknik Pengayoman Indonesia.</p>
+      </div>
+
+      <div class="login-cards-grid">
+        <!-- Pilihan 1: Peserta SSCASN BKN -->
+        <div class="choice-card primary-choice">
+          <div>
+            <span class="choice-badge badge-bkn">Terintegrasi SSCASN BKN</span>
+            <h2 class="choice-title">Peserta Seleksi Kedinasan</h2>
+            <p class="choice-desc">Untuk seluruh peserta terdaftar yang mengikuti tahapan Seleksi Kedinasan Poltekpin 2026.</p>
+            <ul class="choice-features">
+              <li>Masuk menggunakan <strong>NIK &amp; Password BKN</strong></li>
+              <li>Akses Transkrip Skor Resmi CAT BKN &amp; Instansi</li>
+              <li>Pantau Progres Alur &amp; Jadwal Tahapan Tes</li>
+              <li>Tanpa perlu mendaftar ulang di portal</li>
+            </ul>
+          </div>
+          <div>
+            <a href="login.html?type=peserta" class="btn-choice-primary">
+              Masuk sebagai Peserta SSCASN ➔
+            </a>
+          </div>
+        </div>
+
+        <!-- Pilihan 2: Masyarakat Umum / Staff -->
+        <div class="choice-card secondary-choice">
+          <div>
+            <span class="choice-badge badge-umum">Pengguna Umum &amp; Staff</span>
+            <h2 class="choice-title">Pengguna Umum / Helpdesk</h2>
+            <p class="choice-desc">Untuk masyarakat umum, pelapor kendala/pengaduan, atau petugas pengelola instansi.</p>
+            <ul class="choice-features">
+              <li>Masuk menggunakan <strong>Email &amp; Password</strong></li>
+              <li>Sampaikan pengaduan &amp; kendala teknis</li>
+              <li>Fitur percakapan interaktif Helpdesk</li>
+              <li>Tersedia pendaftaran akun umum baru</li>
+            </ul>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 10px;">
+            <a href="login.html?type=umum" class="btn-choice-outline">
+              Masuk sebagai Pengguna Umum ➔
+            </a>
+            <a href="register.html" style="text-align: center; font-size: 13px; color: #475569; text-decoration: underline; font-weight: 600;">
+              Belum Punya Akun? Daftar Akun Umum
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align: center; margin-top: 36px;">
+        <a href="index.html" style="color: #64748b; font-size: 14px; text-decoration: none; font-weight: 600;">
+          ← Kembali ke Halaman Utama
+        </a>
+      </div>
+    </main>
+
+    <div data-site-footer></div>
+    <script src="app.js"></script>
+  </body>
+</html>

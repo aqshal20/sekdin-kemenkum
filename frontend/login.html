@@ -39,20 +39,17 @@
       <div class="auth-card fade-in">
         <!-- Header -->
         <div style="text-align: center; margin-bottom: 24px;">
-          <div style="width: 60px; height: 60px; border-radius: 12px; background: #e8eef8; display: grid; place-items: center; font-size: 28px; margin: 0 auto 14px;">
-            🔐
-          </div>
-          <h1 style="font-size: 22px; margin-bottom: 4px; color: #003366;">Masuk ke Sistem</h1>
-          <p class="auth-subtitle">Silakan pilih jenis akun Anda untuk masuk ke portal</p>
+          <h1 id="login-title" style="font-size: 22px; margin-bottom: 6px; color: #003366;">Masuk ke Portal</h1>
+          <p id="login-subtitle" class="auth-subtitle">Silakan masukkan kredensial akun Anda</p>
         </div>
 
         <!-- Switcher Login Type -->
-        <div class="login-type-switch" style="display: flex; gap: 6px; margin-bottom: 22px; background: #f1f5f9; padding: 4px; border-radius: 10px;">
+        <div class="login-type-switch" id="login-type-switch" style="display: flex; gap: 6px; margin-bottom: 22px; background: #f1f5f9; padding: 4px; border-radius: 10px;">
           <button type="button" id="tab-peserta" class="tab-btn active" onclick="switchLoginTab('peserta')" style="flex: 1; padding: 11px 8px; border: none; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.2s;">
             Peserta SSCASN BKN
           </button>
           <button type="button" id="tab-umum" class="tab-btn" onclick="switchLoginTab('umum')" style="flex: 1; padding: 11px 8px; border: none; border-radius: 8px; font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.2s;">
-            Pengguna Umum / Staff
+            Pengguna Umum
           </button>
         </div>
 
@@ -114,8 +111,9 @@
         <div id="footer-register" class="auth-footer-text">
           Belum punya akun? <a href="register.html">Daftar Akun Umum di sini</a>
         </div>
-        <div class="auth-footer-text" style="margin-top: 10px;">
-          <a href="index.html" style="color: var(--muted); border-bottom-color: transparent;">← Kembali ke Beranda</a>
+        <div class="auth-footer-text" style="margin-top: 12px; display: flex; flex-direction: column; gap: 6px;">
+          <a href="pilihan-login.html" style="color: #003366; font-weight: 700; text-decoration: none;">← Kembali ke Pilihan Akses Portal</a>
+          <a href="index.html" style="color: var(--muted); text-decoration: none; font-size: 12px;">Ke Halaman Utama</a>
         </div>
       </div>
     </main>
@@ -133,6 +131,8 @@
         const formUmum = document.getElementById("login-form");
         const loginError = document.getElementById("login-error");
         const footerRegister = document.getElementById("footer-register");
+        const loginTitle = document.getElementById("login-title");
+        const loginSubtitle = document.getElementById("login-subtitle");
 
         loginError.style.display = "none";
 
@@ -146,6 +146,8 @@
           document.getElementById("email").required = false;
           document.getElementById("password").required = false;
           footerRegister.style.display = "none";
+          if (loginTitle) loginTitle.textContent = "Masuk Peserta SSCASN BKN";
+          if (loginSubtitle) loginSubtitle.textContent = "Masukkan NIK dan kata sandi SSCASN Anda";
         } else {
           tabUmum.classList.add("active");
           tabPeserta.classList.remove("active");
@@ -156,11 +158,19 @@
           document.getElementById("email").required = true;
           document.getElementById("password").required = true;
           footerRegister.style.display = "block";
+          if (loginTitle) loginTitle.textContent = "Masuk Pengguna Umum / Staff";
+          if (loginSubtitle) loginSubtitle.textContent = "Masukkan email dan kata sandi terdaftar Anda";
         }
       }
 
-      // Initialize default tab
-      switchLoginTab("peserta");
+      // Check URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const reqType = urlParams.get("type");
+      if (reqType === "umum") {
+        switchLoginTab("umum");
+      } else {
+        switchLoginTab("peserta");
+      }
 
       // BKN Login Form Listener
       const bknForm = document.getElementById("bkn-login-form");
