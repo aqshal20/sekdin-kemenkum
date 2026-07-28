@@ -1120,7 +1120,7 @@
       }
 
       function initSocket() {
-        socket = io("http://localhost:3000");
+        socket = io();
         
         socket.on("connect", () => {
           socket.emit("join", `user_room_${userData.id}`);

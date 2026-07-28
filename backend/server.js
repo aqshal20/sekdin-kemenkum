@@ -195,7 +195,8 @@ const allowedOrigins = [
   'http://localhost:8080',
   'http://127.0.0.1:3000',
   'http://127.0.0.1:8080',
-  'https://sekdin-kemenkum.com' // Ubah dengan domain asli nanti
+  'http://172.27.101.101:3000',
+  'https://sekdin-kemenkum.com'
 ];
 
 const app = express();
@@ -208,7 +209,7 @@ const server = http.createServer(app);
 // Socket.IO
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: "*",
     methods: ["GET", "POST"]
   }
 });
@@ -1902,6 +1903,7 @@ app.use((req, res) => {
 // initializeWhatsApp();
 
 const PORT = process.env.PORT || 3000;
-server.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+const HOST = process.env.HOST || '0.0.0.0';
+server.listen(PORT, HOST, () => {
+  console.log(`Server running on http://${HOST}:${PORT}`);
 });
