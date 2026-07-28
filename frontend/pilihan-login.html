@@ -3,133 +3,298 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pilih Jenis Akses Portal — Sekdin-Poltekpin Kementerian Hukum RI</title>
+    <title>Akses Portal — Sekdin-Poltekpin Kementerian Hukum RI</title>
+    <meta name="description" content="Pilih jenis akun untuk mengakses Portal Terpadu Peserta dan Layanan Helpdesk Politeknik Pengayoman Indonesia." />
     <link rel="stylesheet" href="style.css" />
     <style>
-      .login-choice-container {
-        max-width: 960px;
-        margin: 40px auto 60px;
-        padding: 0 20px;
+      .choice-page {
+        min-height: calc(100vh - var(--header-h) - var(--topbar-h) - 120px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 48px 20px 64px;
       }
-      .login-choice-header {
+
+      .choice-wrapper {
+        width: 100%;
+        max-width: 900px;
+      }
+
+      /* ── Divider Banner ── */
+      .choice-banner {
         text-align: center;
-        margin-bottom: 36px;
+        margin-bottom: 48px;
       }
-      .login-choice-header h1 {
-        font-size: 28px;
+
+      .choice-banner-kop {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        background: #fff;
+        border: 1px solid #d1d9e0;
+        border-radius: 8px;
+        padding: 8px 18px;
+        margin-bottom: 24px;
+        box-shadow: 0 2px 8px rgba(0,51,102,0.06);
+      }
+
+      .choice-banner-kop img {
+        width: 32px;
+        height: 32px;
+        object-fit: contain;
+      }
+
+      .choice-banner-kop span {
+        font-size: 12px;
+        font-weight: 700;
+        color: #003366;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+      }
+
+      .choice-banner h1 {
+        font-size: 30px;
         font-weight: 800;
         color: #003366;
-        margin-bottom: 8px;
+        margin-bottom: 10px;
+        letter-spacing: -0.5px;
+        line-height: 1.2;
       }
-      .login-choice-header p {
+
+      .choice-banner p {
         font-size: 15px;
         color: #64748b;
-        max-width: 600px;
+        max-width: 520px;
         margin: 0 auto;
+        line-height: 1.6;
       }
-      .login-cards-grid {
+
+      /* ── Divider ── */
+      .choice-divider {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 32px;
+      }
+      .choice-divider::before,
+      .choice-divider::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: #e2e8f0;
+      }
+      .choice-divider span {
+        font-size: 11px;
+        font-weight: 700;
+        color: #94a3b8;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+
+      /* ── Card Grid ── */
+      .choice-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-        gap: 24px;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
       }
+
       .choice-card {
         background: #ffffff;
-        border: 1px solid #cbd5e1;
-        border-radius: 16px;
-        padding: 32px;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        box-shadow: 0 2px 12px rgba(0,51,102,0.06);
+        transition: transform 0.18s ease, box-shadow 0.18s ease;
+      }
+
+      .choice-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0,51,102,0.13);
+      }
+
+      .choice-card-head {
+        padding: 20px 24px 16px;
+        border-bottom: 1px solid #f1f5f9;
+      }
+
+      .choice-card-head.head-primary {
+        background: linear-gradient(135deg, #003366 0%, #1e3a5f 100%);
+      }
+
+      .choice-card-head.head-secondary {
+        background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+      }
+
+      .choice-type-label {
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1.2px;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+      }
+
+      .choice-type-label.lbl-primary { color: rgba(255,255,255,0.6); }
+      .choice-type-label.lbl-secondary { color: rgba(255,255,255,0.6); }
+
+      .choice-card-title {
+        font-size: 19px;
+        font-weight: 800;
+        color: #ffffff;
+        margin-bottom: 4px;
+        line-height: 1.3;
+      }
+
+      .choice-card-subtitle {
+        font-size: 13px;
+        color: rgba(255,255,255,0.7);
+        line-height: 1.5;
+      }
+
+      .choice-card-body {
+        padding: 20px 24px 24px;
+        flex: 1;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
-        transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
-        position: relative;
-        overflow: hidden;
+        gap: 20px;
       }
-      .choice-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 12px 28px rgba(0, 51, 102, 0.12);
-        border-color: #2563eb;
-      }
-      .choice-card.primary-choice {
-        border-top: 5px solid #003366;
-      }
-      .choice-card.secondary-choice {
-        border-top: 5px solid #475569;
-      }
-      .choice-badge {
-        display: inline-block;
-        font-size: 11px;
-        font-weight: 800;
-        letter-spacing: 0.5px;
-        text-transform: uppercase;
-        padding: 4px 10px;
-        border-radius: 6px;
-        margin-bottom: 16px;
-        width: fit-content;
-      }
-      .badge-bkn { background: #dbeafe; color: #1e40af; }
-      .badge-umum { background: #f1f5f9; color: #475569; }
-      
-      .choice-title {
-        font-size: 20px;
-        font-weight: 800;
-        color: #003366;
-        margin-bottom: 8px;
-      }
-      .choice-desc {
-        font-size: 14px;
-        color: #475569;
-        line-height: 1.6;
-        margin-bottom: 20px;
-      }
+
       .choice-features {
         list-style: none;
         padding: 0;
-        margin: 0 0 28px;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 9px;
+      }
+
+      .choice-features li {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
         font-size: 13.5px;
         color: #334155;
+        line-height: 1.45;
       }
-      .choice-features li {
-        margin-bottom: 10px;
+
+      .choice-features li::before {
+        content: "";
+        display: block;
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
+        margin-top: 1px;
+        background: #dcfce7;
+        border-radius: 50%;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2 6l3 3 5-5' stroke='%2316a34a' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' fill='none'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: 10px;
+      }
+
+      .choice-actions {
         display: flex;
-        align-items: center;
+        flex-direction: column;
         gap: 8px;
       }
-      .choice-features li::before {
-        content: "✓";
-        color: #16a34a;
-        font-weight: 800;
-      }
-      .btn-choice-primary {
+
+      .btn-acc-primary {
         background: #003366;
-        color: #ffffff;
+        color: #fff;
         padding: 13px 20px;
-        border-radius: 10px;
+        border-radius: 9px;
         font-weight: 700;
         font-size: 14px;
         text-decoration: none;
         text-align: center;
         display: block;
-        transition: background 0.2s;
+        transition: background 0.15s, transform 0.12s;
+        letter-spacing: 0.1px;
       }
-      .btn-choice-primary:hover {
+
+      .btn-acc-primary:hover {
         background: #002244;
+        transform: translateY(-1px);
       }
-      .btn-choice-outline {
-        background: #ffffff;
-        color: #003366;
-        border: 1.5px solid #003366;
-        padding: 12px 20px;
-        border-radius: 10px;
+
+      .btn-acc-secondary {
+        background: #1e293b;
+        color: #fff;
+        padding: 13px 20px;
+        border-radius: 9px;
         font-weight: 700;
         font-size: 14px;
         text-decoration: none;
         text-align: center;
         display: block;
-        transition: background 0.2s;
+        transition: background 0.15s, transform 0.12s;
       }
-      .btn-choice-outline:hover {
-        background: #f8fafc;
+
+      .btn-acc-secondary:hover {
+        background: #0f172a;
+        transform: translateY(-1px);
+      }
+
+      .btn-acc-ghost {
+        color: #475569;
+        font-size: 13px;
+        font-weight: 600;
+        text-align: center;
+        text-decoration: none;
+        padding: 7px;
+        border-radius: 7px;
+        display: block;
+        transition: background 0.15s;
+      }
+
+      .btn-acc-ghost:hover {
+        background: #f1f5f9;
+        color: #003366;
+      }
+
+      /* ── Footer link ── */
+      .choice-footer {
+        text-align: center;
+        margin-top: 32px;
+        font-size: 13.5px;
+        color: #94a3b8;
+      }
+
+      .choice-footer a {
+        color: #475569;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.15s;
+      }
+
+      .choice-footer a:hover {
+        color: #003366;
+      }
+
+      /* ── Security note ── */
+      .choice-security-note {
+        margin-top: 28px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        font-size: 12px;
+        color: #94a3b8;
+        font-weight: 500;
+      }
+
+      .choice-security-note::before {
+        content: "";
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #22c55e;
+        box-shadow: 0 0 0 3px rgba(34,197,94,0.2);
       }
     </style>
   </head>
@@ -139,61 +304,84 @@
     </div>
     <div data-site-header></div>
 
-    <main class="login-choice-container fade-in">
-      <div class="login-choice-header">
-        <h1>Pilih Jenis Akses Portal</h1>
-        <p>Silakan pilih kategori akun Anda untuk masuk ke sistem layanan terpadu Politeknik Pengayoman Indonesia.</p>
-      </div>
+    <main class="choice-page">
+      <div class="choice-wrapper fade-in">
 
-      <div class="login-cards-grid">
-        <!-- Pilihan 1: Peserta SSCASN BKN -->
-        <div class="choice-card primary-choice">
-          <div>
-            <span class="choice-badge badge-bkn">Terintegrasi SSCASN BKN</span>
-            <h2 class="choice-title">Peserta Seleksi Kedinasan</h2>
-            <p class="choice-desc">Untuk seluruh peserta terdaftar yang mengikuti tahapan Seleksi Kedinasan Poltekpin 2026.</p>
-            <ul class="choice-features">
-              <li>Masuk menggunakan <strong>NIK &amp; Password BKN</strong></li>
-              <li>Akses Transkrip Skor Resmi CAT BKN &amp; Instansi</li>
-              <li>Pantau Progres Alur &amp; Jadwal Tahapan Tes</li>
-              <li>Tanpa perlu mendaftar ulang di portal</li>
-            </ul>
+        <!-- Header Banner -->
+        <div class="choice-banner">
+          <div class="choice-banner-kop">
+            <img src="assets/Kemenkum.png" alt="Logo Kementerian Hukum RI" />
+            <span>Portal Terpadu Sekdin-Poltekpin</span>
           </div>
-          <div>
-            <a href="login.html?type=peserta" class="btn-choice-primary">
-              Masuk sebagai Peserta SSCASN ➔
-            </a>
-          </div>
+          <h1>Pilih Jenis Akses Portal</h1>
+          <p>Silakan tentukan kategori akun Anda. Data dan layanan yang tersedia akan disesuaikan dengan jenis akses yang dipilih.</p>
         </div>
 
-        <!-- Pilihan 2: Masyarakat Umum / Staff -->
-        <div class="choice-card secondary-choice">
-          <div>
-            <span class="choice-badge badge-umum">Pengguna Umum &amp; Staff</span>
-            <h2 class="choice-title">Pengguna Umum / Helpdesk</h2>
-            <p class="choice-desc">Untuk masyarakat umum, pelapor kendala/pengaduan, atau petugas pengelola instansi.</p>
-            <ul class="choice-features">
-              <li>Masuk menggunakan <strong>Email &amp; Password</strong></li>
-              <li>Sampaikan pengaduan &amp; kendala teknis</li>
-              <li>Fitur percakapan interaktif Helpdesk</li>
-              <li>Tersedia pendaftaran akun umum baru</li>
-            </ul>
-          </div>
-          <div style="display: flex; flex-direction: column; gap: 10px;">
-            <a href="login.html?type=umum" class="btn-choice-outline">
-              Masuk sebagai Pengguna Umum ➔
-            </a>
-            <a href="register.html" style="text-align: center; font-size: 13px; color: #475569; text-decoration: underline; font-weight: 600;">
-              Belum Punya Akun? Daftar Akun Umum
-            </a>
-          </div>
+        <div class="choice-divider">
+          <span>Pilih Akses Sesuai Kategori Anda</span>
         </div>
-      </div>
 
-      <div style="text-align: center; margin-top: 36px;">
-        <a href="index.html" style="color: #64748b; font-size: 14px; text-decoration: none; font-weight: 600;">
-          ← Kembali ke Halaman Utama
-        </a>
+        <!-- Card Grid -->
+        <div class="choice-grid">
+
+          <!-- Card 1: Peserta SSCASN BKN -->
+          <div class="choice-card">
+            <div class="choice-card-head head-primary">
+              <div class="choice-type-label lbl-primary">Terintegrasi SSCASN BKN</div>
+              <div class="choice-card-title">Peserta Seleksi Kedinasan</div>
+              <div class="choice-card-subtitle">Peserta terdaftar Seleksi Kedinasan Poltekpin 2026</div>
+            </div>
+            <div class="choice-card-body">
+              <ul class="choice-features">
+                <li>Autentikasi menggunakan <strong>NIK &amp; Kata Sandi SSCASN BKN</strong></li>
+                <li>Akses Transkrip Skor Resmi CAT BKN (TWK, TIU, TKP)</li>
+                <li>Pantau Status &amp; Jadwal Tiap Tahapan Seleksi</li>
+                <li>Tidak diperlukan pendaftaran ulang di portal ini</li>
+              </ul>
+              <div class="choice-actions">
+                <a href="login.html?type=peserta" class="btn-acc-primary">
+                  Masuk sebagai Peserta SSCASN ➔
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: Pengguna Umum / Staff -->
+          <div class="choice-card">
+            <div class="choice-card-head head-secondary">
+              <div class="choice-type-label lbl-secondary">Akun Portal Terpadu</div>
+              <div class="choice-card-title">Pengguna Umum / Staff Instansi</div>
+              <div class="choice-card-subtitle">Masyarakat umum, pelapor, atau petugas pengelola</div>
+            </div>
+            <div class="choice-card-body">
+              <ul class="choice-features">
+                <li>Autentikasi menggunakan <strong>Email &amp; Kata Sandi</strong> terdaftar</li>
+                <li>Layanan Helpdesk &amp; Pengaduan Terpadu</li>
+                <li>Fitur percakapan langsung dengan petugas</li>
+                <li>Registrasi akun baru tersedia secara gratis</li>
+              </ul>
+              <div class="choice-actions">
+                <a href="login.html?type=umum" class="btn-acc-secondary">
+                  Masuk sebagai Pengguna Umum ➔
+                </a>
+                <a href="register.html" class="btn-acc-ghost">
+                  Belum punya akun? Daftar Akun Umum
+                </a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Security Note -->
+        <div class="choice-security-note">
+          Koneksi aman &mdash; Sistem berjalan di lingkungan terenkripsi Kementerian Hukum RI
+        </div>
+
+        <!-- Back link -->
+        <div class="choice-footer" style="margin-top: 20px;">
+          <a href="index.html">← Kembali ke Halaman Utama</a>
+        </div>
       </div>
     </main>
 
