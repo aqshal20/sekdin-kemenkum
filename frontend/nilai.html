@@ -391,23 +391,26 @@
         }
 
         /* Tanda Tangan */
-        .pd-ttd {
-          margin-top: 20px;
-          display: flex;
-          justify-content: flex-end;
-        }
-        .pd-ttd-box {
+        .pd-congrats {
+          margin-top: 16px;
+          border: 1.5px solid #003366;
+          border-radius: 4px;
+          background: linear-gradient(135deg, #003366 0%, #1e40af 100%);
+          color: white;
+          padding: 14px 18px;
           text-align: center;
-          width: 210px;
         }
-        .pd-ttd-box .ttd-label { font-size: 9.5pt; }
-        .pd-ttd-box .ttd-name {
-          font-size: 10pt;
+        .pd-congrats .cg-title {
+          font-size: 13pt;
           font-weight: bold;
-          text-decoration: underline;
-          margin-top: 52px;
+          letter-spacing: 0.5px;
+          margin-bottom: 4px;
         }
-        .pd-ttd-box .ttd-jabatan { font-size: 9pt; color: #333; }
+        .pd-congrats .cg-sub {
+          font-size: 9pt;
+          opacity: 0.85;
+          line-height: 1.5;
+        }
 
         /* Watermark */
         .pd-watermark {
@@ -617,20 +620,15 @@
             </div>
           </div>
 
-          <!-- Tanda Tangan -->
-          <div class="pd-ttd">
-            <div class="pd-ttd-box">
-              <div class="ttd-label">Depok, <span id="print-ttd-tanggal">—</span></div>
-              <div class="ttd-label" style="margin-top: 4px;">Kepala Sub Bagian Akademik</div>
-              <div class="ttd-label">Politeknik Pengayoman Indonesia</div>
-              <div class="ttd-name">(__________________________)</div>
-              <div class="ttd-jabatan">NIP. ………………………………</div>
-            </div>
+          <!-- Congrats Banner -->
+          <div class="pd-congrats">
+            <div class="cg-title">SELAMAT! ANDA TELAH BERHASIL LOLOS SELEKSI KEDINASAN POLTEKPIN 2026</div>
+            <div class="cg-sub">Transkrip nilai ini diterbitkan dari Portal Resmi Seleksi Kedinasan Politeknik Pengayoman Indonesia.<br>Nilai SKD CAT BKN bersumber langsung dari database resmi Badan Kepegawaian Negara (BKN).</div>
           </div>
 
           <!-- Disclaimer -->
           <div class="pd-disclaimer">
-            <strong>Catatan:</strong> Dokumen ini merupakan transkrip resmi yang diterbitkan oleh sistem informasi Politeknik Pengayoman Indonesia, Kementerian Hukum RI. Nilai SKD CAT BKN bersumber langsung dari Badan Kepegawaian Negara (BKN). Dokumen ini sah tanpa tanda tangan basah apabila dicetak dari portal resmi Poltekpin. Untuk konfirmasi keabsahan, hubungi Sub Bagian Akademik Poltekpin.
+            <strong>Catatan:</strong> Dokumen ini merupakan rekap nilai pribadi peserta yang diterbitkan secara mandiri melalui portal seleksi kedinasan Poltekpin. Data nilai bersumber dari sistem CAT BKN dan evaluasi internal Kementerian Hukum RI. Dicetak pada <span id="print-tanggal-disclaimer"></span>.
           </div>
         </div>
 
@@ -713,7 +711,7 @@
         document.getElementById('print-nik').textContent = d ? d.nik : '—';
         document.getElementById('print-reg').textContent = d ? d.reg_number : '—';
         document.getElementById('print-tanggal').textContent = tanggalCetak;
-        document.getElementById('print-ttd-tanggal').textContent = tanggalCetak;
+        document.getElementById('print-tanggal-disclaimer').textContent = tanggalFull;
         document.getElementById('print-footer-tanggal').textContent = tanggalFull;
 
         if (d) {
