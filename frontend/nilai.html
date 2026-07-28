@@ -3,20 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Hasil & Nilai Ujian | Sekdin-Poltekpin</title>
+    <title>Hasil &amp; Nilai Ujian | Sekdin-Poltekpin</title>
     <meta name="description" content="Transkrip Hasil dan Nilai Ujian Seleksi Kedinasan Politeknik Pengayoman Indonesia." />
     <link rel="stylesheet" href="style.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <style>
-      .gov-topbar {
-        position: fixed; top: 0; left: 0; right: 0; height: 38px;
-        background: linear-gradient(90deg, #cc0000, #a00000);
-        display: flex; align-items: center; padding: 0 5vw; z-index: 50;
-        font-size: 12px; color: rgba(255,255,255,0.95); font-weight: 600;
-        gap: 10px;
-      }
       .score-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -50,9 +40,7 @@
         border-bottom: 1px dashed #e2e8f0;
         font-size: 14px;
       }
-      .sub-score-item:last-child {
-        border-bottom: none;
-      }
+      .sub-score-item:last-child { border-bottom: none; }
       .progress-bar-bg {
         width: 100%; height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden; margin-top: 6px;
       }
@@ -64,6 +52,30 @@
       }
       .status-pill-success { background: #dcfce7; color: #15803d; }
       .status-pill-info { background: #dbeafe; color: #1e40af; }
+
+      /* ── PRINT STYLES ── */
+      @media print {
+        * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+        .gov-topbar,
+        [data-site-header],
+        [data-site-footer],
+        .content-header .btn,
+        .score-grid,
+        .notice,
+        .page-no-print { display: none !important; }
+
+        body { margin: 0; padding: 0; font-family: 'Times New Roman', Times, serif; font-size: 11pt; background: white; }
+        .page-container { padding: 0 !important; max-width: 100% !important; }
+
+        /* Show print document */
+        .print-document { display: block !important; }
+      }
+
+      /* ── PRINT DOCUMENT ── */
+      .print-document {
+        display: none;
+      }
     </style>
   </head>
   <body data-page="nilai">
@@ -79,11 +91,10 @@
           <h1 style="font-size: 26px; font-weight: 800; color: #003366; margin-top: 8px;">Transkrip Hasil &amp; Nilai Ujian</h1>
           <p class="text-muted" style="font-size: 14px;">Rekapitulasi skor resmi Seleksi Kompetensi Dasar (CAT BKN) dan Ujian Lanjutan Kementerian Hukum RI.</p>
         </div>
-        <button class="btn btn-secondary" onclick="window.print()" style="display: flex; align-items: center; gap: 6px; font-weight: 700;">
-          Cetak Transkrip Nilai
+        <button class="btn btn-primary" onclick="cetakTranskrip()" style="display: flex; align-items: center; gap: 8px; font-weight: 700; padding: 12px 22px;">
+          Cetak / Unduh Transkrip
         </button>
       </div>
-
 
       <!-- Identity Banner -->
       <div class="card" style="background: linear-gradient(135deg, #003366 0%, #1e40af 100%); color: white; border-radius: 16px; padding: 24px; margin-bottom: 28px;">
@@ -92,7 +103,7 @@
             <div style="font-size: 13px; opacity: 0.85; font-weight: 600;">NAMA PESERTA TERDAFTAR</div>
             <h2 id="participant-name" style="font-size: 22px; font-weight: 800; margin: 4px 0;">Memuat nama peserta...</h2>
             <div style="font-size: 13px; opacity: 0.9;">
-              NIK: <span id="participant-nik" style="font-weight: 700;">-</span> | 
+              NIK: <span id="participant-nik" style="font-weight: 700;">-</span> |
               No. Register SSCASN: <span id="participant-reg" style="font-weight: 700;">-</span>
             </div>
           </div>
@@ -208,18 +219,434 @@
         </div>
       </div>
 
-      <!-- Info Box Notice -->
+      <!-- Info Notice -->
       <div class="notice" style="margin-top: 32px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 12px; padding: 18px;">
-        <span style="font-size: 20px;">ℹ️</span>
         <div style="font-size: 13px; color: #475569; line-height: 1.6;">
           <strong>Catatan Transparansi Nilai:</strong> Nilai SKD BKN bersumber langsung dari database CAT BKN secara real-time. Jika Anda memiliki pertanyaan atau perbedaan data terkait transkrip nilai, silakan ajukan tiket bantuan melalui menu <a href="pengaduan.html" style="font-weight: 700; color: #003366;">Helpdesk Poltekpin</a>.
         </div>
       </div>
     </main>
 
+    <!-- ═══════════════════════════════════════════════ -->
+    <!--  PRINT DOCUMENT (hidden on screen, shown on print) -->
+    <!-- ═══════════════════════════════════════════════ -->
+    <div id="print-doc" style="display:none;">
+      <style>
+        #print-doc {
+          font-family: 'Times New Roman', Times, serif;
+          font-size: 11pt;
+          color: #000;
+          background: white;
+        }
+        #print-doc * { box-sizing: border-box; }
+        .pd-page {
+          width: 210mm;
+          min-height: 297mm;
+          padding: 18mm 20mm 20mm 25mm;
+          margin: 0 auto;
+          background: white;
+          position: relative;
+        }
+        /* Kop Surat */
+        .pd-kop {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          padding-bottom: 10px;
+          border-bottom: 3px solid #003366;
+          margin-bottom: 4px;
+        }
+        .pd-kop-logo {
+          width: 72px;
+          height: 72px;
+          object-fit: contain;
+          flex-shrink: 0;
+        }
+        .pd-kop-text { flex: 1; text-align: center; }
+        .pd-kop-text .inst-1 {
+          font-size: 10pt;
+          font-weight: normal;
+          letter-spacing: 0.3px;
+          margin-bottom: 1px;
+        }
+        .pd-kop-text .inst-2 {
+          font-size: 16pt;
+          font-weight: bold;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          color: #003366;
+          line-height: 1.15;
+        }
+        .pd-kop-text .inst-3 {
+          font-size: 9pt;
+          color: #444;
+          margin-top: 2px;
+        }
+        .pd-kop-line2 {
+          border-top: 1.5px solid #003366;
+          margin-top: 3px;
+        }
+
+        /* Judul Dokumen */
+        .pd-judul {
+          text-align: center;
+          margin: 18px 0 12px;
+        }
+        .pd-judul .judul-main {
+          font-size: 14pt;
+          font-weight: bold;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+          text-decoration: underline;
+        }
+        .pd-judul .judul-sub {
+          font-size: 10pt;
+          margin-top: 3px;
+        }
+
+        /* Nomor Dokumen */
+        .pd-nomor {
+          text-align: center;
+          font-size: 9.5pt;
+          color: #555;
+          margin-bottom: 16px;
+        }
+
+        /* Identitas Peserta */
+        .pd-identitas {
+          border: 1.5px solid #003366;
+          border-radius: 4px;
+          padding: 10px 14px;
+          margin-bottom: 16px;
+          background: #f0f4f8;
+        }
+        .pd-identitas table { width: 100%; border-collapse: collapse; }
+        .pd-identitas td { padding: 3px 6px; font-size: 10.5pt; vertical-align: top; }
+        .pd-identitas td:first-child { width: 160px; font-weight: bold; }
+        .pd-identitas td:nth-child(2) { width: 10px; }
+
+        /* Tabel Nilai */
+        .pd-tabel {
+          width: 100%;
+          border-collapse: collapse;
+          margin-bottom: 14px;
+          font-size: 10pt;
+        }
+        .pd-tabel th {
+          background: #003366;
+          color: white;
+          padding: 8px 10px;
+          text-align: center;
+          font-size: 9.5pt;
+          border: 1px solid #003366;
+        }
+        .pd-tabel td {
+          padding: 7px 10px;
+          border: 1px solid #aaa;
+          vertical-align: middle;
+        }
+        .pd-tabel tr:nth-child(even) td { background: #f5f8fc; }
+        .pd-tabel .tabel-section {
+          background: #dbe7f3;
+          font-weight: bold;
+          font-size: 9.5pt;
+          text-transform: uppercase;
+          letter-spacing: 0.3px;
+          padding: 6px 10px;
+          border: 1px solid #aaa;
+        }
+        .pd-tabel .nilai-angka {
+          text-align: center;
+          font-weight: bold;
+        }
+        .pd-tabel .status-lulus {
+          text-align: center;
+          color: #15803d;
+          font-weight: bold;
+        }
+
+        /* Status Akhir Box */
+        .pd-status-akhir {
+          border: 2px solid #003366;
+          border-radius: 4px;
+          padding: 10px 16px;
+          margin: 14px 0;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          background: #eef4fb;
+        }
+        .pd-status-akhir .label { font-size: 10pt; font-weight: bold; color: #003366; }
+        .pd-status-akhir .value { font-size: 13pt; font-weight: bold; color: #15803d; text-align: right; }
+        .pd-status-akhir .rank { font-size: 9pt; color: #555; text-align: right; margin-top: 2px; }
+
+        /* Disclaimer */
+        .pd-disclaimer {
+          font-size: 8.5pt;
+          color: #555;
+          border-top: 1px solid #ccc;
+          padding-top: 10px;
+          margin-top: 10px;
+          line-height: 1.5;
+        }
+
+        /* Tanda Tangan */
+        .pd-ttd {
+          margin-top: 20px;
+          display: flex;
+          justify-content: flex-end;
+        }
+        .pd-ttd-box {
+          text-align: center;
+          width: 210px;
+        }
+        .pd-ttd-box .ttd-label { font-size: 9.5pt; }
+        .pd-ttd-box .ttd-name {
+          font-size: 10pt;
+          font-weight: bold;
+          text-decoration: underline;
+          margin-top: 52px;
+        }
+        .pd-ttd-box .ttd-jabatan { font-size: 9pt; color: #333; }
+
+        /* Watermark */
+        .pd-watermark {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%) rotate(-35deg);
+          font-size: 60pt;
+          font-weight: bold;
+          color: rgba(0, 51, 102, 0.05);
+          pointer-events: none;
+          white-space: nowrap;
+          text-transform: uppercase;
+          letter-spacing: 6px;
+          z-index: 0;
+        }
+
+        .pd-content { position: relative; z-index: 1; }
+
+        /* Footer garis bawah */
+        .pd-footer {
+          position: absolute;
+          bottom: 14mm;
+          left: 25mm;
+          right: 20mm;
+          border-top: 1px solid #aaa;
+          padding-top: 5px;
+          font-size: 8pt;
+          color: #777;
+          display: flex;
+          justify-content: space-between;
+        }
+      </style>
+
+      <div class="pd-page">
+        <div class="pd-watermark">POLITEKNIK PENGAYOMAN</div>
+
+        <div class="pd-content">
+          <!-- KOP -->
+          <div class="pd-kop">
+            <img src="assets/Kemenkum.png" alt="Logo Kemenkum" class="pd-kop-logo" />
+            <div class="pd-kop-text">
+              <div class="inst-1">KEMENTERIAN HUKUM REPUBLIK INDONESIA</div>
+              <div class="inst-2">Politeknik Pengayoman Indonesia</div>
+              <div class="inst-3">Jl. Raya Gandul, Cinere – Depok 16512 &nbsp;|&nbsp; Telp. (021) 7540236 &nbsp;|&nbsp; www.poltekpin.ac.id</div>
+            </div>
+          </div>
+          <div class="pd-kop-line2"></div>
+
+          <!-- JUDUL -->
+          <div class="pd-judul">
+            <div class="judul-main">Transkrip Resmi Hasil Seleksi Kedinasan</div>
+            <div class="judul-sub">Politeknik Pengayoman Indonesia — Kementerian Hukum RI — Tahun 2026</div>
+          </div>
+          <div class="pd-nomor" id="print-nomor">No. Dokumen: POLTEKPIN/SKD/2026/—</div>
+
+          <!-- IDENTITAS -->
+          <div class="pd-identitas">
+            <table>
+              <tr>
+                <td>Nama Lengkap</td><td>:</td><td id="print-nama"><strong>—</strong></td>
+              </tr>
+              <tr>
+                <td>NIK</td><td>:</td><td id="print-nik">—</td>
+              </tr>
+              <tr>
+                <td>No. Register SSCASN</td><td>:</td><td id="print-reg">—</td>
+              </tr>
+              <tr>
+                <td>Formasi</td><td>:</td><td>Politeknik Pengayoman Indonesia — Pengayoman</td>
+              </tr>
+              <tr>
+                <td>Instansi Penyelenggara</td><td>:</td><td>Kementerian Hukum Republik Indonesia</td>
+              </tr>
+              <tr>
+                <td>Tanggal Cetak</td><td>:</td><td id="print-tanggal">—</td>
+              </tr>
+            </table>
+          </div>
+
+          <!-- TABEL NILAI -->
+          <table class="pd-tabel">
+            <thead>
+              <tr>
+                <th style="width: 40px;">No.</th>
+                <th style="text-align: left;">Jenis Seleksi / Tes</th>
+                <th style="width: 80px;">Nilai</th>
+                <th style="width: 80px;">Nilai Min.</th>
+                <th style="width: 100px;">Keterangan</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- SKD -->
+              <tr>
+                <td colspan="5" class="tabel-section">A. Seleksi Kompetensi Dasar (SKD) — CAT BKN</td>
+              </tr>
+              <tr>
+                <td class="nilai-angka">1</td>
+                <td>Tes Wawasan Kebangsaan (TWK)</td>
+                <td class="nilai-angka" id="print-twk">—</td>
+                <td class="nilai-angka">65</td>
+                <td class="status-lulus" id="print-twk-ket">Lulus</td>
+              </tr>
+              <tr>
+                <td class="nilai-angka">2</td>
+                <td>Tes Intelegensia Umum (TIU)</td>
+                <td class="nilai-angka" id="print-tiu">—</td>
+                <td class="nilai-angka">80</td>
+                <td class="status-lulus" id="print-tiu-ket">Lulus</td>
+              </tr>
+              <tr>
+                <td class="nilai-angka">3</td>
+                <td>Tes Karakteristik Pribadi (TKP)</td>
+                <td class="nilai-angka" id="print-tkp">—</td>
+                <td class="nilai-angka">166</td>
+                <td class="status-lulus" id="print-tkp-ket">Lulus</td>
+              </tr>
+              <tr style="background: #e8f0fb;">
+                <td colspan="2" style="font-weight: bold; padding: 7px 10px;">Total SKD</td>
+                <td class="nilai-angka" style="font-weight: bold;" id="print-skd-total">—</td>
+                <td class="nilai-angka">311</td>
+                <td class="status-lulus" id="print-skd-pg">Lolos PG</td>
+              </tr>
+
+              <!-- Kesehatan -->
+              <tr>
+                <td colspan="5" class="tabel-section">B. Tes Kesehatan Medis</td>
+              </tr>
+              <tr>
+                <td class="nilai-angka">4</td>
+                <td>Pemeriksaan Kesehatan (Jasmani &amp; Psikologi)</td>
+                <td class="nilai-angka" id="print-kes">—</td>
+                <td class="nilai-angka">—</td>
+                <td class="status-lulus">Memenuhi Syarat</td>
+              </tr>
+
+              <!-- Samapta -->
+              <tr>
+                <td colspan="5" class="tabel-section">C. Tes Kesamaptaan Fisik</td>
+              </tr>
+              <tr>
+                <td class="nilai-angka">5</td>
+                <td>Lari 12 Menit</td>
+                <td class="nilai-angka" id="print-lari">—</td>
+                <td class="nilai-angka">—</td>
+                <td class="status-lulus">Memenuhi Syarat</td>
+              </tr>
+              <tr>
+                <td class="nilai-angka">6</td>
+                <td>Push-Up (1 Menit)</td>
+                <td class="nilai-angka" id="print-pushup">—</td>
+                <td class="nilai-angka">—</td>
+                <td class="status-lulus">Memenuhi Syarat</td>
+              </tr>
+              <tr>
+                <td class="nilai-angka">7</td>
+                <td>Sit-Up (1 Menit)</td>
+                <td class="nilai-angka" id="print-situp">—</td>
+                <td class="nilai-angka">—</td>
+                <td class="status-lulus">Memenuhi Syarat</td>
+              </tr>
+              <tr>
+                <td class="nilai-angka">8</td>
+                <td>Chinning / Pull-Up</td>
+                <td class="nilai-angka" id="print-chinning">—</td>
+                <td class="nilai-angka">—</td>
+                <td class="status-lulus">Memenuhi Syarat</td>
+              </tr>
+              <tr style="background: #e8f0fb;">
+                <td colspan="2" style="font-weight: bold; padding: 7px 10px;">Nilai Rata-rata Kesamaptaan</td>
+                <td class="nilai-angka" style="font-weight: bold;" id="print-samapta-total">—</td>
+                <td class="nilai-angka">—</td>
+                <td class="status-lulus">Memenuhi Syarat</td>
+              </tr>
+
+              <!-- Wawancara -->
+              <tr>
+                <td colspan="5" class="tabel-section">D. Wawancara &amp; Pengamatan Fisik Keterampilan (WPFK)</td>
+              </tr>
+              <tr>
+                <td class="nilai-angka">9</td>
+                <td>Wawancara &amp; WPFK (Kemenkumham)</td>
+                <td class="nilai-angka" id="print-wawancara">—</td>
+                <td class="nilai-angka">—</td>
+                <td class="status-lulus">Selesai</td>
+              </tr>
+
+              <!-- Nilai Akhir -->
+              <tr style="background: #003366; color: white;">
+                <td colspan="2" style="font-weight: bold; font-size: 10.5pt; padding: 9px 10px; border: 1px solid #003366;">NILAI AKHIR SELEKSI</td>
+                <td class="nilai-angka" style="font-weight: bold; font-size: 13pt; border: 1px solid #003366; color: white;" id="print-nilai-akhir">—</td>
+                <td style="border: 1px solid #003366;"></td>
+                <td style="font-weight: bold; text-align: center; border: 1px solid #003366; color: #fef08a;" id="print-status-akhir">—</td>
+              </tr>
+            </tbody>
+          </table>
+
+          <!-- Status Peringkat -->
+          <div class="pd-status-akhir">
+            <div>
+              <div class="label">Status Kelulusan Seleksi Kedinasan Poltekpin 2026</div>
+              <div style="font-size: 9pt; color: #555; margin-top: 3px;">Berdasarkan hasil akumulasi seluruh tahapan seleksi</div>
+            </div>
+            <div>
+              <div class="value" id="print-status-final">—</div>
+              <div class="rank" id="print-rank">—</div>
+            </div>
+          </div>
+
+          <!-- Tanda Tangan -->
+          <div class="pd-ttd">
+            <div class="pd-ttd-box">
+              <div class="ttd-label">Depok, <span id="print-ttd-tanggal">—</span></div>
+              <div class="ttd-label" style="margin-top: 4px;">Kepala Sub Bagian Akademik</div>
+              <div class="ttd-label">Politeknik Pengayoman Indonesia</div>
+              <div class="ttd-name">(__________________________)</div>
+              <div class="ttd-jabatan">NIP. ………………………………</div>
+            </div>
+          </div>
+
+          <!-- Disclaimer -->
+          <div class="pd-disclaimer">
+            <strong>Catatan:</strong> Dokumen ini merupakan transkrip resmi yang diterbitkan oleh sistem informasi Politeknik Pengayoman Indonesia, Kementerian Hukum RI. Nilai SKD CAT BKN bersumber langsung dari Badan Kepegawaian Negara (BKN). Dokumen ini sah tanpa tanda tangan basah apabila dicetak dari portal resmi Poltekpin. Untuk konfirmasi keabsahan, hubungi Sub Bagian Akademik Poltekpin.
+          </div>
+        </div>
+
+        <!-- Footer Halaman -->
+        <div class="pd-footer">
+          <span>Portal Seleksi Kedinasan Poltekpin — portal.poltekpin.ac.id</span>
+          <span>Halaman 1 dari 1 &nbsp;|&nbsp; Dicetak: <span id="print-footer-tanggal"></span></span>
+        </div>
+      </div>
+    </div>
+
     <div data-site-footer></div>
     <script src="app.js"></script>
     <script>
+      let nilaiData = null;
+
       async function loadNilaiData() {
         const token = localStorage.getItem("sekdin-token");
         if (!token) return;
@@ -230,6 +657,7 @@
           });
           if (!res.ok) return;
           const d = await res.json();
+          nilaiData = d;
 
           document.getElementById("participant-name").textContent = d.fullname;
           document.getElementById("participant-nik").textContent = d.nik;
@@ -267,6 +695,73 @@
         } catch (err) {
           console.error("Gagal memuat nilai:", err);
         }
+      }
+
+      function cetakTranskrip() {
+        const d = nilaiData;
+
+        // Generate nomor dokumen
+        const now = new Date();
+        const pad = (n) => String(n).padStart(2, '0');
+        const noDoc = `POLTEKPIN/TRK/${now.getFullYear()}/${pad(now.getMonth()+1)}${pad(now.getDate())}`;
+        const tanggalCetak = now.toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+        const tanggalFull = now.toLocaleString('id-ID', { day: '2-digit', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+        // Fill in print data
+        document.getElementById('print-nomor').textContent = `No. Dokumen: ${noDoc}`;
+        document.getElementById('print-nama').innerHTML = `<strong>${d ? d.fullname : '—'}</strong>`;
+        document.getElementById('print-nik').textContent = d ? d.nik : '—';
+        document.getElementById('print-reg').textContent = d ? d.reg_number : '—';
+        document.getElementById('print-tanggal').textContent = tanggalCetak;
+        document.getElementById('print-ttd-tanggal').textContent = tanggalCetak;
+        document.getElementById('print-footer-tanggal').textContent = tanggalFull;
+
+        if (d) {
+          document.getElementById('print-twk').textContent = d.skd.twk;
+          document.getElementById('print-tiu').textContent = d.skd.tiu;
+          document.getElementById('print-tkp').textContent = d.skd.tkp;
+          document.getElementById('print-skd-total').textContent = d.skd.total;
+          document.getElementById('print-skd-pg').textContent = d.skd.status;
+          document.getElementById('print-twk-ket').textContent = d.skd.twk >= d.skd.twk_min ? 'Lulus' : 'Tidak Lulus';
+          document.getElementById('print-tiu-ket').textContent = d.skd.tiu >= d.skd.tiu_min ? 'Lulus' : 'Tidak Lulus';
+          document.getElementById('print-tkp-ket').textContent = d.skd.tkp >= d.skd.tkp_min ? 'Lulus' : 'Tidak Lulus';
+
+          document.getElementById('print-kes').textContent = d.kesehatan.skor;
+          document.getElementById('print-lari').textContent = d.kesamaptaan.rincian?.lari ?? '—';
+          document.getElementById('print-pushup').textContent = d.kesamaptaan.rincian?.pushup ?? '—';
+          document.getElementById('print-situp').textContent = d.kesamaptaan.rincian?.situp ?? '—';
+          document.getElementById('print-chinning').textContent = d.kesamaptaan.rincian?.chinning ?? '—';
+          document.getElementById('print-samapta-total').textContent = d.kesamaptaan.skor;
+          document.getElementById('print-wawancara').textContent = d.wawancara.skor;
+          document.getElementById('print-nilai-akhir').textContent = d.total_akhir;
+          document.getElementById('print-status-akhir').textContent = d.status_kelulusan;
+          document.getElementById('print-status-final').textContent = d.status_kelulusan;
+          document.getElementById('print-rank').textContent = d.peringkat;
+        }
+
+        // Show print doc, hide main content, print, restore
+        const printDoc = document.getElementById('print-doc');
+        const mainEl   = document.querySelector('main');
+        const topbar   = document.querySelector('.gov-topbar');
+        const hdr      = document.querySelector('[data-site-header]');
+        const ftr      = document.querySelector('[data-site-footer]');
+
+        printDoc.style.display = 'block';
+        mainEl.style.display = 'none';
+        if (topbar) topbar.style.display = 'none';
+        if (hdr) hdr.style.display = 'none';
+        if (ftr) ftr.style.display = 'none';
+
+        window.print();
+
+        // Restore after print dialog closed
+        setTimeout(() => {
+          printDoc.style.display = 'none';
+          mainEl.style.display = '';
+          if (topbar) topbar.style.display = '';
+          if (hdr) hdr.style.display = '';
+          if (ftr) ftr.style.display = '';
+        }, 800);
       }
 
       loadNilaiData();
